@@ -21,8 +21,17 @@ async function tryPythonCommands(filePath, input) {
             const { stdout, stderr } = await execAsync(`echo "${input}" | ${command} ${filePath}`);
             return { stdout, stderr };
         } catch (error) {
-            // If we find a Python syntax error, return it immediately
-            if (error.message.includes('SyntaxError') || error.message.includes('IndentationError')) {
+            if (error.message.includes('SyntaxError') ||
+                error.message.includes('IndentationError') ||
+                error.message.includes('NameError') ||
+                error.message.includes('TypeError') ||
+                error.message.includes('ValueError') ||
+                error.message.includes('AttributeError') ||
+                error.message.includes('ImportError') ||
+                error.message.includes('IndexError') ||
+                error.message.includes('KeyError') ||
+                error.message.includes('ZeroDivisionError') ||
+                error.message.includes('RecursionError')) {
                 return { error: extractPythonError(error.message) };
             }
             // Otherwise, continue to the next command
@@ -39,6 +48,16 @@ function extractPythonError(errorMessage) {
         line.includes('File') ||
         line.includes('SyntaxError') ||
         line.includes('IndentationError') ||
+        line.includes('NameError') ||
+        line.includes('TypeError') ||
+        line.includes('ValueError') ||
+        line.includes('AttributeError') ||
+        line.includes('ImportError') ||
+        line.includes('IndexError') ||
+        line.includes('KeyError') ||
+        line.includes('ZeroDivisionError') ||
+        line.includes('RecursionError') ||
+        line.includes('maximum recursion depth exceeded') ||
         line.trim().startsWith('^')
     );
     return relevantLines.join('\n');
