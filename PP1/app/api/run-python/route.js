@@ -6,25 +6,42 @@ import path from 'path';
 
 const execAsync = promisify(exec);
 
-async function runPythonCode(filePath, input) {
-    try {
-        const { stdout, stderr } = await execAsync(`python3 ${filePath}`, { input });
-        return { output: stdout, error: stderr };
-    } catch (error) {
-        return { error: formatPythonError(error.message, await fs.readFile(filePath, 'utf-8')) };
+async function tryPythonCommands(filePath, input) {
+    const commands = [
+        'python',
+        'python3',
+        '/usr/bin/python',
+        '/usr/bin/python3',
+        '/usr/local/bin/python',
+        '/usr/local/bin/python3'
+    ];
+
+    for (const command of commands) {
+        try {
+            const { stdout, stderr } = await execAsync(`echo "${input}" | ${command} ${filePath}`);
+            return { stdout, stderr };
+        } catch (error) {
+            // If we find a Python syntax error, return it immediately
+            if (error.message.includes('SyntaxError') || error.message.includes('IndentationError')) {
+                return { error: extractPythonError(error.message) };
+            }
+            // Otherwise, continue to the next command
+        }
     }
+
+    // If all commands fail without a syntax error, return a generic error
+    return { error: "Failed to execute Python. Please ensure Python is installed and in the system PATH." };
 }
 
-function formatPythonError(errorMessage, sourceCode) {
+function extractPythonError(errorMessage) {
     const lines = errorMessage.split('\n');
-    const errorLine = lines.find(line => line.includes('line'));
-    if (errorLine) {
-        const lineNumber = parseInt(errorLine.match(/line (\d+)/)[1]);
-        const codeLines = sourceCode.split('\n');
-        const relevantCode = codeLines.slice(Math.max(0, lineNumber - 2), lineNumber + 1).join('\n');
-        return `${errorMessage}\n\nRelevant code:\n${relevantCode}`;
-    }
-    return errorMessage;
+    const relevantLines = lines.filter(line =>
+        line.includes('File') ||
+        line.includes('SyntaxError') ||
+        line.includes('IndentationError') ||
+        line.trim().startsWith('^')
+    );
+    return relevantLines.join('\n');
 }
 
 export async function POST(req) {
@@ -40,14 +57,18 @@ export async function POST(req) {
         const filePath = path.join(tempDir, 'script.py');
         await fs.writeFile(filePath, code);
 
-        // Run the Python code
-        const { output, error } = await runPythonCode(filePath, input);
+        // Try running the Python code with different commands
+        const { stdout, stderr, error } = await tryPythonCommands(filePath, input);
 
         if (error) {
             return NextResponse.json({ error }, { status: 400 });
         }
 
-        return NextResponse.json({ output });
+        if (stderr) {
+            return NextResponse.json({ error: stderr }, { status: 400 });
+        }
+
+        return NextResponse.json({ output: stdout });
     } catch (error) {
         console.error('Error running Python code:', error);
         return NextResponse.json({ error: error.message }, { status: 500 });
