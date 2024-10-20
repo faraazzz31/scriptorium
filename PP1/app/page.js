@@ -55,11 +55,12 @@ export default function Home() {
         body: JSON.stringify({ code, input }),
       });
 
+      const data = await response.json();
+
       if (response.ok) {
-        const data = await response.json();
-        setOutput(data.output || data.error || 'No output');
+        setOutput(data.output || 'No output');
       } else {
-        setOutput(`Error: ${response.status} ${response.statusText}`);
+        setOutput(data.error || `Error: ${response.status} ${response.statusText}`);
       }
     } catch (error) {
       console.error('Error in runCode:', error);

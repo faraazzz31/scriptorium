@@ -6,42 +6,25 @@ import path from 'path';
 
 const execAsync = promisify(exec);
 
-async function tryPythonCommands(filePath, input) {
-    const commands = [
-        'python',
-        'python3',
-        '/usr/bin/python',
-        '/usr/bin/python3',
-        '/usr/local/bin/python',
-        '/usr/local/bin/python3'
-    ];
-
-    for (const command of commands) {
-        try {
-            const { stdout, stderr } = await execAsync(`echo "${input}" | ${command} ${filePath}`);
-            return { stdout, stderr };
-        } catch (error) {
-            // If we find a Python error, return it immediately
-            if (error.message.includes('Error') || error.message.includes('Exception')) {
-                return { error: extractPythonError(error.message) };
-            }
-            // Otherwise, continue to the next command
-        }
+async function runPythonCode(filePath, input) {
+    try {
+        const { stdout, stderr } = await execAsync(`python3 ${filePath}`, { input });
+        return { output: stdout, error: stderr };
+    } catch (error) {
+        return { error: formatPythonError(error.message, await fs.readFile(filePath, 'utf-8')) };
     }
-
-    // If all commands fail without a Python error, return null
-    return { error: null };
 }
 
-function extractPythonError(errorMessage) {
+function formatPythonError(errorMessage, sourceCode) {
     const lines = errorMessage.split('\n');
-    const relevantLines = lines.filter(line =>
-        line.includes('File') ||
-        line.includes('Error') ||
-        line.includes('Exception') ||
-        line.trim().startsWith('^')
-    );
-    return relevantLines.join('\n');
+    const errorLine = lines.find(line => line.includes('line'));
+    if (errorLine) {
+        const lineNumber = parseInt(errorLine.match(/line (\d+)/)[1]);
+        const codeLines = sourceCode.split('\n');
+        const relevantCode = codeLines.slice(Math.max(0, lineNumber - 2), lineNumber + 1).join('\n');
+        return `${errorMessage}\n\nRelevant code:\n${relevantCode}`;
+    }
+    return errorMessage;
 }
 
 export async function POST(req) {
@@ -57,22 +40,17 @@ export async function POST(req) {
         const filePath = path.join(tempDir, 'script.py');
         await fs.writeFile(filePath, code);
 
-        // Try running the Python code with different commands
-        const { stdout, stderr, error } = await tryPythonCommands(filePath, input);
+        // Run the Python code
+        const { output, error } = await runPythonCode(filePath, input);
 
         if (error) {
             return NextResponse.json({ error }, { status: 400 });
         }
 
-        if (stderr) {
-            return NextResponse.json({ error: stderr }, { status: 400 });
-        }
-
-        return NextResponse.json({ output: stdout });
+        return NextResponse.json({ output });
     } catch (error) {
         console.error('Error running Python code:', error);
-        // Return an empty response if no Python-specific error was found
-        return NextResponse.json({}, { status: 500 });
+        return NextResponse.json({ error: error.message }, { status: 500 });
     } finally {
         // Clean up
         if (tempDir) {
