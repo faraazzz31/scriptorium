@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { verifyAccessToken } from '@/app/middleware/auth.js'
-import { validatePhone } from '@/app/utils/validators.js';
+import { validatePhone } from '@/app/utils/validation.js';
 
 const prisma = new PrismaClient();
 

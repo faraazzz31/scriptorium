@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { validateEmail, validatePassword, validatePhone } from '@/app/utils/validators.js';
+import { validateEmail, validatePassword, validatePhone } from '@/app/utils/validation.js';
 import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
