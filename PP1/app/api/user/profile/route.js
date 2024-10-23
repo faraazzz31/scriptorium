@@ -2,14 +2,12 @@
 
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { verifyAccessToken } from '@/app/middleware/auth.js'
+import { withAuth } from '@/app/middleware/auth.js';
 
 const prisma = new PrismaClient();
 
-export async function GET(request) {
-    const user = await verifyAccessToken(request);
-
-    console.log(`Get user profile request: ${user}`);
+async function handler (req) {
+    const user = req.user;
 
     if (!user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -43,3 +41,6 @@ export async function GET(request) {
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }
+
+export const GET = withAuth(handler);
+

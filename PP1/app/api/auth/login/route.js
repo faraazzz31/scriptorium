@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+import { signAccessToken, signRefreshToken } from '@/app/lib/auth';
 
 const prisma = new PrismaClient();
 
-export async function POST(request) {
+export async function POST(req) {
     try {
-        const { email, password } = await request.json();
+        const { email, password } = await req.json();
 
         if (!email || !password) {
             return NextResponse.json({ error: 'All fields are required' }, { status: 400 });
@@ -27,10 +27,12 @@ export async function POST(request) {
         console.log(`Userid: ${user.id}, email: ${user.email}, role: ${user.role}`);
         const payload = { id: user.id, email: user.email, role: user.role};
 
-        const accesstoken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1d' });
-        const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET, { expiresIn: '7d' });
+        const accessToken = signAccessToken(payload);
+        const refreshToken = signRefreshToken(payload);
 
-        return NextResponse.json({ "accessToken" : accesstoken, "refreshToken": refreshToken }, { status: 200 });
+        console.log(`Access Token: ${accessToken}, Refresh Token: ${refreshToken}`);
+
+        return NextResponse.json({ "accessToken" : accessToken, "refreshToken": refreshToken }, { status: 200 });
 
     } catch (error) {
         console.error('Login error:', error);
