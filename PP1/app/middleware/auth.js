@@ -1,22 +1,36 @@
-// lib/auth.js
+// app/middleware/auth.js
 
-import jwt from 'jsonwebtoken';
+import { NextResponse } from 'next/server';
+import { verifyAccessToken } from '../lib/auth';
 
-export const verifyAccessToken = async (request) => {
-    const token = request.headers.get('authorization')?.split(' ')[1];
+export function withAuth(handler) {
+    return async function(req, params) {
+        const authHeader = req.headers.get('authorization');
 
-    if (!token) {
-        return null;
-    }
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return NextResponse.json(
+                { error: 'Unauthorized - No token provided' },
+                { status: 401 }
+            )
+        }
 
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        console.log(`Decoded: ${JSON.stringify(decoded)}`);
+        const token = authHeader.split(' ')[1]
 
+        try {
+            const decoded = await verifyAccessToken(token)
+            req.user = decoded
 
-        return decoded;
-    } catch (error) {
-        console.error(`Error in verifyAccessToken: ${error}`);
-        return null;
+            return handler(req, params)
+
+        } catch (error) {
+            console.error(`Error in withAuth middleware: ${error}`)
+
+            return NextResponse.json(
+                {
+                    error: 'Unauthorized - Invalid token',
+                    code: 'TOKEN_EXPIRED'
+                },
+                { status: 401 })
+        }
     }
 }

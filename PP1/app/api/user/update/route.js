@@ -1,18 +1,18 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { verifyAccessToken } from '@/app/middleware/auth.js'
+import { withAuth } from '@/app/middleware/auth.js';
 import { validatePhone } from '@/app/utils/validation.js';
 
 const prisma = new PrismaClient();
 
-export async function PUT(request) {
-    const user = await verifyAccessToken(request);
+async function handler (req) {
+    const user = req.user;
 
     if (!user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { firstName, lastName, phone, avatar } = await request.json();
+    const { firstName, lastName, phone, avatar } = await req.json();
 
     if (phone && !validatePhone(phone)) {
         return NextResponse.json({ error: 'Invalid phone number' }, { status: 400 });
@@ -52,3 +52,5 @@ export async function PUT(request) {
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }
+
+export const PUT = withAuth(handler);
