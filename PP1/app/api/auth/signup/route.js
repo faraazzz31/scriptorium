@@ -6,7 +6,7 @@ import bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 export async function POST(request) {
-    const { email, password, firstName, lastName, phone } = await request.json();
+    const { email, password, firstName, lastName, phone, role } = await request.json();
 
     console.log(`Signup request: ${email}, ${firstName}, ${lastName}, ${phone}`);
 
@@ -42,6 +42,7 @@ export async function POST(request) {
                 firstName,
                 lastName,
                 phone,
+                role: role || 'USER',
             },
             select: {
                 id: true,
@@ -49,6 +50,7 @@ export async function POST(request) {
                 firstName: true,
                 lastName: true,
                 phone: true,
+                role: true,
             }
         });
 
