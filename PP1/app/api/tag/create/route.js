@@ -43,8 +43,7 @@ async function handler (req) {
         return NextResponse.json(
             {
                 id: tag.id,
-                name: tag.name,
-                codeTemplate: tag.codeTemplate,
+                name: tag.name
             }
         );
     } catch (error) {

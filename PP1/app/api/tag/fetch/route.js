@@ -19,9 +19,10 @@ async function handler (req) {
             },
         });
 
-        return NextResponse.json(
-            tags,
-            { status: 200 });
+        return NextResponse.json({
+            tags: tags
+            }
+        )
     } catch (error) {
         console.error(`Error in /app/api/tag/fetch: ${error}`);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
