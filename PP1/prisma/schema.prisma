@@ -14,19 +14,22 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String
-  firstName String?
-  lastName  String?
-  avatar    String?
-  phone     String?
-  role      String   @default("USER")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  codeTemplates CodeTemplate[]
-  blogPosts BlogPost[]
-  comments  Comment[]
+  id             Int            @id @default(autoincrement())
+  email          String         @unique
+  password       String
+  firstName      String?
+  lastName       String?
+  avatar         String?
+  phone          String?
+  role           String         @default("USER")
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  codeTemplates  CodeTemplate[]
+  blogPosts      BlogPost[]
+  comments       Comment[]
+  hiddenPosts    BlogPost[]     @relation("HiddenPosts")
+  hiddenComments Comment[]      @relation("HiddenComments")
+  reports        Report[]       @relation("reportsMade")
 }
 
 model CodeTemplate {
@@ -43,34 +46,60 @@ model CodeTemplate {
 }
 
 model BlogPost {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   title       String
   description String
   content     String
   tags        Tag[]
   authorId    Int
-  author      User     @relation(fields: [authorId], references: [id])
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  author      User      @relation(fields: [authorId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   comments    Comment[]
+  isHidden    Boolean   @default(false)
+  hiddenAt    DateTime?
+  hiddenBy    User?     @relation("HiddenPosts", fields: [hiddenById], references: [id])
+  hiddenById  Int?
+  reports     Report[]
 }
 
 model Tag {
-  id              Int             @id @default(autoincrement())
-  name            String          @unique
-  codeTemplates   CodeTemplate[]
-  blogPosts       BlogPost[]
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id            Int            @id @default(autoincrement())
+  name          String         @unique
+  codeTemplates CodeTemplate[]
+  blogPosts     BlogPost[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
 }
 
 model Comment {
-  id        Int      @id @default(autoincrement())
-  content   String
-  authorId  Int
-  author    User     @relation(fields: [authorId], references: [id])
+  id         Int       @id @default(autoincrement())
+  content    String
+  authorId   Int
+  author     User      @relation(fields: [authorId], references: [id])
   blogPostId Int
-  blogPost  BlogPost @relation(fields: [blogPostId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  blogPost   BlogPost  @relation(fields: [blogPostId], references: [id])
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  isHidden   Boolean   @default(false)
+  hiddenAt   DateTime?
+  hiddenBy   User?     @relation("HiddenComments", fields: [hiddenById], references: [id])
+  hiddenById Int?
+  reports    Report[]
+}
+
+model Report {
+  id          Int       @id @default(autoincrement())
+  type        String
+  reason      String
+  explanation String
+  status      String    @default("PENDING")
+  reporterId  Int
+  reporter    User      @relation(name: "reportsMade", fields: [reporterId], references: [id])
+  blogPostId  Int?
+  blogPost    BlogPost? @relation(fields: [blogPostId], references: [id])
+  commentId   Int?
+  comment     Comment?  @relation(fields: [commentId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
