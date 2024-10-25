@@ -16,17 +16,14 @@ async function handler(req) {
         const { type, reason, explanation, blogPostId, commentId } = await req.json();
         console.log(`type: ${type}, reason: ${reason}, explanation: ${explanation}, blogPostId: ${blogPostId}, commentId: ${commentId}`);
 
-        // Validate required fields
         if (!type || !reason || !explanation) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
 
-        // Validate type
         if (!['BLOG_POST', 'COMMENT'].includes(type)) {
             return NextResponse.json({ error: 'Invalid report type' }, { status: 400 });
         }
 
-        // Check if reported item exists
         if (type === 'BLOG_POST' && blogPostId) {
             const blogPost = await prisma.blogPost.findUnique({
                 where: { id: parseInt(blogPostId) }
@@ -36,7 +33,6 @@ async function handler(req) {
                 return NextResponse.json({ error: 'Blog post not found' }, { status: 404 });
             }
 
-            // Check if user has already reported this blog post
             const existingReport = await prisma.report.findFirst({
                 where: {
                     type: 'BLOG_POST',
@@ -57,7 +53,6 @@ async function handler(req) {
                 return NextResponse.json({ error: 'Comment not found' }, { status: 404 });
             }
 
-            // Check if user has already reported this comment
             const existingReport = await prisma.report.findFirst({
                 where: {
                     type: 'COMMENT',
@@ -73,7 +68,6 @@ async function handler(req) {
             return NextResponse.json({ error: 'Missing target ID' }, { status: 400 });
         }
 
-        // Create the report
         const report = await prisma.report.create({
             data: {
                 type,
