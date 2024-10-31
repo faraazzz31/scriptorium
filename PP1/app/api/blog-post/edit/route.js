@@ -12,9 +12,9 @@ async function handler(req) {
     }
 
     try {
-        const { blogPostId, title, description, content, tag_ids } = await req.json();
+        const { blogPostId, title, content, tag_ids } = await req.json();
 
-        console.log(`blogPostId: ${blogPostId}, title: ${title}, description: ${description}, content: ${content}, tags: ${tag_ids}`);
+        console.log(`blogPostId: ${blogPostId}, title: ${title}, content: ${content}, tags: ${tag_ids}`);
 
         if (!blogPostId) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -39,7 +39,6 @@ async function handler(req) {
 
         const data = {
             title: title ? title : blogPost.title,
-            description: description ? description : blogPost.description,
             content: content ? content : blogPost.content,
         }
 
@@ -75,9 +74,10 @@ async function handler(req) {
         return NextResponse.json({
             id: updatedBlogPost.id,
             title: updatedBlogPost.title,
-            description: updatedBlogPost.description,
             content: updatedBlogPost.content,
             tags: updatedBlogPost.tags,
+            upvotes: updatedBlogPost.upvotes,
+            downvotes: updatedBlogPost.downvotes,
         });
     } catch (error) {
         console.error(`Error in /app/api/blogpost/edit-blogpost: ${error}`);
