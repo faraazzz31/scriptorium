@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 async function main() {
@@ -12,11 +13,14 @@ async function main() {
 
     console.log('All existing data has been deleted.');
 
+    const adminPassword = await bcrypt.hash('test123', 10)
+    const userPassword = await bcrypt.hash('test123', 10)
+
     // Creating sample users
     const user1 = await prisma.user.create({
         data: {
             email: 'admin@example.com',
-            password: 'test123',
+            password: adminPassword,
             firstName: 'Admin',
             lastName: 'Admin',
             role: 'ADMIN',
@@ -28,7 +32,7 @@ async function main() {
     const user2 = await prisma.user.create({
         data: {
             email: 'user@example.com',
-            password: 'test123',
+            password: userPassword,
             firstName: 'User',
             lastName: 'User',
             avatar: 'https://example.com/avatar2.jpg',
@@ -87,7 +91,7 @@ async function main() {
     });
 
     // Creating comments
-    await prisma.comment.create({
+    const comment1 = await prisma.comment.create({
         data: {
             content: 'Great post! Learned a lot.',
             authorId: user2.id,
@@ -110,7 +114,7 @@ async function main() {
             reason: 'Inappropriate content',
             explanation: 'This comment is irrelevant and spammy.',
             reporterId: user1.id,
-            commentId: 1
+            commentId: comment1.id
         }
     });
 
