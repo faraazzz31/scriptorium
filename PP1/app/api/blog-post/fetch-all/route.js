@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { parseStringToNumberArray } from '@/app/utils/parseString';
+import { valueScore, controversyScore } from '@/app/utils/sortingScore';
 
 const prisma = new PrismaClient();
 
@@ -13,6 +14,7 @@ export async function handler(req) {
     const content = searchParams.get('content');
     let tag_ids = searchParams.get('tag_ids');
     let code_template_ids = searchParams.get('code_template_ids');
+    const sorting = searchParams.get('sorting');
 
     if (tag_ids?.length > 0
         && (tag_ids[0] !== '['
@@ -31,7 +33,7 @@ export async function handler(req) {
     code_template_ids = code_template_ids ? parseStringToNumberArray(code_template_ids) : [];
     
 
-    console.log(`page: ${page}, limit: ${limit}, title: ${title}, content: ${content}, tag_ids: ${tag_ids}, code_template_ids: ${code_template_ids}`);
+    console.log(`page: ${page}, limit: ${limit}, title: ${title}, content: ${content}, tag_ids: ${tag_ids}, code_template_ids: ${code_template_ids}, sorting: ${sorting}`);
 
     try {
         const where = {};
@@ -78,7 +80,7 @@ export async function handler(req) {
 
         const offset = (page - 1) * limit;
 
-        const blogPosts = await prisma.blogPost.findMany({
+        let blogPosts = await prisma.blogPost.findMany({
             skip: offset,
             take: limit,
             where: where,
@@ -86,6 +88,8 @@ export async function handler(req) {
                 id: true,
                 title: true,
                 content: true,
+                upvotes: true,
+                downvotes: true,
                 tags: {
                     select: {
                         id: true,
@@ -104,9 +108,18 @@ export async function handler(req) {
 
         console.log(`blogPosts: ${JSON.stringify(blogPosts)}`);
 
+        if (sorting === 'Most valued') {
+            blogPosts = blogPosts.sort((a, b) => valueScore(b.upvotes, b.downvotes) - valueScore(a.upvotes, a.downvotes));
+        } else if (sorting === 'Most controversial') {
+            blogPosts = blogPosts.sort((a, b) => controversyScore(b.upvotes, b.downvotes) - controversyScore(a.upvotes, a.downvotes));
+        }
+
+        console.log(`blogPosts after sorting: ${JSON.stringify(blogPosts)}`);
+
         const totalPages = Math.ceil(blogPosts.length / limit);
 
         return NextResponse.json({
+            sorting: sorting ? sorting : 'No sorting',
             totalPages: totalPages,
             totalCount: totalCount,
             data: blogPosts,
@@ -116,3 +129,5 @@ export async function handler(req) {
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }
+
+export const GET = handler;
