@@ -1,18 +1,10 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { withAuth } from '@/app/middleware/auth';
 import { parseStringToNumberArray } from '@/app/utils/parseString';
 
 const prisma = new PrismaClient();
 
 export async function handler(req) {
-    const user = req.user;
-    console.log(`user: ${JSON.stringify(user)}`);
-
-    if (!user || user.role !== 'ADMIN') {
-        return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 401 });
-    }
-
     const { searchParams } = new URL(req.url);
 
     let page = searchParams.get('page');
@@ -124,5 +116,3 @@ export async function handler(req) {
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }
-
-export const GET = withAuth(handler);
