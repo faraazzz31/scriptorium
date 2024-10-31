@@ -33,34 +33,38 @@ model User {
 }
 
 model CodeTemplate {
-  id          Int      @id @default(autoincrement())
+  id          Int        @id @default(autoincrement())
   title       String
   explanation String?
   code        String
   language    String
   tags        Tag[]
   authorId    Int
-  author      User     @relation(fields: [authorId], references: [id])
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  author      User       @relation(fields: [authorId], references: [id])
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  blogPosts   BlogPost[]
 }
 
 model BlogPost {
-  id          Int       @id @default(autoincrement())
-  title       String
-  description String
-  content     String
-  tags        Tag[]
-  authorId    Int
-  author      User      @relation(fields: [authorId], references: [id])
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  comments    Comment[]
-  isHidden    Boolean   @default(false)
-  hiddenAt    DateTime?
-  hiddenBy    User?     @relation("HiddenPosts", fields: [hiddenById], references: [id])
-  hiddenById  Int?
-  reports     Report[]
+  id            Int            @id @default(autoincrement())
+  title         String
+  description   String
+  content       String
+  tags          Tag[]
+  authorId      Int
+  author        User           @relation(fields: [authorId], references: [id])
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  comments      Comment[]
+  isHidden      Boolean        @default(false)
+  hiddenAt      DateTime?
+  hiddenBy      User?          @relation("HiddenPosts", fields: [hiddenById], references: [id])
+  hiddenById    Int?
+  reports       Report[]
+  codeTemplates CodeTemplate[]
+  upvotes       Int            @default(0)
+  downvotes     Int            @default(0)
 }
 
 model Tag {
@@ -86,6 +90,11 @@ model Comment {
   hiddenBy   User?     @relation("HiddenComments", fields: [hiddenById], references: [id])
   hiddenById Int?
   reports    Report[]
+  parentId   Int? // Optional because top-level comments won't have a parent
+  parent     Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  replies    Comment[] @relation("CommentReplies")
+  upvotes    Int       @default(0)
+  downvotes  Int       @default(0)
 }
 
 model Report {
