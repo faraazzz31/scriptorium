@@ -4,9 +4,10 @@ import { validateEmail, validatePassword, validatePhone } from '@/app/utils/vali
 import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
+const VALID_AVATAR_PATHS = avatarConfig.getValidPaths();
 
 export async function POST(request) {
-    const { email, password, firstName, lastName, phone, role } = await request.json();
+    const { email, password, firstName, lastName, phone, role, selectedAvatar } = await request.json();
 
     console.log(`Signup request: ${email}, ${firstName}, ${lastName}, ${phone}`);
 
@@ -26,6 +27,10 @@ export async function POST(request) {
         return NextResponse.json({ error: 'Invalid phone number' }, { status: 400 });
     }
 
+    if (selectedAvatar && !VALID_AVATAR_PATHS.includes(selectedAvatar)) {
+        return NextResponse.json({ error: 'Invalid avatar selection' }, { status: 400 });
+    }
+
     try {
         const existingUser = await prisma.user.findUnique({ where: { email } });
 
@@ -43,6 +48,7 @@ export async function POST(request) {
                 lastName,
                 phone,
                 role: role || 'USER',
+                avatar: selectedAvatar || avatarConfig.getDefaultPath(),
             },
             select: {
                 id: true,
@@ -51,6 +57,7 @@ export async function POST(request) {
                 lastName: true,
                 phone: true,
                 role: true,
+                avatar: true,
             }
         });
 
@@ -60,6 +67,7 @@ export async function POST(request) {
             lastName: user.lastName,
             phone: user.phone,
             role: user.role,
+            avatar: user.avatar
         }, { status: 201 });
 
     } catch (error) {
