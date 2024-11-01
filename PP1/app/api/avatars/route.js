@@ -4,14 +4,12 @@ import { avatarConfig } from '@/app/config/avatar.js';
 export async function GET() {
     try {
         return NextResponse.json({
-            success: true,
             data: avatarConfig.defaultAvatars,
             message: 'Avatars retrieved successfully'
         }, { status: 200 });
     } catch (error) {
         console.error('Error fetching avatars:', error);
         return NextResponse.json({
-            success: false,
             error: 'Failed to fetch avatars'
         }, { status: 500 });
     }
