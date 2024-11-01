@@ -59,6 +59,8 @@ async function handler(req) {
             content: blogPost.content,
             author: blogPost.author,
             tags: blogPost.tags,
+            upvotes: blogPost.upvotes,
+            downvotes: blogPost.downvotes,
             createdAt: blogPost.createdAt,
             updatedAt: blogPost.updatedAt,
         });
