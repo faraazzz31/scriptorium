@@ -11,6 +11,7 @@ export async function handler(req) {
     let limit = searchParams.get('limit');
     const content = searchParams.get('content');
     const authorId = searchParams.get('authorId');
+    const blogPostId = searchParams.get('blogPostId');
     const parentId = searchParams.get('parentId');
     const sorting = searchParams.get('sorting');
 
@@ -30,6 +31,10 @@ export async function handler(req) {
 
         if (authorId) {
             where.authorId = parseInt(authorId);
+        }
+
+        if (blogPostId) {
+            where.blogPostId = parseInt(blogPostId);
         }
 
         if (parentId) {
