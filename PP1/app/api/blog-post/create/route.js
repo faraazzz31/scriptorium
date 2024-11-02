@@ -13,23 +13,37 @@ async function handler(req) {
     }
 
     try {
-        const { title, description, content, tag_ids } = await req.json();
-        console.log(`title: ${title}, description: ${description}, content: ${content}, tags: ${tag_ids}`);
+        const { title, description, tag_ids } = await req.json();
+        console.log(`title: ${title}, description: ${description}, tags: ${tag_ids}`);
 
-        if (!title || !description || !content) {
+        if (!title || !description) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
 
         const data = {
             title,
             description,
-            content,
             author: {
                 connect: {
                     id: user.id,
                 },
             },
         };
+
+        // Check if tag_ids contain only valid tag ids
+        if (tag_ids?.length > 0) {
+            const valid_tags = await prisma.tag.findMany({
+                select: {
+                    id: true,
+                }
+            });
+            const valid_tag_ids = valid_tags.map(tag => tag.id);
+            for (let tag_id of tag_ids) {
+                if (!valid_tag_ids.includes(tag_id)) {
+                    return NextResponse.json({ error: 'tag_ids contain tags that aren\'t in the database' }, { status: 400 });
+                }
+            }
+        }
 
         if (tag_ids && tag_ids.length > 0) {
             data.tags = {
@@ -56,8 +70,7 @@ async function handler(req) {
             id: blogPost.id,
             title: blogPost.title,
             description: blogPost.description,
-            content: blogPost.content,
-            author: blogPost.author,
+            authorId: blogPost.authorId,
             tags: blogPost.tags,
             upvotes: blogPost.upvotes,
             downvotes: blogPost.downvotes,

@@ -72,7 +72,6 @@ async function main() {
         data: {
             title: 'Introduction to JavaScript',
             description: 'An introductory post on JavaScript basics.',
-            content: 'JavaScript is a versatile language...',
             authorId: user1.id,
             tags: { connect: [{ id: tag1.id }] },
             codeTemplates: { connect: [{ id: template1.id }] }
@@ -83,7 +82,6 @@ async function main() {
         data: {
             title: 'Getting Started with Python',
             description: 'Learn the basics of Python programming.',
-            content: 'Python is a popular programming language...',
             authorId: user2.id,
             tags: { connect: [{ id: tag2.id }] },
             codeTemplates: { connect: [{ id: template2.id }] }

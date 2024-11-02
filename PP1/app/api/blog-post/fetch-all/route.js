@@ -11,7 +11,8 @@ export async function handler(req) {
     let page = searchParams.get('page');
     let limit = searchParams.get('limit');
     const title = searchParams.get('title');
-    const content = searchParams.get('content');
+    const description = searchParams.get('description');
+    const authorId = searchParams.get('authorId');
     let tag_ids = searchParams.get('tag_ids');
     let code_template_ids = searchParams.get('code_template_ids');
     const sorting = searchParams.get('sorting');
@@ -33,7 +34,7 @@ export async function handler(req) {
     code_template_ids = code_template_ids ? parseStringToNumberArray(code_template_ids) : [];
     
 
-    console.log(`page: ${page}, limit: ${limit}, title: ${title}, content: ${content}, tag_ids: ${tag_ids}, code_template_ids: ${code_template_ids}, sorting: ${sorting}`);
+    console.log(`page: ${page}, limit: ${limit}, title: ${title}, description: ${description}, tag_ids: ${tag_ids}, code_template_ids: ${code_template_ids}, sorting: ${sorting}`);
 
     try {
         const where = {};
@@ -44,10 +45,14 @@ export async function handler(req) {
             };
         }
 
-        if (content) {
-            where.content = {
-                contains: content.toLocaleLowerCase()
+        if (description) {
+            where.description = {
+                contains: description.toLocaleLowerCase()
             };
+        }
+
+        if (authorId) {
+            where.authorId = parseInt(authorId);
         }
 
         if (tag_ids?.length > 0) {
@@ -87,7 +92,7 @@ export async function handler(req) {
             select: {
                 id: true,
                 title: true,
-                content: true,
+                description: true,
                 upvotes: true,
                 downvotes: true,
                 tags: {
