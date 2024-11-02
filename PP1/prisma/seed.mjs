@@ -13,8 +13,8 @@ async function main() {
 
     console.log('All existing data has been deleted.');
 
-    const adminPassword = await bcrypt.hash('test123', 10)
-    const userPassword = await bcrypt.hash('test123', 10)
+    const adminPassword = await bcrypt.hash('Test123*', 10)
+    const userPassword = await bcrypt.hash('Test123*', 10)
 
     // Creating sample users
     const user1 = await prisma.user.create({
