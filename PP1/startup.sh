@@ -10,5 +10,5 @@ EOL
 npm install
 npx prisma generate
 npx prisma migrate dev
-npx prisma seed db
+npx prisma seed db
 # admin email: admin@example.com, password: Test123*
