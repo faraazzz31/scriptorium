@@ -26,6 +26,10 @@ async function handler (req) {
             },
         });
 
+        if (!userProfile) {
+            return NextResponse.json({ error: 'User not found' }, { status: 404 });
+        }
+
         return NextResponse.json(
             {
                 id: userProfile.id,
