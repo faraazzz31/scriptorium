@@ -2,8 +2,10 @@ import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { withAuth } from '@/app/middleware/auth.js';
 import { validatePhone } from '@/app/utils/validation.js';
+import { avatarConfig } from '@/app/config/avatar.js';
 
 const prisma = new PrismaClient();
+const VALID_AVATAR_PATHS = avatarConfig.getValidPaths();
 
 async function handler (req) {
     const user = req.user;
@@ -16,6 +18,10 @@ async function handler (req) {
 
     if (phone && !validatePhone(phone)) {
         return NextResponse.json({ error: 'Invalid phone number' }, { status: 400 });
+    }
+
+    if (avatar && !VALID_AVATAR_PATHS.includes(avatar)) {
+        return NextResponse.json({ error: 'Invalid avatar selection' }, { status: 400 });
     }
 
     try {
