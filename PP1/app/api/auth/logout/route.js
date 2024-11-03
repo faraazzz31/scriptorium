@@ -1,3 +1,5 @@
+// Used Github co-pilot to help me write this code
+
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { withAuth } from '@/app/middleware/auth';
