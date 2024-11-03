@@ -16,22 +16,26 @@ datasource db {
 }
 
 model User {
-  id             Int            @id @default(autoincrement())
-  email          String         @unique
-  password       String
-  firstName      String?
-  lastName       String?
-  avatar         String?
-  phone          String?
-  role           String         @default("USER")
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-  codeTemplates  CodeTemplate[]
-  blogPosts      BlogPost[]
-  comments       Comment[]
-  hiddenPosts    BlogPost[]     @relation("HiddenPosts")
-  hiddenComments Comment[]      @relation("HiddenComments")
-  reports        Report[]       @relation("reportsMade")
+  id                Int            @id @default(autoincrement())
+  email             String         @unique
+  password          String
+  firstName         String?
+  lastName          String?
+  avatar            String?
+  phone             String?
+  role              String         @default("USER")
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  codeTemplates     CodeTemplate[]
+  blogPosts         BlogPost[]
+  comments          Comment[]
+  hiddenPosts       BlogPost[]     @relation("HiddenPosts")
+  hiddenComments    Comment[]      @relation("HiddenComments")
+  reports           Report[]       @relation("reportsMade")
+  upvotedPosts      BlogPost[]     @relation("UserUpvotedPosts")
+  downvotedPosts    BlogPost[]     @relation("UserDownvotedPosts")
+  upvotedComments   Comment[]      @relation("UserUpvotedComments")
+  downvotedComments Comment[]      @relation("UserDownvotedComments")
 }
 
 model CodeTemplate {
@@ -66,6 +70,8 @@ model BlogPost {
   codeTemplates CodeTemplate[]
   upvotes       Int            @default(0)
   downvotes     Int            @default(0)
+  upvotedBy     User[]         @relation("UserUpvotedPosts")
+  downvotedBy   User[]         @relation("UserDownvotedPosts")
 }
 
 model Tag {
@@ -78,24 +84,26 @@ model Tag {
 }
 
 model Comment {
-  id         Int       @id @default(autoincrement())
-  content    String
-  authorId   Int
-  author     User      @relation(fields: [authorId], references: [id])
-  blogPostId Int?
-  blogPost   BlogPost?  @relation(fields: [blogPostId], references: [id])
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  isHidden   Boolean   @default(false)
-  hiddenAt   DateTime?
-  hiddenBy   User?     @relation("HiddenComments", fields: [hiddenById], references: [id])
-  hiddenById Int?
-  reports    Report[]
-  parentId   Int? // Optional because top-level comments won't have a parent
-  parent     Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
-  replies    Comment[] @relation("CommentReplies")
-  upvotes    Int       @default(0)
-  downvotes  Int       @default(0)
+  id          Int       @id @default(autoincrement())
+  content     String
+  authorId    Int
+  author      User      @relation(fields: [authorId], references: [id])
+  blogPostId  Int?
+  blogPost    BlogPost? @relation(fields: [blogPostId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  isHidden    Boolean   @default(false)
+  hiddenAt    DateTime?
+  hiddenBy    User?     @relation("HiddenComments", fields: [hiddenById], references: [id])
+  hiddenById  Int?
+  reports     Report[]
+  parentId    Int? // Optional because top-level comments won't have a parent
+  parent      Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  replies     Comment[] @relation("CommentReplies")
+  upvotes     Int       @default(0)
+  downvotes   Int       @default(0)
+  upvotedBy   User[]    @relation("UserUpvotedComments")
+  downvotedBy User[]    @relation("UserDownvotedComments")
 }
 
 model Report {

@@ -36,7 +36,11 @@ async function handler(req) {
         }
 
         if (blogPost.authorId !== user.id) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+            return NextResponse.json({ error: "Unauthorized, you aren't the author of this blog post" }, { status: 401 });
+        }
+
+        if (blogPost.isHidden) {
+            return NextResponse.json({ error: "Blog post is hidden, can't be edited" }, { status: 403 });
         }
 
         const data = {

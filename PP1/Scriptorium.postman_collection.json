@@ -4,8 +4,8 @@
 		"name": "Scriptorium",
 		"description": "JWT_SECRET='7c790aded86421b733c7aa837c2249d4903574e2d1d5fb310f509719ed503899d2c37118d9feea1c8400b7dd2768a940d853721867059e2f07f0dd86b105241a'\n\nJWT_REFRESH_SECRET='bab29b3aaa29a4633298e41c03226346b3febc941047ca5b433e16d7352d6bc869796df2d22f961406e9cb2363bec231241854346535ee8e6da17042698ecdae'\n\nSALT_ROUNDS=10",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "39125036",
-		"_collection_link": "https://csc309-scriptorium.postman.co/workspace/CSC309---Scriptorium-Workspace~aba080fc-e740-49c3-8c27-4fdd75a7135e/collection/30158464-d8ac27ef-09a0-458f-b9e8-34715847b1da?action=share&source=collection_link&creator=39125036"
+		"_exporter_id": "30158464",
+		"_collection_link": "https://csc309-scriptorium.postman.co/workspace/CSC309---Scriptorium-Workspace~aba080fc-e740-49c3-8c27-4fdd75a7135e/collection/30158464-d8ac27ef-09a0-458f-b9e8-34715847b1da?action=share&source=collection_link&creator=30158464"
 	},
 	"item": [
 		{
@@ -48,7 +48,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"email\": \"test5@gmail.com\",\n    \"password\": \"Test123*\",\n    \"firstName\": \"test\", \n    \"lastName\": \"test\", \n    \"phone\": \"0399394909\",\n    \"role\": \"ADMIN\"\n}",
+									"raw": "{\n    \"email\": \"apitest@gmail.com\",\n    \"password\": \"Test123*\",\n    \"firstName\": \"test\", \n    \"lastName\": \"api\", \n    \"phone\": \"0399394909\",\n    \"role\": \"ADMIN\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -124,7 +124,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\": \"admin@example.com\",\n    \"password\": \"test123\"\n}",
+							"raw": "{\n    \"email\": \"admin@example.com\",\n    \"password\": \"Test123*\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1071,7 +1071,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"title\": \"Test\",\n    \"explanation\": \"Test Test\",\n    \"code\": \"int x\",\n    \"language\": \"Python\",\n    \"tag_ids\": [1]\n}",
+							"raw": "{\n    \"title\": \"Basic Python\",\n    \"explanation\": \"Initialize variable\",\n    \"code\": \"int x\",\n    \"language\": \"Python\",\n    \"tag_ids\": [2]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1173,7 +1173,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:3000/api/code-template/fetch-all?page=1&limit=10&title=&tag_id=&explanation=javascript",
+							"raw": "http://localhost:3000/api/code-template/fetch-all?page=1&limit=10&title=python&tag_id=&explanation=",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -1195,7 +1195,7 @@
 								},
 								{
 									"key": "title",
-									"value": ""
+									"value": "python"
 								},
 								{
 									"key": "tag_id",
@@ -1203,7 +1203,7 @@
 								},
 								{
 									"key": "explanation",
-									"value": "javascript"
+									"value": ""
 								}
 							]
 						}
@@ -1429,7 +1429,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"codeTemplateId\": 1,\n    \"code\": \"int y\",\n    \"tag_ids\": [1]\n}",
+							"raw": "{\n    \"codeTemplateId\": 3,\n    \"code\": \"int y\",\n    \"explanation\": \"Initialize new variable in Python\",\n    \"tag_ids\": [2]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1503,7 +1503,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"codeTemplateId\": 2\n}",
+							"raw": "{\n    \"codeTemplateId\": 3\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1593,7 +1593,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:3000/api/code-template/fetch?id=3",
+							"raw": "http://localhost:3000/api/code-template/fetch?id=2",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -1607,7 +1607,7 @@
 							"query": [
 								{
 									"key": "id",
-									"value": "3"
+									"value": "2"
 								}
 							]
 						}

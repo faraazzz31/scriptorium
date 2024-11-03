@@ -25,8 +25,23 @@ async function handler(req) {
       );
     }
 
+    if (type !== "UPVOTE" && type !== "DOWNVOTE") {
+      return NextResponse.json(
+        { error: "Invalid type, must be UPVOTE or DOWNVOTE" },
+        { status: 400 }
+      );
+    }
+
+    if (change !== 1 && change !== -1) {
+      return NextResponse.json(
+        { error: "Invalid change, must be 1 or -1" },
+        { status: 400 }
+      );
+    }
+
     const blogPost = await prisma.blogPost.findUnique({
       where: { id: parseInt(blogPostId) },
+      include: { upvotedBy: true, downvotedBy: true },
     });
 
     if (!blogPost) {
@@ -38,27 +53,72 @@ async function handler(req) {
 
     const upvotes = blogPost.upvotes;
     const downvotes = blogPost.downvotes;
+    const upvotersIds = blogPost.upvotedBy.map((user) => user.id);
+    const downvotersIds = blogPost.downvotedBy.map((user) => user.id);
 
-    if (type === "UPVOTE" && upvotes + change < 0) {
-      return NextResponse.json(
-        { error: "Invalid upvote change, resulting in negative" },
-        { status: 400 }
-      );
-    }
-    if (type === "DOWNVOTE" && downvotes + change < 0) {
-      return NextResponse.json(
-        { error: "Invalid downvote change, resulting in negative" },
-        { status: 400 }
-      );
-    }
+    let updatedBlogPost;
 
-    const updatedBlogPost = await prisma.blogPost.update({
-      where: { id: parseInt(blogPostId) },
-      data:
-        type === "UPVOTE"
-          ? { upvotes: blogPost.upvotes + change }
-          : { downvotes: blogPost.downvotes + change },
-    });
+    if (change === 1) {
+      if (upvotersIds.includes(user.id)) {
+        return NextResponse.json(
+          { error: "You have already upvoted this blog post" },
+          { status: 400 }
+        );
+      }
+      if (downvotersIds.includes(user.id)) {
+        return NextResponse.json(
+          { error: "You have already downvoted this blog post" },
+          { status: 400 }
+        );
+      }
+      if (type === "UPVOTE") {
+        updatedBlogPost = await prisma.blogPost.update({
+          where: { id: parseInt(blogPostId) },
+          data: {
+            upvotes: upvotes + change,
+            upvotedBy: { connect: { id: user.id } },
+          },
+        });
+      } else if (type === "DOWNVOTE") {
+        updatedBlogPost = await prisma.blogPost.update({
+          where: { id: parseInt(blogPostId) },
+          data: {
+            downvotes: downvotes + change,
+            downvotedBy: { connect: { id: user.id } },
+          },
+        });
+      }
+    } else if (change === -1) {
+      if (type === "UPVOTE") {
+        if (!upvotersIds.includes(user.id)) {
+          return NextResponse.json(
+            { error: "You haven't upvoted this blog post" },
+            { status: 400 }
+          );
+        }
+        updatedBlogPost = await prisma.blogPost.update({
+          where: { id: parseInt(blogPostId) },
+          data: {
+            upvotes: upvotes + change,
+            upvotedBy: { disconnect: { id: user.id } },
+          },
+        });
+      } else if (type === "DOWNVOTE") {
+        if (!downvotersIds.includes(user.id)) {
+          return NextResponse.json(
+            { error: "You haven't downvoted this blog post" },
+            { status: 400 }
+          );
+        }
+        updatedBlogPost = await prisma.blogPost.update({
+          where: { id: parseInt(blogPostId) },
+          data: {
+            downvotes: downvotes + change,
+            downvotedBy: { disconnect: { id: user.id } },
+          },
+        });
+      }
+    }
 
     return NextResponse.json({
       id: updatedBlogPost.id,
