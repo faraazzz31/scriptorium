@@ -1,4 +1,4 @@
-// app/middleware/auth.js
+// Used Claude to help me with the idea of middleware
 
 import { NextResponse } from 'next/server';
 import { verifyAccessToken } from '../lib/auth';
