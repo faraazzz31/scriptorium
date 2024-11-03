@@ -108,6 +108,7 @@ export async function handler(req) {
                     }
                 },
                 authorId: true,
+                isHidden: true,
             }
         });
 
