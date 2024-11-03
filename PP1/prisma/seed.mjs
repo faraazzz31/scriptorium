@@ -13,8 +13,8 @@ async function main() {
 
     console.log('All existing data has been deleted.');
 
-    const adminPassword = await bcrypt.hash('test123', 10)
-    const userPassword = await bcrypt.hash('test123', 10)
+    const adminPassword = await bcrypt.hash('Test123*', 10)
+    const userPassword = await bcrypt.hash('Test123*', 10)
 
     // Creating sample users
     const user1 = await prisma.user.create({
@@ -72,7 +72,6 @@ async function main() {
         data: {
             title: 'Introduction to JavaScript',
             description: 'An introductory post on JavaScript basics.',
-            content: 'JavaScript is a versatile language...',
             authorId: user1.id,
             tags: { connect: [{ id: tag1.id }] },
             codeTemplates: { connect: [{ id: template1.id }] }
@@ -83,7 +82,6 @@ async function main() {
         data: {
             title: 'Getting Started with Python',
             description: 'Learn the basics of Python programming.',
-            content: 'Python is a popular programming language...',
             authorId: user2.id,
             tags: { connect: [{ id: tag2.id }] },
             codeTemplates: { connect: [{ id: template2.id }] }

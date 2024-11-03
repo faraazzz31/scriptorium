@@ -33,6 +33,11 @@ export async function handler(req) {
             where.authorId = parseInt(authorId);
         }
 
+        // Check if both blogPostId and parentId are provided
+        if (blogPostId && parentId) {
+            return NextResponse.json({ error: 'Both blogPostId and parentId cannot be provided. A comment can only belong to either blog post or another comment, but not both' }, { status: 400 });
+        }
+
         if (blogPostId) {
             where.blogPostId = parseInt(blogPostId);
         }
