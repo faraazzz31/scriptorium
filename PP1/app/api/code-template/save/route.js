@@ -1,3 +1,5 @@
+// Used Github co-pilot to help me write this code
+
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { withAuth } from '@/app/middleware/auth';
@@ -33,6 +35,18 @@ async function handler (req) {
         }
 
         if (tag_ids && tag_ids.length > 0) {
+            const tags = await prisma.tag.findMany({
+                where: {
+                    id: {
+                        in: tag_ids,
+                    },
+                },
+            });
+
+            if (tags.length !== tag_ids.length) {
+                return NextResponse.json({ error: 'Invalid tags' }, { status: 400 });
+            }
+
             data.tags = {
                 connect: tag_ids.map(tag_id => ({ id: tag_id })),
             };

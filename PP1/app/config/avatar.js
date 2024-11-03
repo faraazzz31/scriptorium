@@ -1,4 +1,6 @@
-// app/config/avatars.js
+// Used Github co-pilot to help me write this code
+
+
 export const avatarConfig = {
     basePath: '/avatars',
     defaultAvatars: [

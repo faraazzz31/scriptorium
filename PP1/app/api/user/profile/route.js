@@ -1,4 +1,4 @@
-// app/api/auth/profile/route.js
+// Used Github co-pilot to help me write this code
 
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
@@ -25,6 +25,10 @@ async function handler (req) {
                 phone: true,
             },
         });
+
+        if (!userProfile) {
+            return NextResponse.json({ error: 'User not found' }, { status: 404 });
+        }
 
         return NextResponse.json(
             {
