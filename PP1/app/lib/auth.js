@@ -1,3 +1,5 @@
+// Used Github co-pilot to help me write this code
+
 import jwt from 'jsonwebtoken';
 
 export function signAccessToken(payload) {

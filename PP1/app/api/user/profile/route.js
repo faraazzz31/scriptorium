@@ -1,4 +1,4 @@
-// app/api/auth/profile/route.js
+// Used Github co-pilot to help me write this code
 
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
