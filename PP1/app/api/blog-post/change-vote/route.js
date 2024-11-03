@@ -61,7 +61,7 @@ async function handler(req) {
     return NextResponse.json({
       id: updatedBlogPost.id,
       title: updatedBlogPost.title,
-      content: updatedBlogPost.content,
+      description: updatedBlogPost.description,
       upvotes: updatedBlogPost.upvotes,
       downvotes: updatedBlogPost.downvotes,
     });

@@ -48,6 +48,18 @@ async function handler (req) {
             // Only modify tags if tag_ids is provided
             if (tag_ids.length > 0) {
                 // Connect new tags
+                const tags = await prisma.tag.findMany({
+                    where: {
+                        id: {
+                            in: tag_ids,
+                        },
+                    },
+                });
+
+                if (tags.length !== tag_ids.length) {
+                    return NextResponse.json({ error: 'Invalid tags' }, { status: 400 });
+                }
+
                 data.tags = {
                     set: [],  // First disconnect all existing tags
                     connect: tag_ids.map(tag_id => ({ id: tag_id })),

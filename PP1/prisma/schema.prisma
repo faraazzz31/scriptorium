@@ -50,7 +50,6 @@ model BlogPost {
   id            Int            @id @default(autoincrement())
   title         String
   description   String
-  content       String
   tags          Tag[]
   authorId      Int
   author        User           @relation(fields: [authorId], references: [id])

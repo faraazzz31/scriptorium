@@ -12,9 +12,9 @@ async function handler(req) {
     }
 
     try {
-        const { blogPostId, title, content, tag_ids } = await req.json();
+        const { blogPostId, title, description, tag_ids } = await req.json();
 
-        console.log(`blogPostId: ${blogPostId}, title: ${title}, content: ${content}, tags: ${tag_ids}`);
+        console.log(`blogPostId: ${blogPostId}, title: ${title}, description: ${description}, tags: ${tag_ids}`);
 
         if (!blogPostId) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -39,7 +39,22 @@ async function handler(req) {
 
         const data = {
             title: title ? title : blogPost.title,
-            content: content ? content : blogPost.content,
+            description: description ? description : blogPost.description,
+        }
+
+        // Check if tag_ids contain only valid tag ids
+        if (tag_ids?.length > 0) {
+            const valid_tags = await prisma.tag.findMany({
+                select: {
+                    id: true,
+                }
+            });
+            const valid_tag_ids = valid_tags.map(tag => tag.id);
+            for (let tag_id of tag_ids) {
+                if (!valid_tag_ids.includes(tag_id)) {
+                    return NextResponse.json({ error: "tag_ids contain tags that aren't in the database" }, { status: 400 });
+                }
+            }
         }
 
         // Handle tags update
@@ -74,7 +89,7 @@ async function handler(req) {
         return NextResponse.json({
             id: updatedBlogPost.id,
             title: updatedBlogPost.title,
-            content: updatedBlogPost.content,
+            description: updatedBlogPost.description,
             tags: updatedBlogPost.tags,
             upvotes: updatedBlogPost.upvotes,
             downvotes: updatedBlogPost.downvotes,

@@ -2,11 +2,16 @@ import { NextResponse } from 'next/server'
 import { verifyRefreshToken, signAccessToken } from '@/app/lib/auth'
 
 export async function POST(req) {
-    const { refreshToken } = await req.json()
+    const authHeader = req.headers.get('authorization');
 
-    if (!refreshToken) {
-        return NextResponse.json({ error: 'Refresh token is required' }, { status: 400 })
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return NextResponse.json(
+            { error: 'Refresh Token is required' },
+            { status: 401 }
+        )
     }
+
+    const refreshToken = authHeader.split(' ')[1]
 
     try {
         const decoded = await verifyRefreshToken(refreshToken)
