@@ -1,12 +1,81 @@
 // Used Github co-pilot to help me write this code
-
-import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { NextRequest, NextResponse } from 'next/server';
+import { PrismaClient, User, BlogPost, Comment } from '@prisma/client';
 import { withAuth } from '@/app/middleware/auth';
 
 const prisma = new PrismaClient();
 
-async function handler(req) {
+type ReportType = 'ALL' | 'BLOG_POST' | 'COMMENT';
+type ReportStatus = 'PENDING' | 'RESOLVED' | string;
+
+interface AuthenticatedRequest extends NextRequest {
+    user: User;
+}
+
+interface AuthorInfo {
+    id: number;
+    email: string;
+    firstName: string | null;
+    lastName: string | null;
+}
+
+interface BlogPostInfo {
+    id: number;
+    title: string;
+}
+
+interface ReportInfo {
+    id: number;
+    reason: string;
+    explanation: string;
+    status: string;
+    createdAt: Date;
+    reporter: AuthorInfo;
+}
+
+interface BlogPostResult {
+    type: 'BLOG_POST';
+    id: number;
+    content: {
+        id: number;
+        title: string;
+        description: string;
+        author: AuthorInfo;
+    };
+    reportCount: number;
+    reports: ReportInfo[];
+    isHidden: boolean;
+}
+
+interface CommentResult {
+    type: 'COMMENT';
+    id: number;
+    content: {
+        id: number;
+        text: string;
+        author: AuthorInfo;
+        blogPost: BlogPostInfo | null;
+    };
+    reportCount: number;
+    reports: ReportInfo[];
+    isHidden: boolean;
+}
+
+type ReportResult = BlogPostResult | CommentResult;
+
+interface PaginationInfo {
+    total: number;
+    pages: number;
+    currentPage: number;
+    limit: number;
+}
+
+interface ApiResponse {
+    results: ReportResult[];
+    pagination: PaginationInfo;
+}
+
+async function handler(req: AuthenticatedRequest): Promise<NextResponse<ApiResponse | { error: string }>> {
     const user = req.user;
     console.log(`user: ${JSON.stringify(user)}`);
 
@@ -16,13 +85,26 @@ async function handler(req) {
 
     try {
         const { searchParams } = new URL(req.url);
-        const type = searchParams.get('type') || 'ALL';
-        const status = searchParams.get('status');
+        const type = (searchParams.get('type') || 'ALL') as ReportType;
+        const status = searchParams.get('status') as ReportStatus | null;
         const page = parseInt(searchParams.get('page') || '1');
         const limit = parseInt(searchParams.get('limit') || '10');
         const skip = (page - 1) * limit;
 
         console.log(`Fetching reports - type: ${type}, status: ${status}, page: ${page}, limit: ${limit}`);
+
+        type BlogPostWithReports = BlogPost & {
+            author: AuthorInfo;
+            _count: { reports: number };
+            reports: ReportInfo[];
+        };
+
+        type CommentWithReports = Comment & {
+            author: AuthorInfo;
+            blogPost: BlogPostInfo | null;
+            _count: { reports: number };
+            reports: ReportInfo[];
+        };
 
         const reportedBlogPosts = type !== 'COMMENT' ? await prisma.blogPost.findMany({
             where: {
@@ -69,7 +151,7 @@ async function handler(req) {
             },
             skip: type === 'ALL' ? 0 : skip,
             take: type === 'ALL' ? undefined : limit
-        }) : [];
+        }) as BlogPostWithReports[] : [];
 
         const reportedComments = type !== 'BLOG_POST' ? await prisma.comment.findMany({
             where: {
@@ -122,12 +204,12 @@ async function handler(req) {
             },
             skip: type === 'ALL' ? 0 : skip,
             take: type === 'ALL' ? undefined : limit
-        }) : [];
+        }) as CommentWithReports[] : [];
 
-        let results;
+        let results: ReportResult[];
         if (type === 'ALL') {
             results = [
-                ...reportedBlogPosts.map(post => ({
+                ...reportedBlogPosts.map((post): BlogPostResult => ({
                     type: 'BLOG_POST',
                     id: post.id,
                     content: {
@@ -140,7 +222,7 @@ async function handler(req) {
                     reports: post.reports,
                     isHidden: post.isHidden
                 })),
-                ...reportedComments.map(comment => ({
+                ...reportedComments.map((comment): CommentResult => ({
                     type: 'COMMENT',
                     id: comment.id,
                     content: {
@@ -158,7 +240,7 @@ async function handler(req) {
                 .slice(skip, skip + limit);
         } else {
             results = type === 'BLOG_POST'
-                ? reportedBlogPosts.map(post => ({
+                ? reportedBlogPosts.map((post): BlogPostResult => ({
                     type: 'BLOG_POST',
                     id: post.id,
                     content: {
@@ -171,7 +253,7 @@ async function handler(req) {
                     reports: post.reports,
                     isHidden: post.isHidden
                 }))
-                : reportedComments.map(comment => ({
+                : reportedComments.map((comment): CommentResult => ({
                     type: 'COMMENT',
                     id: comment.id,
                     content: {
