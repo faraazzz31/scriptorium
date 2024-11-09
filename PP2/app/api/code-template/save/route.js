@@ -15,11 +15,21 @@ async function handler (req) {
     }
 
     try {
-        const { title, explanation, code, language, tag_ids } = await req.json();
-        console.log(`title: ${title}, code: ${code}, explanation: ${explanation}, tags: ${tag_ids}, language: ${language}`);
+        const { title, explanation, code, language, tag_ids, forkOfId } = await req.json();
+        console.log(`title: ${title}, code: ${code}, explanation: ${explanation}, tags: ${tag_ids}, language: ${language} forkOfId: ${forkOfId}`);
 
         if (!title || !code || !language) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+        }
+
+        if (forkOfId) {
+            const originalTemplate = await prisma.codeTemplate.findUnique({
+                where: { id: forkOfId }
+            });
+
+            if (!originalTemplate) {
+                return NextResponse.json({ error: 'Original template not found' }, { status: 404 });
+            }
         }
 
         const data = {
@@ -32,6 +42,13 @@ async function handler (req) {
                     id: user.id,
                 },
             },
+            ...(forkOfId && {
+                forkOf: {
+                    connect: {
+                        id: forkOfId
+                    }
+                }
+            })
         }
 
         if (tag_ids && tag_ids.length > 0) {
@@ -62,8 +79,9 @@ async function handler (req) {
                 title: codeTemplate.title,
                 explanation: codeTemplate.explanation,
                 code: codeTemplate.code,
-                author: codeTemplate.author,
+                authorId: codeTemplate.authorId,
                 tags: codeTemplate.tags,
+                forkOfId: codeTemplate.forkOfId,
             }
         );
     } catch (error) {

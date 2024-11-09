@@ -2,17 +2,10 @@
 
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { withAuth } from '@/app/middleware/auth';
 
 const prisma = new PrismaClient();
 
-async function handler (req) {
-    const user = req.user;
-    console.log(`user: ${JSON.stringify(user)}`);
-
-    if (!user) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+export async function GET(req) {
     const { searchParams } = new URL(req.url);
 
     let page = searchParams.get('page');
@@ -32,7 +25,6 @@ async function handler (req) {
 
     try {
         const where = {};
-        where.authorId = user.id;
 
         if (title) {
             where.title = {
@@ -69,8 +61,29 @@ async function handler (req) {
             take: limit,
             where: where,
             include: {
-                tags: { select: { id: true, name: true } },
-                author: { select: { id: true, firstName: true, lastName: true } },
+                tags: {
+                    select: {
+                        id: true,
+                        name: true
+                    }
+                },
+                author: {
+                    select: {
+                        id: true,
+                        firstName: true,
+                        lastName: true
+                    }
+                },
+                forks: {
+                    select: {
+                        id: true,
+                        title: true,
+                        createdAt: true,
+                        author: {
+                            select: { id: true, firstName: true, lastName: true }
+                        }
+                    }
+                },
             }
         });
 
@@ -83,10 +96,8 @@ async function handler (req) {
             totalPages: totalPages,
             totalCount: totalCount,
         });
-    } catch (error) {
-        console.log(`fetch-user error: ${error}`);
+    } catch {
+        console.error(`Error in /app/api/code_template/fetch: ${error}`);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }
-
-export const GET = withAuth(handler);

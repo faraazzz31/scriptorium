@@ -39,18 +39,22 @@ model User {
 }
 
 model CodeTemplate {
-  id          Int        @id @default(autoincrement())
+  id          Int            @id @default(autoincrement())
   title       String
   explanation String?
   code        String
   language    String
   tags        Tag[]
   authorId    Int
-  author      User       @relation(fields: [authorId], references: [id])
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  author      User          @relation(fields: [authorId], references: [id])
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
   blogPosts   BlogPost[]
+  forkOf      CodeTemplate? @relation("Forks", fields: [forkOfId], references: [id])
+  forkOfId    Int?
+  forks       CodeTemplate[] @relation("Forks")
 }
+
 
 model BlogPost {
   id            Int            @id @default(autoincrement())
