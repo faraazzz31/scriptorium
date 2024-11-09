@@ -1,12 +1,32 @@
 // Used Github co-pilot to help me write this code
 
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { withAuth } from "@/app/middleware/auth";
 
 const prisma = new PrismaClient();
 
-async function handler(req) {
+interface AuthenticatedRequest extends NextRequest {
+  user?: {
+    id: number;
+    email: string;
+    role: string;
+  };
+}
+
+interface ChangeVoteBlogPostResponse {
+  id: number;
+  title: string;
+  description: string;
+  upvotes: number;
+  downvotes: number;
+}
+
+interface ErrorResponse {
+  error: string;
+}
+
+async function handler(req: AuthenticatedRequest): Promise<NextResponse<ChangeVoteBlogPostResponse | ErrorResponse>> {
   const user = req.user;
 
   if (!user) {
@@ -120,12 +140,19 @@ async function handler(req) {
       }
     }
 
+    if (!updatedBlogPost) {
+      return NextResponse.json(
+        { error: "Failed to update blog post" },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json({
-      id: updatedBlogPost.id,
-      title: updatedBlogPost.title,
-      description: updatedBlogPost.description,
-      upvotes: updatedBlogPost.upvotes,
-      downvotes: updatedBlogPost.downvotes,
+      id: updatedBlogPost?.id,
+      title: updatedBlogPost?.title,
+      description: updatedBlogPost?.description,
+      upvotes: updatedBlogPost?.upvotes,
+      downvotes: updatedBlogPost?.downvotes,
     });
   } catch (error) {
     console.error(`Error in /app/api/blog-post/change-upvote: ${error}`);

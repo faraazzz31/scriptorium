@@ -1,12 +1,29 @@
 // Used Github co-pilot to help me write this code
 
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { withAuth } from "@/app/middleware/auth";
 
 const prisma = new PrismaClient();
 
-async function handler(req) {
+interface AuthenticatedRequest extends NextRequest {
+  user?: {
+    id: number;
+    email: string;
+    role: string;
+  };
+}
+
+interface DeleteBlogPostResponse {
+  message: string;
+  blogPostId: number;
+}
+
+interface ErrorResponse {
+  error: string;
+}
+
+async function handler(req: AuthenticatedRequest): Promise<NextResponse<DeleteBlogPostResponse | ErrorResponse>> {
   const user = req.user;
 
   if (!user) {
