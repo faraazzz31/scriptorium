@@ -69,8 +69,29 @@ async function handler (req) {
             take: limit,
             where: where,
             include: {
-                tags: { select: { id: true, name: true } },
-                author: { select: { id: true, firstName: true, lastName: true } },
+                tags: {
+                    select: {
+                        id: true,
+                        name: true
+                    }
+                },
+                author: {
+                    select: {
+                        id: true,
+                        firstName: true,
+                        lastName: true
+                    }
+                },
+                forks: {
+                    select: {
+                        id: true,
+                        title: true,
+                        createdAt: true,
+                        author: {
+                            select: { id: true, firstName: true, lastName: true }
+                        }
+                    }
+                },
             }
         });
 

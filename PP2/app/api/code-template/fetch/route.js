@@ -21,7 +21,38 @@ export async function GET(req) {
                 id: parseInt(id)
             },
             include: {
-                tags: true
+                tags: {
+                    select: {
+                        id: true,
+                        name: true
+                    }
+                },
+                author: {
+                    select: {
+                        id: true,
+                        firstName: true,
+                        lastName: true
+                    }
+                },
+                forks: {
+                    select: {
+                        id: true,
+                        title: true,
+                        createdAt: true,
+                        author: {
+                            select: { id: true, firstName: true, lastName: true }
+                        }
+                    }
+                },
+                forkOf: {
+                    select: {
+                        id: true,
+                        title: true,
+                        author: {
+                            select: { id: true, firstName: true, lastName: true }
+                        }
+                    }
+                }
             }
         });
 
