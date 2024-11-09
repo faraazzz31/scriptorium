@@ -1,0 +1,3608 @@
+{
+	"info": {
+		"_postman_id": "d8ac27ef-09a0-458f-b9e8-34715847b1da",
+		"name": "Scriptorium",
+		"description": "JWT_SECRET='7c790aded86421b733c7aa837c2249d4903574e2d1d5fb310f509719ed503899d2c37118d9feea1c8400b7dd2768a940d853721867059e2f07f0dd86b105241a'\n\nJWT_REFRESH_SECRET='bab29b3aaa29a4633298e41c03226346b3febc941047ca5b433e16d7352d6bc869796df2d22f961406e9cb2363bec231241854346535ee8e6da17042698ecdae'\n\nSALT_ROUNDS=10",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "30158464",
+		"_collection_link": "https://csc309-scriptorium.postman.co/workspace/CSC309---Scriptorium-Workspace~aba080fc-e740-49c3-8c27-4fdd75a7135e/collection/30158464-d8ac27ef-09a0-458f-b9e8-34715847b1da?action=share&source=collection_link&creator=30158464"
+	},
+	"item": [
+		{
+			"name": "Accounts",
+			"item": [
+				{
+					"name": "Signup",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"testavatar@gmail.com\",\n    \"password\": \"Test123*\",\n    \"firstName\": \"test\", \n    \"lastName\": \"test\", \n    \"phone\": \"0399394909\",\n    \"role\": \"ADMIN\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/auth/signup",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"auth",
+								"signup"
+							]
+						},
+						"description": "### **Endpoint:** `/api/auth/register`\n\n- **Method:** `POST`\n    \n- **Description:** Registers a new user in the system. The user must provide valid email, password, first name, last name, and phone number. The email and phone number must be unique in the system. Passwords are hashed before storing in the database.\n    \n\n### **Payload**\n\nThe request must include the following fields in the body:\n\n- **email** (string): The user's email address.\n    \n- **password** (string): The user's password (must meet validation criteria).\n    \n- **firstName** (string): The user's first name.\n    \n- **lastName** (string): The user's last name.\n    \n- **phone** (string): The user's phone number (must be a valid format).\n    \n\n### **Validation**\n\n- **Email Validation:** The email must be in a proper format, e.g., `user@example.com`. The `validateEmail` function checks for this.\n    \n- **Password Validation:** The password must meet specific criteria (e.g., minimum length, complexity). The `validatePassword` function ensures that it complies.\n    \n- **Phone Validation:** The phone number must be in a valid format, typically including the country code. The `validatePhone` function verifies the format."
+					},
+					"response": [
+						{
+							"name": "Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"email\": \"apitest@gmail.com\",\n    \"password\": \"Test123*\",\n    \"firstName\": \"test\", \n    \"lastName\": \"api\", \n    \"phone\": \"0399394909\",\n    \"role\": \"ADMIN\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/api/auth/signup",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"auth",
+										"signup"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "vary",
+									"value": "RSC, Next-Router-State-Tree, Next-Router-Prefetch"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 02 Nov 2024 22:13:27 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": 12,\n    \"firstName\": \"test\",\n    \"lastName\": \"test\",\n    \"phone\": \"0399394909\",\n    \"role\": \"ADMIN\",\n    \"avatar\": \"/avatars/avatar1.jpg\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let response = pm.response.json();",
+									"pm.environment.set('accessToken', response.accessToken);",
+									"pm.environment.set('refreshToken', response.refreshToken);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@example.com\",\n    \"password\": \"Test123*\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"email\": \"test5@gmail.com\",\n    \"password\": \"Test123*\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/api/auth/login",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"auth",
+										"login"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "vary",
+									"value": "RSC, Next-Router-State-Tree, Next-Router-Prefetch"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 02 Nov 2024 22:14:58 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTIsImVtYWlsIjoidGVzdDVAZ21haWwuY29tIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzMwNTg1Njk4LCJleHAiOjE3MzA1ODY1OTh9.GtFABSzGx0KS-WRg6SicF9W00XuUVFbX9WSNQXKTZdI\",\n    \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTIsImVtYWlsIjoidGVzdDVAZ21haWwuY29tIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzMwNTg1Njk4LCJleHAiOjE3MzExOTA0OTh9.GiRGCHk8-_W9tq9Uj72oQ5jAX0vSxMFTXdTk3Iqbjmc\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/auth/logout",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"auth",
+								"logout"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:3000/api/auth/logout",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"auth",
+										"logout"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "vary",
+									"value": "RSC, Next-Router-State-Tree, Next-Router-Prefetch"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								},
+								{
+									"key": "set-cookie",
+									"value": "accessToken=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT"
+								},
+								{
+									"key": "set-cookie",
+									"value": "refreshToken=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 02 Nov 2024 22:15:23 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Logged out successfully\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Refresh Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let response = pm.response.json();",
+									"pm.environment.set('accessToken', response.accessToken);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{refreshToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/auth/refresh",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"auth",
+								"refresh"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/api/auth/refresh",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"auth",
+										"refresh"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "vary",
+									"value": "RSC, Next-Router-State-Tree, Next-Router-Prefetch"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 02 Nov 2024 22:23:21 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJ0ZXN0QGdtYWlsLmNvbSIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNzMwNTg2MjAxLCJleHAiOjE3MzA1ODcxMDF9.yBKkQiL44ExrghHo1z1SzxQ1XsSivEOMHLF1ba8dkxg\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Profile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/user/profile",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"user",
+								"profile"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:3000/api/user/profile",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"user",
+										"profile"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "vary",
+									"value": "RSC, Next-Router-State-Tree, Next-Router-Prefetch"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 02 Nov 2024 22:15:38 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": 12,\n    \"email\": \"test5@gmail.com\",\n    \"firstName\": \"test\",\n    \"lastName\": \"test\",\n    \"avatar\": \"/avatars/avatar1.jpg\",\n    \"phone\": \"0399394909\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Update Profile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"avatar\": \"/avatars/avatar2.png\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/user/update",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"user",
+								"update"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Response",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"firstName\": \"john\",\n    \"lastName\": \"doe\",\n    \"avatar\": \"/avatars/avatar2.png\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/api/user/update",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"user",
+										"update"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "vary",
+									"value": "RSC, Next-Router-State-Tree, Next-Router-Prefetch"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 02 Nov 2024 22:16:00 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": 12,\n    \"email\": \"test5@gmail.com\",\n    \"firstName\": \"john\",\n    \"lastName\": \"doe\",\n    \"avatar\": \"/avatars/avatar2.png\",\n    \"phone\": \"0399394909\"\n}"
+						}
+					]
+				}
+			],
+			"description": "1. As a user, I want to sign up, log in, log out, and edit my profile. Profile information should include first and last name, email, avatar, and phone number. Authentication should be handled with a proper JWT setupEndFragment"
+		},
+		{
+			"name": "Code writing and execution",
+			"item": [
+				{
+					"name": "Run Javascript",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"console.log(\\\"Hello, World!\\\");\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/run-javascript",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"run-javascript"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"code\": \"console.log(\\\"Hello, World!\\\");\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/api/run-javascript",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"run-javascript"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "vary",
+									"value": "RSC, Next-Router-State-Tree, Next-Router-Prefetch"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 02 Nov 2024 19:57:03 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"output\": \"Hello, World!\\n\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Run Python",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"print(\\\"Hello, World!\\\")\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/run-python",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"run-python"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"code\": \"print(\\\"Hello, World!\\\")\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/api/run-python",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"run-python"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "vary",
+									"value": "RSC, Next-Router-State-Tree, Next-Router-Prefetch"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 02 Nov 2024 20:09:14 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"output\": \"Hello, World!\\n\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Run C",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"#include <stdio.h>\\n\\nint main() {\\n    printf(\\\"Hello, World!\\\\n\\\");\\n    return 0;\\n}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/run-c",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"run-c"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"code\": \"#include <stdio.h>\\n\\nint main() {\\n    printf(\\\"Hello, World!\\\\n\\\");\\n    return 0;\\n}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/api/run-c",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"run-c"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "vary",
+									"value": "RSC, Next-Router-State-Tree, Next-Router-Prefetch"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 02 Nov 2024 20:23:07 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"output\": \"Hello, World!\\n\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Run C++",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"#include <iostream>\\n\\nint main() {\\n    std::cout << \\\"Hello, World!\\\" << std::endl;\\n    return 0;\\n}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/run-cpp",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"run-cpp"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"code\": \"#include <iostream>\\n\\nint main() {\\n    std::cout << \\\"Hello, World!\\\" << std::endl;\\n    return 0;\\n}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/api/run-cpp",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"run-cpp"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "vary",
+									"value": "RSC, Next-Router-State-Tree, Next-Router-Prefetch"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 02 Nov 2024 20:23:13 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"output\": \"Hello, World!\\n\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Run Java",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"public class HelloWorld {\\n    public static void main(String[] args) {\\n        System.out.println(\\\"Hello, World!\\\");\\n    }\\n}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/run-java",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"run-java"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"code\": \"public class HelloWorld {\\n    public static void main(String[] args) {\\n        System.out.println(\\\"Hello, World!\\\");\\n    }\\n}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/api/run-java",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"run-java"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "vary",
+									"value": "RSC, Next-Router-State-Tree, Next-Router-Prefetch"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 02 Nov 2024 20:23:18 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"output\": \"Hello, World!\\n\"\n}"
+						}
+					]
+				}
+			],
+			"description": "1. As a visitor (unauthenticated user), I want to write code in various programming languages (e.g., C, C++, Java, Python, JavaScript) on Scriptorium.\n    \n2. As a visitor, I want my code to be highlighted based on the syntax rules of the programming language so that I get a good understanding of my code.\n    \n3. As a visitor, I want to execute my code on Scriptorium and see the output in real-time so that I can quickly verify its correctness.\n    \n4. As a visitor, I want to provide input to my code via the standard input (`stdin`) before execution so that I can test programs that require user input.\n    \n5. As a visitor, I want to see error messages if my code fails to compile or run so that I can debug my code effectively. This includes compile errors, runtime errors, timeouts, or any warnings generated in the meantime."
+		},
+		{
+			"name": "Code templates",
+			"item": [
+				{
+					"name": "Save Template",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Basic Python\",\n    \"explanation\": \"Initialize variable\",\n    \"code\": \"int x\",\n    \"language\": \"Python\",\n    \"tag_ids\": [2]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/code-template/save",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"code-template",
+								"save"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"title\": \"Test\",\n    \"explanation\": \"Test Test\",\n    \"code\": \"int x\",\n    \"language\": \"Python\",\n    \"tag_ids\": [2]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/api/code-template/save",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"code-template",
+										"save"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "vary",
+									"value": "RSC, Next-Router-State-Tree, Next-Router-Prefetch"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 02 Nov 2024 22:16:23 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": 8,\n    \"title\": \"Test\",\n    \"explanation\": \"Test Test\",\n    \"code\": \"int x\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Fetch All Code Templates",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/code-template/fetch-all?page=1&limit=10&title=python&tag_id=&explanation=",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"code-template",
+								"fetch-all"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "title",
+									"value": "python"
+								},
+								{
+									"key": "tag_id",
+									"value": ""
+								},
+								{
+									"key": "explanation",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/api/code-template/fetch-all?page=1&limit=10&title=&tag_id=&explanation=javascript",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"code-template",
+										"fetch-all"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "limit",
+											"value": "10"
+										},
+										{
+											"key": "title",
+											"value": ""
+										},
+										{
+											"key": "tag_id",
+											"value": ""
+										},
+										{
+											"key": "explanation",
+											"value": "javascript"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "vary",
+									"value": "RSC, Next-Router-State-Tree, Next-Router-Prefetch"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 02 Nov 2024 22:16:36 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"data\": [\n        {\n            \"id\": 3,\n            \"title\": \"Basic JavaScript Loop\",\n            \"explanation\": \"A simple loop in JavaScript that prints numbers from 0 to 9.\",\n            \"code\": \"for(let i = 0; i < 10; i++) { console.log(i); }\",\n            \"language\": \"JavaScript\",\n            \"authorId\": 6,\n            \"createdAt\": \"2024-11-01T20:31:00.731Z\",\n            \"updatedAt\": \"2024-11-01T20:31:00.731Z\",\n            \"tags\": [\n                {\n                    \"id\": 2,\n                    \"name\": \"JavaScript\"\n                }\n            ],\n            \"author\": {\n                \"id\": 6,\n                \"firstName\": \"Admin\",\n                \"lastName\": \"Admin\"\n            }\n        }\n    ],\n    \"totalPages\": 1,\n    \"totalCount\": 1\n}"
+						}
+					]
+				},
+				{
+					"name": "Fetch All Code Templates for a User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/code-template/fetch-user?page=1&limit=10&tag_id=1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"code-template",
+								"fetch-user"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "tag_id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:3000/api/code-template/fetch-user?page=1&limit=10&tag_id=2&title&explanation",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"code-template",
+										"fetch-user"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "limit",
+											"value": "10"
+										},
+										{
+											"key": "tag_id",
+											"value": "2"
+										},
+										{
+											"key": "title",
+											"value": null
+										},
+										{
+											"key": "explanation",
+											"value": null
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "vary",
+									"value": "RSC, Next-Router-State-Tree, Next-Router-Prefetch"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 02 Nov 2024 22:17:03 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"data\": [\n        {\n            \"id\": 8,\n            \"title\": \"Test\",\n            \"explanation\": \"Test Test\",\n            \"code\": \"int x\",\n            \"language\": \"Python\",\n            \"authorId\": 12,\n            \"createdAt\": \"2024-11-02T22:16:23.247Z\",\n            \"updatedAt\": \"2024-11-02T22:16:23.247Z\",\n            \"tags\": [\n                {\n                    \"id\": 2,\n                    \"name\": \"JavaScript\"\n                }\n            ],\n            \"author\": {\n                \"id\": 12,\n                \"firstName\": \"john\",\n                \"lastName\": \"doe\"\n            }\n        }\n    ],\n    \"totalPages\": 1,\n    \"totalCount\": 1\n}"
+						}
+					]
+				},
+				{
+					"name": "Edit Code Template",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"codeTemplateId\": 3,\n    \"code\": \"int y\",\n    \"explanation\": \"Initialize new variable in Python\",\n    \"tag_ids\": [2]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/code-template/edit",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"code-template",
+								"edit"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Response",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"codeTemplateId\": 3,\n    \"code\": \"int y\",\n    // \"title\": (optional)\n    // \"explanation\": (optional)\n    \"tag_ids\": [2]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/api/code-template/edit",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"code-template",
+										"edit"
+									]
+								}
+							},
+							"_postman_previewlanguage": null,
+							"header": null,
+							"cookie": [],
+							"body": null
+						}
+					]
+				},
+				{
+					"name": "Delete Code Template",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"codeTemplateId\": 3\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/code-template/delete",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"code-template",
+								"delete"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Response",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"codeTemplateId\": 8\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/api/code-template/delete",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"code-template",
+										"delete"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "vary",
+									"value": "RSC, Next-Router-State-Tree, Next-Router-Prefetch"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 02 Nov 2024 22:19:32 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Code template deleted successfully\",\n    \"codeTemplateId\": 8\n}"
+						}
+					]
+				},
+				{
+					"name": "Get a Code Template Based on id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/code-template/fetch?id=2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"code-template",
+								"fetch"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:3000/api/code-template/fetch?id=7",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"code-template",
+										"fetch"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "7"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "vary",
+									"value": "RSC, Next-Router-State-Tree, Next-Router-Prefetch"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 02 Nov 2024 22:20:16 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"data\": {\n        \"id\": 7,\n        \"title\": \"Test\",\n        \"explanation\": \"Test Test\",\n        \"code\": \"int x\",\n        \"language\": \"Python\",\n        \"authorId\": 10,\n        \"createdAt\": \"2024-11-02T21:56:56.124Z\",\n        \"updatedAt\": \"2024-11-02T21:56:56.124Z\",\n        \"tags\": [\n            {\n                \"id\": 2,\n                \"name\": \"JavaScript\",\n                \"createdAt\": \"2024-11-01T20:31:00.728Z\",\n                \"updatedAt\": \"2024-11-01T20:31:00.728Z\"\n            }\n        ]\n    }\n}"
+						}
+					]
+				}
+			],
+			"description": "1. As a user (authenticated), I want to save my code as a template with a title, explanation, and tags so that I can organize and share my work effectively.\n    \n2. As a user, I want to view and search through my list of my saved templates, including their titles, explanations, and tags, so that I can easily find and reuse them.\n    \n3. As a user, I want to edit an existing code template’s title, explanation, tags, and code, or delete it entirely.\n    \n4. 4\\. As a visitor, I want to use an existing code template, run or modify it, and if desired, save it as a new template with a notification that it’s a forked version, so I can build on others’ work. Saving a template is only available to authenticated users.\n    \n5. As a visitor, I want to search through all available templates by title, tags, or content so that I can quickly find relevant code for my needs."
+		},
+		{
+			"name": "Blog posts",
+			"item": [
+				{
+					"name": "Create Blog Post",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Test Blogpost Title\",\n    \"description\": \"This is a test description for the blog post\",\n    \"tag_ids\": [39]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/blog-post/create",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"blog-post",
+								"create"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "",
+										"value": "",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"title\": \"Test Blogpost Title\",\n    \"description\": \"This is a test description for the blog post\",\n    \"tag_ids\": [39]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/api/blog-post/create",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"blog-post",
+										"create"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "vary",
+									"value": "RSC, Next-Router-State-Tree, Next-Router-Prefetch"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 02 Nov 2024 22:58:08 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": 17,\n    \"title\": \"Test Blogpost Title\",\n    \"description\": \"This is a test description for the blog post\",\n    \"authorId\": 32,\n    \"tags\": [\n        {\n            \"id\": 39,\n            \"name\": \"JavaScript\",\n            \"createdAt\": \"2024-11-02T22:56:12.059Z\",\n            \"updatedAt\": \"2024-11-02T22:56:12.059Z\"\n        }\n    ],\n    \"upvotes\": 0,\n    \"downvotes\": 0,\n    \"createdAt\": \"2024-11-02T22:58:08.695Z\",\n    \"updatedAt\": \"2024-11-02T22:58:08.695Z\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Edit Blog Post",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"blogPostId\": 17,\n    \"title\": \"UPDATED title\",\n    \"description\": \"This is the UPDATED main content of the blog post.\",\n    \"tag_ids\": [40]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/blog-post/edit",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"blog-post",
+								"edit"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Response",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "",
+										"value": "",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"blogPostId\": 17,\n    \"title\": \"UPDATED title\",\n    \"description\": \"This is the UPDATED main content of the blog post.\",\n    \"tag_ids\": [40]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/api/blog-post/edit",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"blog-post",
+										"edit"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "vary",
+									"value": "RSC, Next-Router-State-Tree, Next-Router-Prefetch"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 02 Nov 2024 22:58:36 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": 17,\n    \"title\": \"UPDATED title\",\n    \"description\": \"This is the UPDATED main content of the blog post.\",\n    \"tags\": [\n        {\n            \"id\": 40,\n            \"name\": \"Python\",\n            \"createdAt\": \"2024-11-02T22:56:12.068Z\",\n            \"updatedAt\": \"2024-11-02T22:56:12.068Z\"\n        }\n    ],\n    \"upvotes\": 0,\n    \"downvotes\": 0\n}"
+						}
+					]
+				},
+				{
+					"name": "Delete Blog Post",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"blogPostId\": 18\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/blog-post/delete",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"blog-post",
+								"delete"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Response",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "",
+										"value": "",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"blogPostId\": 18\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/api/blog-post/delete",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"blog-post",
+										"delete"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "vary",
+									"value": "RSC, Next-Router-State-Tree, Next-Router-Prefetch"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 02 Nov 2024 23:00:34 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Blog post deleted successfully\",\n    \"blogPostId\": 18\n}"
+						}
+					]
+				},
+				{
+					"name": "Fetch All Blog Posts",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/blog-post/fetch-all?page=1&limit=10&title=JavaScript&description=introductory&tag_ids=[39]&code_template_ids=[21]&sorting=Most controversial",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"blog-post",
+								"fetch-all"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "title",
+									"value": "JavaScript"
+								},
+								{
+									"key": "description",
+									"value": "introductory"
+								},
+								{
+									"key": "tag_ids",
+									"value": "[39]"
+								},
+								{
+									"key": "code_template_ids",
+									"value": "[21]"
+								},
+								{
+									"key": "sorting",
+									"value": "Most controversial",
+									"description": "\"Most valued\", \"Most controversial\", or null"
+								},
+								{
+									"key": "",
+									"value": null,
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "",
+										"value": "",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/api/blog-post/fetch-all?page=1&limit=10&title=JavaScript&description=introductory&tag_ids=[39]&code_template_ids=[21]&sorting=Most controversial",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"blog-post",
+										"fetch-all"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "limit",
+											"value": "10"
+										},
+										{
+											"key": "title",
+											"value": "JavaScript"
+										},
+										{
+											"key": "description",
+											"value": "introductory"
+										},
+										{
+											"key": "tag_ids",
+											"value": "[39]"
+										},
+										{
+											"key": "code_template_ids",
+											"value": "[21]"
+										},
+										{
+											"key": "sorting",
+											"value": "Most controversial",
+											"description": "\"Most valued\", \"Most controversial\", or null"
+										},
+										{
+											"key": "",
+											"value": null,
+											"disabled": true
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "vary",
+									"value": "RSC, Next-Router-State-Tree, Next-Router-Prefetch"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 02 Nov 2024 23:05:37 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"sorting\": \"Most controversial\",\n    \"totalPages\": 1,\n    \"totalCount\": 1,\n    \"data\": [\n        {\n            \"id\": 15,\n            \"title\": \"Introduction to JavaScript\",\n            \"description\": \"An introductory post on JavaScript basics.\",\n            \"upvotes\": 0,\n            \"downvotes\": 0,\n            \"tags\": [\n                {\n                    \"id\": 39,\n                    \"name\": \"JavaScript\"\n                }\n            ],\n            \"codeTemplates\": [\n                {\n                    \"id\": 21,\n                    \"title\": \"Basic JavaScript Loop\"\n                }\n            ],\n            \"authorId\": 32\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Change Blog Post Vote",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"type\": \"UPVOTE\", // UPVOTE or DOWNVOTE\r\n    \"blogPostId\": 15,\r\n    \"change\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/blog-post/change-vote",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"blog-post",
+								"change-vote"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Response",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "",
+										"value": "",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"type\": \"UPVOTE\", // UPVOTE or DOWNVOTE\r\n    \"blogPostId\": 15,\r\n    \"change\": 1\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/api/blog-post/change-vote",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"blog-post",
+										"change-vote"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "vary",
+									"value": "RSC, Next-Router-State-Tree, Next-Router-Prefetch"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 02 Nov 2024 23:07:52 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": 15,\n    \"title\": \"Introduction to JavaScript\",\n    \"description\": \"An introductory post on JavaScript basics.\",\n    \"upvotes\": 1,\n    \"downvotes\": 0\n}"
+						}
+					]
+				}
+			],
+			"description": "1. As a user, I want to create/edit/delete blog posts. A blog post has title, description, and tag. It might also include links to code templates (either mine or someone else’s).\n    \n2. As a visitor, I want to browse and read blog posts so that I can learn from others’ experiences and code examples. I want to search through blog posts by their title, content, tags, and also the code templates they contain.\n    \n3. As a visitor, I want to follow links from a blog post directly to the relevant code template so that I can view, run, or fork the code discussed.\n    \n4. As a visitor, I want to see the list of blog posts that mention a code template on the template page.\n    \n5. As a user, I want to comment, or reply to existing comments on a blog post so that I can engage with the author and other readers by sharing feedback, asking questions, or starting discussions.\n    \n6. As a user, I want to rate blog posts and comments with upvotes or downvotes so that I can express my agreement or disagreement with the content.\n    \n7. As a visitor, I want to see the list of blog posts and comments sorted by their ratings so that I get exposed to the most valued or controversial discussions first."
+		},
+		{
+			"name": "Inappropriate content reports",
+			"item": [
+				{
+					"name": "Admin Sort Report",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/admin/sort-reports",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"admin",
+								"sort-reports"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OCwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTczMDU3ODY1NSwiZXhwIjoxNzMwNTc5NTU1fQ.H6eNQwHvYVqEa-Uy_8V_vXvTucouzOQyUiThUKDWxEk",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/api/admin/sort-reports",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"admin",
+										"sort-reports"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "vary",
+									"value": "RSC, Next-Router-State-Tree, Next-Router-Prefetch"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 02 Nov 2024 20:24:38 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"results\": [\n        {\n            \"type\": \"COMMENT\",\n            \"id\": 1,\n            \"content\": {\n                \"id\": 1,\n                \"text\": \"Great post! Learned a lot.\",\n                \"author\": {\n                    \"id\": 9,\n                    \"email\": \"user@example.com\",\n                    \"firstName\": \"User\",\n                    \"lastName\": \"User\"\n                },\n                \"blogPost\": {\n                    \"id\": 1,\n                    \"title\": \"Introduction to JavaScript\"\n                }\n            },\n            \"reportCount\": 1,\n            \"reports\": [\n                {\n                    \"id\": 5,\n                    \"reason\": \"Inappropriate content\",\n                    \"explanation\": \"This comment is irrelevant and spammy.\",\n                    \"status\": \"PENDING\",\n                    \"createdAt\": \"2024-11-02T20:16:12.315Z\",\n                    \"reporter\": {\n                        \"id\": 8,\n                        \"email\": \"admin@example.com\",\n                        \"firstName\": \"Admin\",\n                        \"lastName\": \"Admin\"\n                    }\n                }\n            ],\n            \"isHidden\": false\n        }\n    ],\n    \"pagination\": {\n        \"total\": 1,\n        \"pages\": 1,\n        \"currentPage\": 1,\n        \"limit\": 10\n    }\n}"
+						},
+						{
+							"name": "Only Blog Post Reports",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTEsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20iLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3MzAzOTY2NDksImV4cCI6MTczMDM5NzU0OX0.WexeGBrbO81i4i9Djx7U-dNutwlsS9FkcieAvw6gnCk",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/api/admin/sort-reports?type=BLOG_POST",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"admin",
+										"sort-reports"
+									],
+									"query": [
+										{
+											"key": "type",
+											"value": "BLOG_POST"
+										}
+									]
+								}
+							},
+							"_postman_previewlanguage": null,
+							"header": null,
+							"cookie": [],
+							"body": null
+						},
+						{
+							"name": "Only Comment Reports",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTEsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20iLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3MzAzOTY2NDksImV4cCI6MTczMDM5NzU0OX0.WexeGBrbO81i4i9Djx7U-dNutwlsS9FkcieAvw6gnCk",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/api/admin/sort-reports?type=COMMENT",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"admin",
+										"sort-reports"
+									],
+									"query": [
+										{
+											"key": "type",
+											"value": "COMMENT"
+										}
+									]
+								}
+							},
+							"_postman_previewlanguage": null,
+							"header": null,
+							"cookie": [],
+							"body": null
+						},
+						{
+							"name": "Reports by Status",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTEsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20iLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3MzAzOTY2NDksImV4cCI6MTczMDM5NzU0OX0.WexeGBrbO81i4i9Djx7U-dNutwlsS9FkcieAvw6gnCk",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/api/admin/sort-reports?status=PENDING",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"admin",
+										"sort-reports"
+									],
+									"query": [
+										{
+											"key": "status",
+											"value": "PENDING"
+										}
+									]
+								}
+							},
+							"_postman_previewlanguage": null,
+							"header": null,
+							"cookie": [],
+							"body": null
+						},
+						{
+							"name": "Reports by Pagination",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwiZW1haWwiOiJhZG1pbkBnbWFpbC5jb20iLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3Mjk4MjA1MTMsImV4cCI6MTcyOTgyMTQxM30.qe7hSCQJXddENcKnYgRo8MPWVU9PdVm22a98wcFG-Wc",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/api/admin/sort-reports?page=1&limit=10",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"admin",
+										"sort-reports"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "limit",
+											"value": "10"
+										}
+									]
+								}
+							},
+							"_postman_previewlanguage": null,
+							"header": null,
+							"cookie": [],
+							"body": null
+						}
+					]
+				},
+				{
+					"name": "Admin Hide Content",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"type\": \"BLOG_POST\",\n    \"contentId\": 1,\n    \"hide\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/admin/hide-content",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"admin",
+								"hide-content"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OCwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTczMDU3ODY1NSwiZXhwIjoxNzMwNTc5NTU1fQ.H6eNQwHvYVqEa-Uy_8V_vXvTucouzOQyUiThUKDWxEk",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"type\": \"COMMENT\",\n    \"contentId\": 1,\n    \"hide\": true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/api/admin/hide-content",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"admin",
+										"hide-content"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "vary",
+									"value": "RSC, Next-Router-State-Tree, Next-Router-Prefetch"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 02 Nov 2024 20:25:51 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"message\": \"Content has been hidden\",\n    \"content\": {\n        \"type\": \"COMMENT\",\n        \"id\": 1,\n        \"isHidden\": true,\n        \"hiddenAt\": \"2024-11-02T20:25:51.024Z\",\n        \"author\": {\n            \"id\": 9,\n            \"email\": \"user@example.com\",\n            \"firstName\": \"User\",\n            \"lastName\": \"User\"\n        },\n        \"blogPost\": {\n            \"id\": 1,\n            \"title\": \"Introduction to JavaScript\"\n        },\n        \"reportCount\": 1,\n        \"updatedReports\": {\n            \"count\": 0\n        }\n    }\n}"
+						},
+						{
+							"name": "Hide Comment",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTEsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20iLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3MzAzOTY2NDksImV4cCI6MTczMDM5NzU0OX0.WexeGBrbO81i4i9Djx7U-dNutwlsS9FkcieAvw6gnCk",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"type\": \"COMMENT\",\n    \"contentId\": 1,\n    \"hide\": true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/api/admin/hide-content",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"admin",
+										"hide-content"
+									]
+								}
+							},
+							"_postman_previewlanguage": null,
+							"header": null,
+							"cookie": [],
+							"body": null
+						},
+						{
+							"name": "Unhide Content",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTEsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20iLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3MzAzOTY2NDksImV4cCI6MTczMDM5NzU0OX0.WexeGBrbO81i4i9Djx7U-dNutwlsS9FkcieAvw6gnCk",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"type\": \"COMMENT\",  // or \"COMMENT\"\n    \"contentId\": 5,\n    \"hide\": false\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/api/admin/hide-content",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"admin",
+										"hide-content"
+									]
+								}
+							},
+							"_postman_previewlanguage": null,
+							"header": null,
+							"cookie": [],
+							"body": null
+						}
+					]
+				},
+				{
+					"name": "Create New Report Comment",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"type\": \"COMMENT\",\n    \"reason\": \"inappropriate\",\n    \"explanation\": \"This comment is inappropriate\",\n    \"commentId\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/report",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"report"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OCwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTczMDU3ODY1NSwiZXhwIjoxNzMwNTc5NTU1fQ.H6eNQwHvYVqEa-Uy_8V_vXvTucouzOQyUiThUKDWxEk",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"type\": \"COMMENT\",\n    \"reason\": \"inappropriate\",\n    \"explanation\": \"This comment is inappropriate\",\n    \"commentId\": 1\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/api/report",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"report"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "vary",
+									"value": "RSC, Next-Router-State-Tree, Next-Router-Prefetch"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 02 Nov 2024 20:28:16 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": 6,\n    \"type\": \"COMMENT\",\n    \"reason\": \"inappropriate\",\n    \"explanation\": \"This comment is inappropriate\",\n    \"status\": \"PENDING\",\n    \"createdAt\": \"2024-11-02T20:28:16.471Z\",\n    \"updatedAt\": \"2024-11-02T20:28:16.471Z\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Create New Report Blog Post",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"type\": \"BLOG_POST\",\n    \"reason\": \"spam\",\n    \"explanation\": \"This content is spam\",\n    \"blogPostId\": 5\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/report",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"report"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OCwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTczMDU3ODY1NSwiZXhwIjoxNzMwNTc5NTU1fQ.H6eNQwHvYVqEa-Uy_8V_vXvTucouzOQyUiThUKDWxEk",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"type\": \"BLOG_POST\",\n    \"reason\": \"spam\",\n    \"explanation\": \"This content is spam\",\n    \"blogPostId\": 1\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/api/report",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"report"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "vary",
+									"value": "RSC, Next-Router-State-Tree, Next-Router-Prefetch"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 02 Nov 2024 20:29:21 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": 7,\n    \"type\": \"BLOG_POST\",\n    \"reason\": \"spam\",\n    \"explanation\": \"This content is spam\",\n    \"status\": \"PENDING\",\n    \"createdAt\": \"2024-11-02T20:29:21.993Z\",\n    \"updatedAt\": \"2024-11-02T20:29:21.993Z\"\n}"
+						}
+					]
+				}
+			],
+			"description": "1. As a user, I want to report an inappropriate blog post or comment so that the website is purged of abusive content. I want to add additional explanation when submitting my report.\n    \n2. As the system administrator, I want to sort blog posts and comments based on the total number of reports they received so that I can find the inappropriate content easier.\n    \n3. As the system administrator, I want to hide a content that I deem inappropriate so that Scriptorium remains safe for everyone. This content would then be hidden from everyone, except for the author. The author can still see the content (with a flag that indicates the reports), but cannot edit it."
+		},
+		{
+			"name": "Comments",
+			"item": [
+				{
+					"name": "Create Comment",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// uncomment one of blogPostId and parentCommentId, depending on which we want to comment on\n{\n    \"toBlogPost\": false, // true for blog-post, false for comment\n    \"content\": \"I'm replying to comment with id 16\",\n    // \"blogPostId\": 3\n    \"parentCommentId\": 16\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/comment/create",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"comment",
+								"create"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "",
+										"value": "",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// uncomment one of blogPostId and parentCommentId, depending on which we want to comment on\n{\n    \"toBlogPost\": false, // true for blog-post, false for comment\n    \"content\": \"I'm replying to comment with id 16\",\n    // \"blogPostId\": 3\n    \"parentCommentId\": 16\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/api/comment/create",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"comment",
+										"create"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "vary",
+									"value": "RSC, Next-Router-State-Tree, Next-Router-Prefetch"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 02 Nov 2024 22:41:39 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": 18,\n    \"content\": \"I'm replying to comment with id 16\",\n    \"parentId\": 16,\n    \"createdAt\": \"2024-11-02T22:41:39.104Z\",\n    \"updatedAt\": \"2024-11-02T22:41:39.104Z\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Change Comment Vote",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"type\": \"DOWNVOTE\", // UPVOTE or DOWNVOTE\r\n    \"commentId\": 17,\r\n    \"change\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/comment/change-vote",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"comment",
+								"change-vote"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Response",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "",
+										"value": "",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"type\": \"DOWNVOTE\", // UPVOTE or DOWNVOTE\r\n    \"commentId\": 17,\r\n    \"change\": 1\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/api/comment/change-vote",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"comment",
+										"change-vote"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "vary",
+									"value": "RSC, Next-Router-State-Tree, Next-Router-Prefetch"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 02 Nov 2024 22:42:24 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": 17,\n    \"content\": \"Thanks for sharing!\",\n    \"upvotes\": 0,\n    \"downvotes\": 1\n}"
+						}
+					]
+				},
+				{
+					"name": "Fetch All Comments",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/comment/fetch-all?page=1&limit=10&content=post&authorId=31&blogPostId=13&sorting=Most controversial",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"comment",
+								"fetch-all"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "content",
+									"value": "post"
+								},
+								{
+									"key": "authorId",
+									"value": "31"
+								},
+								{
+									"key": "blogPostId",
+									"value": "13"
+								},
+								{
+									"key": "parentId",
+									"value": "16",
+									"disabled": true
+								},
+								{
+									"key": "sorting",
+									"value": "Most controversial",
+									"description": "\"Most valued\", \"Most controversial\", or null"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:3000/api/comment/fetch-all?page=1&limit=10&content=post&authorId=31&blogPostId=13&sorting=Most controversial",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"comment",
+										"fetch-all"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "limit",
+											"value": "10"
+										},
+										{
+											"key": "content",
+											"value": "post"
+										},
+										{
+											"key": "authorId",
+											"value": "31"
+										},
+										{
+											"key": "blogPostId",
+											"value": "13"
+										},
+										{
+											"key": "parentId",
+											"value": "16",
+											"disabled": true
+										},
+										{
+											"key": "sorting",
+											"value": "Most controversial",
+											"description": "\"Most valued\", \"Most controversial\", or null"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "vary",
+									"value": "RSC, Next-Router-State-Tree, Next-Router-Prefetch"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 02 Nov 2024 22:47:29 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"sorting\": \"Most controversial\",\n    \"totalPages\": 1,\n    \"totalCount\": 1,\n    \"data\": [\n        {\n            \"id\": 16,\n            \"content\": \"Great post! Learned a lot.\",\n            \"upvotes\": 0,\n            \"downvotes\": 0,\n            \"authorId\": 31,\n            \"blogPostId\": 13,\n            \"parentId\": null\n        }\n    ]\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Tags",
+			"item": [
+				{
+					"name": "Create New Tag",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"algo\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/tag/create",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"tag",
+								"create"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"ds\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3000/api/tag/create",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"tag",
+										"create"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "vary",
+									"value": "RSC, Next-Router-State-Tree, Next-Router-Prefetch"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 02 Nov 2024 22:21:46 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": 5,\n    \"name\": \"ds\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Fetch All Tags",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/tag/fetch",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"tag",
+								"fetch"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:3000/api/tag/fetch",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"tag",
+										"fetch"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "vary",
+									"value": "RSC, Next-Router-State-Tree, Next-Router-Prefetch"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 02 Nov 2024 22:22:08 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"tags\": [\n        {\n            \"id\": 2,\n            \"name\": \"JavaScript\"\n        },\n        {\n            \"id\": 3,\n            \"name\": \"Python\"\n        },\n        {\n            \"id\": 4,\n            \"name\": \"algo\"\n        },\n        {\n            \"id\": 5,\n            \"name\": \"ds\"\n        }\n    ]\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Avatars",
+			"item": [
+				{
+					"name": "Get Default Avatars",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/avatars",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"avatars"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:3000/api/avatars",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"api",
+										"avatars"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "vary",
+									"value": "RSC, Next-Router-State-Tree, Next-Router-Prefetch"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 02 Nov 2024 22:22:44 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"data\": [\n        {\n            \"path\": \"/avatars/avatar1.jpg\",\n            \"label\": \"Default Avatar 1\",\n            \"alt\": \"A man avatar\"\n        },\n        {\n            \"path\": \"/avatars/avatar2.png\",\n            \"label\": \"Default Avatar 2\",\n            \"alt\": \"A woman avatar\"\n        }\n    ],\n    \"message\": \"Avatars retrieved successfully\"\n}"
+						}
+					]
+				}
+			]
+		}
+	]
+}
