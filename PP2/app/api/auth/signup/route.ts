@@ -1,16 +1,39 @@
 // Used Github co-pilot to help me write this code
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { validateEmail, validatePassword, validatePhone } from '@/app/utils/validation.js';
+import { validateEmail, validatePassword, validatePhone } from '@/app/utils/validation';
 import bcrypt from 'bcrypt';
-import { avatarConfig } from '@/app/config/avatar.js';
+import { avatarConfig } from '@/app/config/avatar';
 
 const prisma = new PrismaClient();
 const VALID_AVATAR_PATHS = avatarConfig.getValidPaths();
 
-export async function POST(request) {
-    const { email, password, firstName, lastName, phone, role, selectedAvatar } = await request.json();
+interface SignupRequest {
+    email: string;
+    password: string;
+    firstName: string;
+    lastName: string;
+    phone: string;
+    role?: string;
+    selectedAvatar?: string;
+}
+
+interface SignupResponse {
+    id: number;
+    firstName: string;
+    lastName: string;
+    phone: string;
+    role: string;
+    avatar: string;
+}
+
+interface ErrorResponse {
+    error: string;
+}
+
+export async function POST(request: NextRequest): Promise<NextResponse<SignupResponse | ErrorResponse>> {
+    const { email, password, firstName, lastName, phone, role, selectedAvatar }: SignupRequest = await request.json();
 
     console.log(`Signup request: ${email}, ${firstName}, ${lastName}, ${phone}`);
 
@@ -41,7 +64,7 @@ export async function POST(request) {
             return NextResponse.json({ error: 'Email already in use' }, { status: 400 });
         }
 
-        const hashedPassword = await bcrypt.hash(password, parseInt(process.env.SALT_ROUNDS));
+        const hashedPassword = await bcrypt.hash(password, parseInt(process.env.SALT_ROUNDS || '10'));
 
         const user = await prisma.user.create({
             data: {
@@ -62,7 +85,7 @@ export async function POST(request) {
                 role: true,
                 avatar: true,
             }
-        });
+        }) as SignupResponse;
 
         return NextResponse.json({
             id: user.id,
