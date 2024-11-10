@@ -1,21 +1,35 @@
 // Used Github co-pilot to help me write this code
 
-import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { NextRequest, NextResponse } from 'next/server';
+import { Prisma, PrismaClient } from '@prisma/client';
+
+interface AuthenticatedRequest extends NextRequest {
+    user?: {
+        id: number;
+        email: string;
+        role: string;
+    };
+}
+
+interface CodeTemplateResponse {
+    totalPages: number;
+    totalCount: number;
+}
+
+interface ErrorResponse {
+    error: string;
+}
 
 const prisma = new PrismaClient();
 
-export async function GET(req) {
+export async function GET(req: AuthenticatedRequest): Promise<NextResponse<CodeTemplateResponse | ErrorResponse>> {
     const { searchParams } = new URL(req.url);
 
-    let page = searchParams.get('page');
-    let limit = searchParams.get('limit');
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '10');
     const title = searchParams.get('title');
     const tag_id = searchParams.get('tag_id');
     const explanation = searchParams.get('explanation');
-
-    page = page ? parseInt(page) : 1;
-    limit = limit ? parseInt(limit) : 10;
 
     console.log(`page: ${page}, limit: ${limit}, title: ${title}, tag_id: ${tag_id}, explanation: ${explanation}`);
 
@@ -24,7 +38,7 @@ export async function GET(req) {
     }
 
     try {
-        const where = {};
+        const where: Prisma.CodeTemplateWhereInput = {};
 
         if (title) {
             where.title = {
@@ -96,7 +110,7 @@ export async function GET(req) {
             totalPages: totalPages,
             totalCount: totalCount,
         });
-    } catch {
+    } catch (error) {
         console.error(`Error in /app/api/code_template/fetch: ${error}`);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
