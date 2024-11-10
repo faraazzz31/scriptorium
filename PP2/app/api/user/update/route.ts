@@ -1,22 +1,50 @@
 // Used Github co-pilot to help me write this code
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { withAuth } from '@/app/middleware/auth.js';
-import { validatePhone } from '@/app/utils/validation.js';
-import { avatarConfig } from '@/app/config/avatar.js';
+import { withAuth } from '@/app/middleware/auth';
+import { validatePhone } from '@/app/utils/validation';
+import { avatarConfig } from '@/app/config/avatar';
 
 const prisma = new PrismaClient();
 const VALID_AVATAR_PATHS = avatarConfig.getValidPaths();
 
-async function handler (req) {
+interface AuthenticatedRequest extends NextRequest {
+    user?: {
+        id: number;
+        email: string;
+        role: string;
+    };
+}
+
+interface UpdateProfileRequest {
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+    avatar?: string;
+}
+
+interface UpdateProfileResponse {
+    id: number;
+    email: string;
+    firstName: string | null;
+    lastName: string | null;
+    avatar: string | null;
+    phone: string | null;
+}
+
+interface ErrorResponse {
+    error: string;
+}
+
+async function handler (req: AuthenticatedRequest): Promise<NextResponse<UpdateProfileResponse | ErrorResponse>> {
     const user = req.user;
 
     if (!user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { firstName, lastName, phone, avatar } = await req.json();
+    const { firstName, lastName, phone, avatar }: UpdateProfileRequest = await req.json();
 
     if (phone && !validatePhone(phone)) {
         return NextResponse.json({ error: 'Invalid phone number' }, { status: 400 });
@@ -27,13 +55,21 @@ async function handler (req) {
     }
 
     try {
+        const existingUser = await prisma.user.findUnique({
+            where: { id: user.id }
+        });
+
+        if (!existingUser) {
+            return NextResponse.json({ error: 'User not found' }, { status: 404 });
+        }
+
         const updatedUser = await prisma.user.update({
             where: { id: user.id },
             data: {
-                firstName: firstName || user.firstName,
-                lastName: lastName || user.lastName,
-                phone: phone || user.phone,
-                avatar: avatar || user.avatar,
+                firstName: firstName || existingUser?.firstName,
+                lastName: lastName || existingUser?.lastName,
+                phone: phone || existingUser?.phone,
+                avatar: avatar || existingUser?.avatar,
             },
             select: {
                 id: true,

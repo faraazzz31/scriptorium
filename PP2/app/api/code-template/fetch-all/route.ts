@@ -1,28 +1,35 @@
 // Used Github co-pilot to help me write this code
 
-import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-import { withAuth } from '@/app/middleware/auth';
+import { NextRequest, NextResponse } from 'next/server';
+import { Prisma, PrismaClient } from '@prisma/client';
+
+interface AuthenticatedRequest extends NextRequest {
+    user?: {
+        id: number;
+        email: string;
+        role: string;
+    };
+}
+
+interface CodeTemplateResponse {
+    totalPages: number;
+    totalCount: number;
+}
+
+interface ErrorResponse {
+    error: string;
+}
 
 const prisma = new PrismaClient();
 
-async function handler (req) {
-    const user = req.user;
-    console.log(`user: ${JSON.stringify(user)}`);
-
-    if (!user) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+export async function GET(req: AuthenticatedRequest): Promise<NextResponse<CodeTemplateResponse | ErrorResponse>> {
     const { searchParams } = new URL(req.url);
 
-    let page = searchParams.get('page');
-    let limit = searchParams.get('limit');
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '10');
     const title = searchParams.get('title');
     const tag_id = searchParams.get('tag_id');
     const explanation = searchParams.get('explanation');
-
-    page = page ? parseInt(page) : 1;
-    limit = limit ? parseInt(limit) : 10;
 
     console.log(`page: ${page}, limit: ${limit}, title: ${title}, tag_id: ${tag_id}, explanation: ${explanation}`);
 
@@ -31,8 +38,7 @@ async function handler (req) {
     }
 
     try {
-        const where = {};
-        where.authorId = user.id;
+        const where: Prisma.CodeTemplateWhereInput = {};
 
         if (title) {
             where.title = {
@@ -69,8 +75,29 @@ async function handler (req) {
             take: limit,
             where: where,
             include: {
-                tags: { select: { id: true, name: true } },
-                author: { select: { id: true, firstName: true, lastName: true } },
+                tags: {
+                    select: {
+                        id: true,
+                        name: true
+                    }
+                },
+                author: {
+                    select: {
+                        id: true,
+                        firstName: true,
+                        lastName: true
+                    }
+                },
+                forks: {
+                    select: {
+                        id: true,
+                        title: true,
+                        createdAt: true,
+                        author: {
+                            select: { id: true, firstName: true, lastName: true }
+                        }
+                    }
+                },
             }
         });
 
@@ -84,9 +111,7 @@ async function handler (req) {
             totalCount: totalCount,
         });
     } catch (error) {
-        console.log(`fetch-user error: ${error}`);
+        console.error(`Error in /app/api/code_template/fetch: ${error}`);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }
-
-export const GET = withAuth(handler);
