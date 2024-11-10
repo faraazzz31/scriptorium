@@ -47,6 +47,17 @@ export default function Home(): JSX.Element {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
 
   useEffect(() => {
+    const darkModePreference = localStorage.getItem('darkMode');
+    setIsDarkMode(darkModePreference === 'true');
+  }, []);
+
+  const toggleDarkMode = () => {
+    const newDarkMode = !isDarkMode;
+    setIsDarkMode(newDarkMode);
+    localStorage.setItem('darkMode', newDarkMode.toString());
+  };
+
+  useEffect(() => {
     setCode(defaultCode[language]);
   }, [language]);
 
@@ -131,7 +142,7 @@ export default function Home(): JSX.Element {
                   Login
                 </Link>
                 <button
-                    onClick={() => setIsDarkMode(!isDarkMode)}
+                    onClick={toggleDarkMode}
                     className={`p-2 rounded-full ${isDarkMode ? 'bg-yellow-400 text-gray-900' : 'bg-gray-700 text-white'}`}
                 >
                   {isDarkMode ? <Sun size={20}/> : <Moon size={20}/>}
@@ -172,7 +183,7 @@ export default function Home(): JSX.Element {
                   </Link>
                   <div className="px-3 py-2">
                     <button
-                        onClick={() => setIsDarkMode(!isDarkMode)}
+                        onClick={toggleDarkMode}
                         className={`p-2 rounded-full ${isDarkMode ? 'bg-yellow-400 text-gray-900' : 'bg-gray-700 text-white'}`}
                     >
                       {isDarkMode ? <Sun size={20}/> : <Moon size={20}/>}
