@@ -1,11 +1,27 @@
 // Used Github co-pilot to help me write this code
 
-import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { NextRequest, NextResponse } from 'next/server';
+import { CodeTemplate, PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export async function GET(req) {
+interface AuthenticatedRequest extends NextRequest {
+    user?: {
+        id: number;
+        email: string;
+        role: string;
+    };
+}
+
+interface CodeTemplateResponse {
+    data: CodeTemplate;
+}
+
+interface ErrorResponse {
+    error: string;
+}
+
+export async function GET(req: AuthenticatedRequest): Promise<NextResponse<CodeTemplateResponse | ErrorResponse>> {
     const { searchParams } = new URL(req.url);
 
     const id = searchParams.get('id');

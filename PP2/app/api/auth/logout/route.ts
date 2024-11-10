@@ -1,10 +1,26 @@
 // Used Github co-pilot to help me write this code
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { withAuth } from '@/app/middleware/auth';
 
-async function handler (req) {
+interface AuthenticatedRequest extends NextRequest {
+    user?: {
+        id: number;
+        email: string;
+        role: string;
+    };
+}
+
+interface LogoutResponse {
+    message: string;
+}
+
+interface ErrorResponse {
+    error: string;
+}
+
+async function handler (req: AuthenticatedRequest): Promise<NextResponse<LogoutResponse | ErrorResponse>> {
     const user = req.user;
 
     if (!user) {

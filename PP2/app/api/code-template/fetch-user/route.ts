@@ -1,12 +1,29 @@
 // Used Github co-pilot to help me write this code
 
-import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { NextRequest, NextResponse } from 'next/server';
+import { PrismaClient, Prisma } from '@prisma/client';
 import { withAuth } from '@/app/middleware/auth';
+
+interface AuthenticatedRequest extends NextRequest {
+    user?: {
+        id: number;
+        email: string;
+        role: string;
+    };
+}
+
+interface CodeTemplateResponse {
+    totalPages: number;
+    totalCount: number;
+}
+
+interface ErrorResponse {
+    error: string;
+}
 
 const prisma = new PrismaClient();
 
-async function handler (req) {
+async function handler (req: AuthenticatedRequest): Promise<NextResponse<CodeTemplateResponse | ErrorResponse>> {
     const user = req.user;
     console.log(`user: ${JSON.stringify(user)}`);
 
@@ -15,14 +32,11 @@ async function handler (req) {
     }
     const { searchParams } = new URL(req.url);
 
-    let page = searchParams.get('page');
-    let limit = searchParams.get('limit');
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '10');
     const title = searchParams.get('title');
     const tag_id = searchParams.get('tag_id');
     const explanation = searchParams.get('explanation');
-
-    page = page ? parseInt(page) : 1;
-    limit = limit ? parseInt(limit) : 10;
 
     console.log(`page: ${page}, limit: ${limit}, title: ${title}, tag_id: ${tag_id}, explanation: ${explanation}`);
 
@@ -31,7 +45,7 @@ async function handler (req) {
     }
 
     try {
-        const where = {};
+        const where: Prisma.CodeTemplateWhereInput = {};
         where.authorId = user.id;
 
         if (title) {
