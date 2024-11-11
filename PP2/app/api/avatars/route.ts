@@ -1,9 +1,18 @@
 // Used Github co-pilot to help me write this code
 
 import { NextResponse } from 'next/server';
-import { avatarConfig } from '@/app/config/avatar.js';
+import { avatarConfig } from '@/app/config/avatar';
 
-export async function GET() {
+interface AvatarResponse {
+    data: object[];
+    message: string;
+}
+
+interface ErrorResponse {
+    error: string;
+}
+
+export async function GET(): Promise<NextResponse<AvatarResponse | ErrorResponse>> {
     try {
         return NextResponse.json({
             data: avatarConfig.defaultAvatars,

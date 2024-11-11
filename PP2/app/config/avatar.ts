@@ -1,7 +1,19 @@
 // Used Github co-pilot to help me write this code
 
+interface Avatar {
+    path: string;
+    label: string;
+    alt: string;
+}
 
-export const avatarConfig = {
+interface AvatarConfig {
+    basePath: string;
+    defaultAvatars: Avatar[];
+    getValidPaths: () => string[];
+    getDefaultPath: () => string;
+}
+
+export const avatarConfig: AvatarConfig = {
     basePath: '/avatars',
     defaultAvatars: [
         {

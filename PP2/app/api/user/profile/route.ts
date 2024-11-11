@@ -1,12 +1,34 @@
 // Used Github co-pilot to help me write this code
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { withAuth } from '@/app/middleware/auth.js';
+import { withAuth } from '@/app/middleware/auth';
+
+// Define interfaces for our data structures
+interface User {
+    id: number;
+    email: string;
+    firstName: string;
+    lastName: string;
+    avatar: string | null;
+    phone: number | null;
+}
+
+interface AuthenticatedRequest extends NextRequest {
+    user?: {
+        id: number;
+        email: string;
+        role: string;
+    };
+}
+
+interface ErrorResponse {
+    error: string;
+}
 
 const prisma = new PrismaClient();
 
-async function handler (req) {
+async function handler (req: AuthenticatedRequest): Promise<NextResponse<User | ErrorResponse>> {
     const user = req.user;
 
     if (!user) {
@@ -24,7 +46,7 @@ async function handler (req) {
                 avatar: true,
                 phone: true,
             },
-        });
+        }) as User | null;
 
         if (!userProfile) {
             return NextResponse.json({ error: 'User not found' }, { status: 404 });
