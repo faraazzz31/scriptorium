@@ -12,6 +12,7 @@ interface User {
     lastName: string;
     avatar: string | null;
     phone: number | null;
+    role: string;
 }
 
 interface AuthenticatedRequest extends NextRequest {
@@ -45,6 +46,7 @@ async function handler (req: AuthenticatedRequest): Promise<NextResponse<User | 
                 lastName: true,
                 avatar: true,
                 phone: true,
+                role: true,
             },
         }) as User | null;
 
@@ -60,6 +62,7 @@ async function handler (req: AuthenticatedRequest): Promise<NextResponse<User | 
                 lastName: userProfile.lastName,
                 avatar: userProfile.avatar,
                 phone: userProfile.phone,
+                role: userProfile.role,
             },
             { status: 200 });
     } catch (error) {
