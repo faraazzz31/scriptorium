@@ -17,12 +17,12 @@ export const avatarConfig: AvatarConfig = {
     basePath: '/avatars',
     defaultAvatars: [
         {
-            path: '/avatars/avatar1.jpg',
+            path: 'avatars/avatar1.jpg',
             label: 'Default Avatar 1',
             alt: 'A man avatar'
         },
         {
-            path: '/avatars/avatar2.png',
+            path: 'avatars/avatar2.png',
             label: 'Default Avatar 2',
             alt: 'A woman avatar'
         },

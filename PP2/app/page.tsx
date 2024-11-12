@@ -7,9 +7,12 @@ import { python } from '@codemirror/lang-python';
 import { javascript } from '@codemirror/lang-javascript';
 import { java } from '@codemirror/lang-java';
 import { cpp } from '@codemirror/lang-cpp';
-import { Moon, Sun, Play, Menu, X } from 'lucide-react';
+import { LogIn, Moon, Sun, Play, Menu, X } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image'
+import { LoginModal } from '@/app/components/auth/LoginModal';
+import { SignupModal } from '@/app/components/auth/SignupModal';
+import { useAuth } from '@/app/components/auth/AuthContext';
 
 interface Tag {
   id: string;
@@ -55,6 +58,11 @@ export default function Home(): JSX.Element {
   const [templateTitle, setTemplateTitle] = useState<string>('');
   const [templateExplanation, setTemplateExplanation] = useState<string>('');
   const [selectedTag, setSelectedTag] = useState<string>('');
+
+  const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
+  const [showSignupModal, setShowSignupModal] = useState<boolean>(false);
+  const { user, logout } = useAuth();
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   // const [tags, setTags] = useState<Tag[]>([]);
   //
@@ -169,19 +177,87 @@ export default function Home(): JSX.Element {
                 </div>
               </div>
 
-              {/* Right side items */}
-              <div className="hidden md:flex items-center space-x-4">
-                <Link href="/login"
-                      className={`${isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-black'} px-3 py-2 rounded-md text-sm font-medium`}>
-                  Login
-                </Link>
+               {/* Right side items */}
+            <div className="hidden md:flex items-center space-x-4">
+              {user ? (
+                // Profile Menu
+                <div className="relative">
+                  <button
+                    onClick={() => setShowProfileMenu(!showProfileMenu)}
+                    className="flex items-center space-x-2"
+                  >
+                    {user.avatar ? (
+                      <Image
+                        src={user.avatar}
+                        width={32}
+                        height={32}
+                        alt="Profile"
+                        className="w-8 h-8 rounded-full"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white">
+                        {user.firstName[0]}
+                      </div>
+                    )}
+                    <span className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                      {user.firstName}
+                    </span>
+                  </button>
+
+                  {showProfileMenu && (
+                    <div 
+                      className={`absolute right-0 mt-2 w-48 rounded-md shadow-lg 
+                        ${isDarkMode ? 'bg-gray-800' : 'bg-white'} 
+                        ring-1 ring-black ring-opacity-5`}
+                    >
+                      <div className="py-1">
+                        <Link
+                          href="/profile"
+                          className={`block px-4 py-2 text-sm ${
+                            isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'
+                          }`}
+                          onClick={() => setShowProfileMenu(false)}
+                        >
+                          Your Profile
+                        </Link>
+                        <button
+                          onClick={() => {
+                            logout();
+                            setShowProfileMenu(false);
+                          }}
+                          className={`block w-full text-left px-4 py-2 text-sm ${
+                            isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'
+                          }`}
+                        >
+                          Sign out
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                // Login Button
                 <button
-                    onClick={toggleDarkMode}
-                    className={`p-2 rounded-full ${isDarkMode ? 'bg-yellow-400 text-gray-900' : 'bg-gray-700 text-white'}`}
+                  onClick={() => setShowLoginModal(true)}
+                  className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium ${
+                    isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-black'
+                  }`}
                 >
-                  {isDarkMode ? <Sun size={20}/> : <Moon size={20}/>}
+                  <LogIn size={20} />
+                  <span>Login</span>
                 </button>
-              </div>
+              )}
+
+              {/* Dark Mode Toggle */}
+              <button
+                onClick={toggleDarkMode}
+                className={`p-2 rounded-full ${
+                  isDarkMode ? 'bg-yellow-400 text-gray-900' : 'bg-gray-700 text-white'
+                }`}
+              >
+                {isDarkMode ? <Sun size={20}/> : <Moon size={20}/>}
+              </button>
+            </div>
 
               {/* Mobile menu button */}
               <div className="md:hidden flex items-center">
@@ -315,6 +391,28 @@ export default function Home(): JSX.Element {
             </div>
           </div>
         </div>
+
+        {/* Login Modal (includes signup option) */}
+        <LoginModal
+          isOpen={showLoginModal}
+          onClose={() => setShowLoginModal(false)}
+          onSwitchToSignup={() => {
+            setShowLoginModal(false);
+            setShowSignupModal(true);
+          }}
+          isDarkMode={isDarkMode}
+        />
+
+        <SignupModal
+          isOpen={showSignupModal}
+          onClose={() => setShowSignupModal(false)}
+          onSwitchToLogin={() => {
+            setShowSignupModal(false);
+            setShowLoginModal(true);
+          }}
+          isDarkMode={isDarkMode}
+        />
+        
         {isDialogOpen && (
             <div
                 className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-auto">
