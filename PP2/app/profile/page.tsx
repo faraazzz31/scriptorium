@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { avatarConfig } from '@/app/config/avatar';
-import Navbar from '@/app/Navbar';
+import Navbar from '@/app/components/Navbar';
 import { useTheme } from '@/app/components/theme/ThemeContext';
 
 export default function ProfilePage() {

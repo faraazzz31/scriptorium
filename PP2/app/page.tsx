@@ -8,7 +8,7 @@ import { javascript } from '@codemirror/lang-javascript';
 import { java } from '@codemirror/lang-java';
 import { cpp } from '@codemirror/lang-cpp';
 import { Play } from 'lucide-react';
-import Navbar from './Navbar';
+import Navbar from './components/Navbar';
 import { useTheme } from './components/theme/ThemeContext';
 
 interface Tag {
