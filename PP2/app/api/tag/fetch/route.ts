@@ -2,7 +2,6 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { withAuth } from '@/app/middleware/auth';
 
 const prisma = new PrismaClient();
 
@@ -25,7 +24,7 @@ interface ErrorResponse {
   error: string;
 }
 
-async function handler(req: AuthenticatedRequest): Promise<NextResponse<TagFetchResponse | ErrorResponse>> {
+export async function GET (req: AuthenticatedRequest): Promise<NextResponse<TagFetchResponse | ErrorResponse>> {
   const user = req.user;
 
   if (!user) {
@@ -49,5 +48,3 @@ async function handler(req: AuthenticatedRequest): Promise<NextResponse<TagFetch
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
-
-export const GET = withAuth(handler);

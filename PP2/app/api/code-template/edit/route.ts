@@ -124,8 +124,10 @@ async function handler (req: AuthenticatedRequest): Promise<NextResponse<CodeTem
             id: updatedCodeTemplate.id,
             title: updatedCodeTemplate.title,
             explanation: updatedCodeTemplate.explanation,
+            language: updatedCodeTemplate.language,
             code: updatedCodeTemplate.code,
-            tags: updatedCodeTemplate.tags
+            tags: updatedCodeTemplate.tags,
+            authorId: updatedCodeTemplate.authorId
         });
     } catch (error) {
         console.error(`Error in /app/api/code_template/edit: ${error}`);
