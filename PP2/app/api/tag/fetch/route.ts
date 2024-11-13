@@ -24,7 +24,7 @@ interface ErrorResponse {
   error: string;
 }
 
-export async function GET(req: AuthenticatedRequest): Promise<NextResponse<TagFetchResponse | ErrorResponse>> {
+export async function GET (req: AuthenticatedRequest): Promise<NextResponse<TagFetchResponse | ErrorResponse>> {
   const user = req.user;
 
   if (!user) {
