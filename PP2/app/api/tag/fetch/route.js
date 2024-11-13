@@ -2,17 +2,10 @@
 
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { withAuth } from '@/app/middleware/auth';
 
 const prisma = new PrismaClient();
 
-async function handler (req) {
-    const user = req.user;
-
-    if (!user) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
+export async function GET () {
     try {
         const tags = await prisma.tag.findMany({
             select: {
@@ -30,5 +23,3 @@ async function handler (req) {
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }
-
-export const GET = withAuth(handler);
