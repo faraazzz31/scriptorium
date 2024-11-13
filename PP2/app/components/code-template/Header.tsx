@@ -1,5 +1,5 @@
 import { UserData } from '@/app/components/auth/types';
-import { Clock, Users, Edit2, Check, X, Trash2, GitFork } from 'lucide-react';
+import { Clock, Users, Edit2, Check, X, Trash2, GitFork, Eye } from 'lucide-react';
 import Link from 'next/link';
 
 interface Template {
@@ -15,6 +15,11 @@ interface Template {
     forkOf?: { id: number; title: string; author: { firstName: string; lastName: string } };
 }
 
+interface TagInterface {
+    id: number;
+    name: string;
+}
+
 interface HeaderProps {
     template: Template;
     user: UserData | null;
@@ -23,10 +28,12 @@ interface HeaderProps {
     isSaving: boolean;
     isDeleting: boolean;
     editedTitle: string;
+    editedExplanation: string;
     isDarkMode: boolean;
     availableTags: { id: number; name: string }[];
     selectedTags: { id: number; name: string }[];
     setEditedTitle: (title: string) => void;
+    setEditedExplanation: (description: string) => void;
     setSelectedTags: (tags: { id: number; name: string }[]) => void;
     setIsEditing: (isEditing: boolean) => void;
     setIsEditingMeta: (isEditing: boolean) => void;
@@ -44,10 +51,15 @@ export const Header = ({
     isSaving,
     isDeleting,
     editedTitle,
+    editedExplanation,
     isDarkMode,
+    availableTags,
+    selectedTags,
     setEditedTitle,
+    setEditedExplanation,
     setIsEditing,
     setIsEditingMeta,
+    setSelectedTags,
     handleSave,
     handleDelete,
     handleFork,
@@ -103,11 +115,20 @@ export const Header = ({
         return `${baseStyles} ${variantStyles}`;
     };
 
+    const handleTagSelect = (tag: TagInterface) => {
+        if (selectedTags.some((t) => t.id === tag.id)) {
+            setSelectedTags(selectedTags.filter((t) => t.id !== tag.id));
+        } else {
+            setSelectedTags([...selectedTags, tag]);
+        }
+    };
+
     return (
         <div className={`rounded-lg p-4 md:p-6 transition-colors duration-200 ${containerStyles}`}>
             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                { /* Title */}
                 <div className="space-y-4 flex-1">
-                    {isEditingMeta ? (
+                    { isEditingMeta ? (
                         <input
                             type="text"
                             value={editedTitle}
@@ -122,6 +143,60 @@ export const Header = ({
                             {template.title}
                         </h1>
                     )}
+
+                    {/* Explanation */}
+                    <div className="space-y-4">
+                        {isEditingMeta ? (
+                            <textarea
+                                value={editedExplanation}
+                                onChange={(e) => setEditedExplanation(e.target.value)}
+                                className={`text-sm w-full px-3 py-2 rounded-md border
+                                            focus:outline-none focus:ring-2 focus:border-transparent
+                                            transition-colors duration-200 ${inputStyles}`}
+                                placeholder="Enter description..."
+                                rows={3}
+                            />
+                        ) : (
+                            <p className={`text-sm ${textStyles}`}>
+                                {template.explanation}
+                            </p>
+                        )}
+                    </div>
+
+                    {/* Tags */}
+                    <div className="mb-4">
+                        {isEditingMeta ? (
+                            <div className="flex flex-wrap gap-2">
+                                {availableTags.map((tag) => (
+                                    <button
+                                        key={tag.id}
+                                        onClick={() => handleTagSelect(tag)}
+                                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all
+                                            ${selectedTags.some((t) => t.id === tag.id)
+                                                ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/25'
+                                                : isDarkMode
+                                                    ? 'bg-gray-800 hover:bg-gray-700 text-gray-300'
+                                                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                                            }`}
+                                    >
+                                        {tag.name}
+                                    </button>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="flex flex-wrap gap-2">
+                                {selectedTags.map((tag) => (
+                                    <div
+                                        key={tag.id}
+                                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all
+                                            bg-blue-500 text-white shadow-lg shadow-blue-500/25`}
+                                    >
+                                        {tag.name}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
 
                     <div className="flex flex-wrap items-center gap-4">
                         <div className={`flex items-center text-sm ${textStyles}`}>
@@ -157,8 +232,17 @@ export const Header = ({
                                 onClick={() => setIsEditing(!isEditing)}
                                 className={getButtonStyles('primary')}
                             >
-                                <Edit2 className="w-4 h-4 mr-2" />
-                                {isEditing ? 'View Mode' : 'Edit Mode'}
+                                {isEditing ? (
+                                    <>
+                                        <Edit2 className="w-4 h-4 mr-2" />
+                                        Edit Mode
+                                    </>
+                                ) : (
+                                    <>
+                                        <Eye className="w-4 h-4 mr-2" />
+                                        View Mode
+                                    </>
+                                )}
                             </button>
                             {isEditingMeta ? (
                                 <>

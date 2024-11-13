@@ -8,6 +8,7 @@ import { Header } from '@/app/components/code-template/Header';
 import { CodeEditor } from '@/app/components/code-template/CodeEditor';
 import { InputOutput } from '@/app/components/code-template/InputOutput';
 import { ForksList } from '@/app/components/code-template/ForksList';
+import { DeleteConfirmationModal } from './DeleteConfirmation';
 
 interface CodeTemplateDetailsProps {
     templateId: number;
@@ -44,6 +45,7 @@ const CodeTemplateDetails = ({ templateId }: CodeTemplateDetailsProps) => {
     const [saveMessage, setSaveMessage] = useState('');
     const [isEditingMeta, setIsEditingMeta] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [error, setError] = useState('');
 
     const [input, setInput] = useState<string>('');
@@ -102,9 +104,9 @@ const CodeTemplateDetails = ({ templateId }: CodeTemplateDetailsProps) => {
             const response: Response = await fetch(apiEndpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    code: isEditing ? editedCode : template?.code, 
-                    input 
+                body: JSON.stringify({
+                    code: isEditing ? editedCode : template?.code,
+                    input
                 }),
             });
 
@@ -145,6 +147,7 @@ const CodeTemplateDetails = ({ templateId }: CodeTemplateDetailsProps) => {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
                 },
                 body: JSON.stringify({
                     codeTemplateId: templateId,
@@ -174,36 +177,52 @@ const CodeTemplateDetails = ({ templateId }: CodeTemplateDetailsProps) => {
 
     const handleFork = async () => {
         try {
-            const response = await fetch(`/api/code-templates/${templateId}/fork`, {
+            const response = await fetch(`/api/code-template/save`, {
                 method: 'POST',
                 headers: {
-                'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
                 },
+                body: JSON.stringify({
+                    title: template?.title ?? '',
+                    explanation: template?.explanation ?? '',
+                    code: template?.code ?? '',
+                    language: template?.language ?? 'javascript',
+                    tag_ids: template?.tags.map((tag) => tag.id),
+                    authorId: user?.id,
+                    forkOfId: template?.id,
+                }),
             });
-        
+
             if (!response.ok) {
                 throw new Error('Failed to fork template');
             }
-        
+
             const data = await response.json();
             // Redirect to the new forked template
-            router.push(`/code-templates/${data.id}`);
+            router.push(`/code-template/${data.id}`);
         } catch (error) {
             console.error('Error forking template:', error);
         }
     };
 
     const handleDelete = async () => {
-        if (!confirm('Are you sure you want to delete this template?')) {
-            return;
-        }
+        setIsDeleteModalOpen(true);
+    }
 
+    const handleDeleteCancel = () => {
+        setIsDeleteModalOpen(false);
+    };
+
+    const handleDeleteConfirm = async () => {
+        setIsDeleteModalOpen(false);
         setIsDeleting(true);
         try {
             const response = await fetch('/api/code-template/delete', {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
                 },
                 body: JSON.stringify({
                     codeTemplateId: templateId,
@@ -233,6 +252,11 @@ const CodeTemplateDetails = ({ templateId }: CodeTemplateDetailsProps) => {
 
     return (
         <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'}`}>
+            {error && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                    <strong>Error:</strong> {error}
+                </div>
+            )}
             <div className="container mx-auto px-4 py-6 space-y-6">
                 <Header
                     template={template}
@@ -242,13 +266,19 @@ const CodeTemplateDetails = ({ templateId }: CodeTemplateDetailsProps) => {
                     isSaving={isSaving}
                     isDeleting={isDeleting}
                     editedTitle={editedTitle}
+                    editedExplanation={editedExplanation}
                     setEditedTitle={setEditedTitle}
+                    setEditedExplanation={setEditedExplanation}
                     setIsEditing={setIsEditing}
                     setIsEditingMeta={setIsEditingMeta}
                     handleSave={handleSave}
                     handleDelete={handleDelete}
                     handleFork={handleFork}
                     isDarkMode={isDarkMode}
+                    availableTags={availableTags}
+                    selectedTags={selectedTags}
+                    setSelectedTags={setSelectedTags}
+                    handleTagSelect={handleTagSelect}
                 />
 
                 <div className="space-y-6">
@@ -277,6 +307,13 @@ const CodeTemplateDetails = ({ templateId }: CodeTemplateDetailsProps) => {
                 {template.forks && template.forks.length > 0 && (
                     <ForksList forks={template.forks} isDarkMode={isDarkMode} />
                 )}
+
+                <DeleteConfirmationModal
+                    isOpen={isDeleteModalOpen}
+                    onConfirm={handleDeleteConfirm}
+                    onCancel={handleDeleteCancel}
+                    isDarkMode={isDarkMode}
+                />
             </div>
         </div>
     );
