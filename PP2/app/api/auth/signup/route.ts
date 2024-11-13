@@ -42,26 +42,26 @@ export async function POST(request: NextRequest): Promise<NextResponse<SignupRes
     }
 
     if (!validateEmail(email)) {
-        return NextResponse.json({ error: 'Invalid email' }, { status: 400 });
-    }
-
-    if (!validatePassword(password)) {
-        return NextResponse.json({ error: 'Invalid password' }, { status: 400 });
+        return NextResponse.json({ error: 'Invalid email format. Please enter a valid email address' }, { status: 400 });
     }
 
     if (!validatePhone(phone)) {
-        return NextResponse.json({ error: 'Invalid phone number' }, { status: 400 });
+        return NextResponse.json({ error: 'Phone number must be 10 digits long' }, { status: 400 });
+    }
+
+    if (!validatePassword(password)) {
+        return NextResponse.json({ error: 'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&)' }, { status: 400 });
     }
 
     if (selectedAvatar && !VALID_AVATAR_PATHS.includes(selectedAvatar)) {
-        return NextResponse.json({ error: 'Invalid avatar selection' }, { status: 400 });
+        return NextResponse.json({ error: 'Please select a valid avatar from the provided options' }, { status: 400 });
     }
 
     try {
         const existingUser = await prisma.user.findUnique({ where: { email } });
 
         if (existingUser) {
-            return NextResponse.json({ error: 'Email already in use' }, { status: 400 });
+            return NextResponse.json({ error: 'This email is already registered. Please use a different email or try logging in' }, { status: 400 });
         }
 
         const hashedPassword = await bcrypt.hash(password, parseInt(process.env.SALT_ROUNDS || '10'));
@@ -98,6 +98,6 @@ export async function POST(request: NextRequest): Promise<NextResponse<SignupRes
 
     } catch (error) {
         console.error('Signup error:', error);
-        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+        return NextResponse.json({ error: 'Failed to create account. Please try again later or contact support if the problem persists' }, { status: 500 });
     }
 }
