@@ -28,7 +28,7 @@ const Navbar: React.FC<NavbarProps> = ({ isDarkMode, toggleDarkMode }) => {
                     {/* Logo and Brand */}
                     <div className="flex items-center pl-0"> {/* Modified this div */}
                         <Image
-                            src="favicon.ico"
+                            src="/favicon.ico"
                             alt="Scriptorium Logo"
                             width={32}
                             height={32}
@@ -63,7 +63,7 @@ const Navbar: React.FC<NavbarProps> = ({ isDarkMode, toggleDarkMode }) => {
                             >
                                 {user.avatar ? (
                                 <Image
-                                    src={user.avatar}
+                                    src={user.avatar.startsWith('/') ? user.avatar : `/${user.avatar}`}
                                     width={32}
                                     height={32}
                                     alt="Profile"

@@ -8,9 +8,9 @@ import { javascript } from '@codemirror/lang-javascript';
 import { java } from '@codemirror/lang-java';
 import { cpp } from '@codemirror/lang-cpp';
 import { Play } from 'lucide-react';
-import Navbar from './components/Navbar';
-import { useTheme } from './components/theme/ThemeContext';
-import SaveCodeTemplate from './components/SaveCodeTemplate';
+import Navbar from '@/app/components/Navbar';
+import { useTheme } from '@/app/components/theme/ThemeContext';
+import SaveCodeTemplate from './components/code-template/SaveCodeTemplate';
 import { LoginModal } from './components/auth/LoginModal';
 import { SignupModal } from './components/auth/SignupModal';
 
