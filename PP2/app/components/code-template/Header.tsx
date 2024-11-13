@@ -51,7 +51,6 @@ export const Header = ({
     handleSave,
     handleDelete,
     handleFork,
-    handleTagSelect,
 }: HeaderProps) => {
     // Container styles
     const containerStyles = isDarkMode
