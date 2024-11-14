@@ -17,21 +17,23 @@ interface Tag {
     name: string;
 }
 
-interface SaveCodeTemplateProps {
+interface ForkCodeTemplateProps {
+    forkOfId: number;
     code: string;
     language: string;
     isOpen: boolean;
+    forkedTags: Tag[];
     onClose: () => void;
     onSwitchToLogin: () => void;
 }
 
-export default function SaveCodeTemplate({ code, language, isOpen, onClose, onSwitchToLogin  }: SaveCodeTemplateProps) {
+export default function ForkCodeTemplate({ forkOfId, code, language, isOpen, forkedTags, onClose, onSwitchToLogin  }: ForkCodeTemplateProps) {
     const [templateTitle, setTemplateTitle] = useState<string>('');
     const [templateExplanation, setTemplateExplanation] = useState<string>('');
     const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
-    const [saveError, setSaveError] = useState<string | null>(null);
+    const [forkError, setForkError] = useState<string | null>(null);
     const [tags, setTags] = useState<Tag[]>([]);
-    const [isSaving, setIsSaving] = useState<boolean>(false);
+    const [isForking, setIsForking] = useState<boolean>(false);
     const [successMessage, setSuccessMessage] = useState<string>('');
 
     const { isDarkMode } = useTheme();
@@ -42,8 +44,8 @@ export default function SaveCodeTemplate({ code, language, isOpen, onClose, onSw
         if (isOpen) {
             setTemplateTitle('');
             setTemplateExplanation('');
-            setSelectedTags([]);
-            setSaveError(null);
+            setSelectedTags(forkedTags);
+            setForkError(null);
             setSuccessMessage('');
             fetchTags();
         }
@@ -74,20 +76,20 @@ export default function SaveCodeTemplate({ code, language, isOpen, onClose, onSw
         }
     };
 
-    const handleSaveCodeTemplate = async () => {
-        setIsSaving(true);
-        setSaveError(null);
+    const handleForkCodeTemplate = async () => {
+        setIsForking(true);
+        setForkError(null);
         setSuccessMessage('');
 
         try {
             if (!user) {
-                setSaveError('You need to be logged in to save code templates.');
+                setForkError('You need to be logged in to fork code templates.');
                 return;
             }
 
             const token = localStorage.getItem('accessToken');
             if (!token) {
-                setSaveError('You need to be logged in to save code templates.');
+                setForkError('You need to be logged in to fork code templates.');
                 return;
             }
 
@@ -103,6 +105,7 @@ export default function SaveCodeTemplate({ code, language, isOpen, onClose, onSw
                     code,
                     language,
                     tag_ids: selectedTags.map((tag) => tag.id),
+                    forkOfId: forkOfId,
                 }),
             });
 
@@ -110,18 +113,19 @@ export default function SaveCodeTemplate({ code, language, isOpen, onClose, onSw
 
             if (response.ok) {
                 setSuccessMessage('Template saved successfully!');
+                // Redirect to the new forked template
                 router.push(`/code-template/${data.id}`);
             } else {
-                setSaveError(data.error || 'Failed to save template');
+                setForkError(data.error || 'Failed to save template');
                 if (response.status === 401) {
-                    setSaveError('You need to be logged in to save code templates.');
+                    setForkError('You need to be logged in to fork code templates.');
                 }
             }
         } catch (error) {
             console.error('Error saving template:', error);
-            setSaveError('An error occurred while saving the template');
+            setForkError('An error occurred while saving the template');
         } finally {
-            setIsSaving(false);
+            setIsForking(false);
         }
     };
 
@@ -134,36 +138,36 @@ export default function SaveCodeTemplate({ code, language, isOpen, onClose, onSw
     };
 
     const handleSaveClick = () => {
-        setSaveError(null);
+        setForkError(null);
 
         if (!templateTitle.trim()) {
-            setSaveError('Please enter a title for the code template.');
+            setForkError('Please enter a title for the code template.');
             return;
         }
 
         if (!code.trim()) {
-            setSaveError('Please provide the code for the template.');
+            setForkError('Please provide the code for the template.');
             return;
         }
 
         if (!language) {
-            setSaveError('Please select a language for the code template.');
+            setForkError('Please select a language for the code template.');
             return;
         }
 
         if (!user) {
-            setSaveError('You need to be logged in to save code templates.');
+            setForkError('You need to be logged in to fork code templates.');
             return;
         }
 
-        handleSaveCodeTemplate();
+        handleForkCodeTemplate();
     };
 
     const handleClose = () => {
         setTemplateTitle('');
         setTemplateExplanation('');
         setSelectedTags([]);
-        setSaveError(null);
+        setForkError(null);
         setSuccessMessage('');
         onClose();
     };
@@ -177,7 +181,7 @@ export default function SaveCodeTemplate({ code, language, isOpen, onClose, onSw
 
     return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            {/* Save Code Template Modal */}
+            {/* Fork Code Template Modal */}
             <div className={`relative w-full max-w-4xl rounded-xl shadow-2xl ${
                 isDarkMode ? 'bg-gray-900' : 'bg-white'} overflow-hidden`}>
                 {/* Header */}
@@ -185,7 +189,7 @@ export default function SaveCodeTemplate({ code, language, isOpen, onClose, onSw
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
                             <Save className="w-5 h-5 text-blue-500" />
-                            <h2 className="text-xl font-semibold">Save Code Template</h2>
+                            <h2 className="text-xl font-semibold">Fork Code Template</h2>
                         </div>
                         <button
                             onClick={handleClose}
@@ -198,15 +202,15 @@ export default function SaveCodeTemplate({ code, language, isOpen, onClose, onSw
 
                 {/* Content */}
                 <div className="p-6 max-h-[calc(100vh-12rem)] overflow-y-auto">
-                    {saveError && (
+                    {forkError && (
                         <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-                            {saveError}
+                            {forkError}
                             {!user && (
                                 <button
                                     onClick={() => handleLoginRedirect()}
                                     className="mt-2 w-full py-2 px-4 rounded-md text-white bg-red-500 hover:bg-red-600"
                                 >
-                                    Login to Save Templates
+                                    Login to Fork Code Template
                                 </button>
                             )}
                         </div>
@@ -324,11 +328,11 @@ export default function SaveCodeTemplate({ code, language, isOpen, onClose, onSw
                         </button>
                         <button
                             onClick={handleSaveClick}
-                            disabled={isSaving}
+                            disabled={isForking}
                             className={`px-4 py-2 rounded-md text-white bg-blue-500 hover:bg-blue-600
-                                ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                ${isForking ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
-                            {isSaving ? 'Saving...' : 'Save Template'}
+                            {isForking ? 'Forking...' : 'Fork Template'}
                         </button>
                     </div>
                 </div>

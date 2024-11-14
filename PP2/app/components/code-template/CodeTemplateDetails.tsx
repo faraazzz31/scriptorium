@@ -175,37 +175,6 @@ const CodeTemplateDetails = ({ templateId }: CodeTemplateDetailsProps) => {
         }
     };
 
-    const handleFork = async () => {
-        try {
-            const response = await fetch(`/api/code-template/save`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-                },
-                body: JSON.stringify({
-                    title: template?.title ?? '',
-                    explanation: template?.explanation ?? '',
-                    code: template?.code ?? '',
-                    language: template?.language ?? 'javascript',
-                    tag_ids: template?.tags.map((tag) => tag.id),
-                    authorId: user?.id,
-                    forkOfId: template?.id,
-                }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to fork template');
-            }
-
-            const data = await response.json();
-            // Redirect to the new forked template
-            router.push(`/code-template/${data.id}`);
-        } catch (error) {
-            console.error('Error forking template:', error);
-        }
-    };
-
     const handleDelete = async () => {
         setIsDeleteModalOpen(true);
     }
@@ -273,7 +242,6 @@ const CodeTemplateDetails = ({ templateId }: CodeTemplateDetailsProps) => {
                     setIsEditingMeta={setIsEditingMeta}
                     handleSave={handleSave}
                     handleDelete={handleDelete}
-                    handleFork={handleFork}
                     isDarkMode={isDarkMode}
                     availableTags={availableTags}
                     selectedTags={selectedTags}
