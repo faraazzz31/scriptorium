@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Search, Code2, GitFork, Tag, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuth } from '@/app/components/auth/AuthContext';
 import { useTheme } from '@/app/components/theme/ThemeContext';
+import debounce from 'lodash/debounce';
 
 interface CodeTemplate {
     id: number;
@@ -53,29 +54,7 @@ const CodeTemplatesList = () => {
     // Calculate total pages based on totalCount and limit
     const totalPages = Math.ceil(totalCount / limit);
 
-
-    useEffect(() => {
-        // Initialize filters from URL params
-        const page = parseInt(searchParams.get('page') || '1');
-        const query = searchParams.get('query') || '';
-        const tagId = searchParams.get('tag_id') || '';
-        const language = searchParams.get('language') || '';
-        const showOwn = searchParams.get('showOwn') === 'true';
-
-        // Ensure page is within valid range
-        const validPage = Math.min(Math.max(1, page), totalPages || 1);
-
-        setCurrentPage(validPage);
-        setSearchQuery(query);
-        setSelectedTagId(tagId);
-        setSelectedLanguage(language);
-        setShowMyTemplates(showOwn);
-
-        fetchTags();
-        fetchTemplates(validPage, query, tagId, language, showOwn);
-    }, [searchParams, totalPages]);
-
-    const fetchTags = async () => {
+    const fetchTags = useCallback(async () => {
         try {
             const response = await fetch('/api/tag/fetch');
             if (response.ok) {
@@ -85,11 +64,9 @@ const CodeTemplatesList = () => {
         } catch (error) {
             console.error('Error fetching tags:', error);
         }
-    };
+    }, []);
 
-    const availableLanguages = ['JavaScript', 'Python', 'Java', 'C', 'C++'];
-
-    const fetchTemplates = async (
+    const fetchTemplates = useCallback(async (
         page: number,
         query: string,
         tagId: string,
@@ -128,9 +105,32 @@ const CodeTemplatesList = () => {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [limit]);
 
-    const updateUrlParams = (
+    useEffect(() => {
+        // Initialize filters from URL params
+        const page = parseInt(searchParams.get('page') || '1');
+        const query = searchParams.get('query') || '';
+        const tagId = searchParams.get('tag_id') || '';
+        const language = searchParams.get('language') || '';
+        const showOwn = searchParams.get('showOwn') === 'true';
+    
+        // Ensure page is within valid range
+        const validPage = Math.min(Math.max(1, page), totalPages || 1);
+    
+        setCurrentPage(validPage);
+        setSearchQuery(query);
+        setSelectedTagId(tagId);
+        setSelectedLanguage(language);
+        setShowMyTemplates(showOwn);
+    
+        fetchTags();
+        fetchTemplates(validPage, query, tagId, language, showOwn);
+    }, [searchParams, totalPages, fetchTemplates, fetchTags]);
+
+    const availableLanguages = ['JavaScript', 'Python', 'Java', 'C', 'C++'];
+
+    const updateUrlParams = useCallback((
         page: number,
         query: string,
         tagId: string,
@@ -145,11 +145,27 @@ const CodeTemplatesList = () => {
             showOwn: showOwn.toString()
         });
         router.push(`/code-templates?${params.toString()}`);
-    };
+    }, [router]);
 
+    // Create a debounced version of the search
+    const debouncedSearch = useMemo(
+        () => debounce((query: string) => {
+            updateUrlParams(1, query, selectedTagId, selectedLanguage, showMyTemplates);
+        }, 300),
+        [updateUrlParams, selectedTagId, selectedLanguage, showMyTemplates]
+    );
+
+    // Don't forget to cleanup
+    useEffect(() => {
+        return () => {
+            debouncedSearch.cancel();
+        };
+    }, [debouncedSearch]);
+
+    // In your handleSearch function
     const handleSearch = (query: string) => {
         setSearchQuery(query);
-        updateUrlParams(1, searchQuery, selectedTagId, selectedLanguage, showMyTemplates);
+        debouncedSearch(query);
     };
 
     const handleTagSelect = (tagId: string) => {
@@ -173,17 +189,17 @@ const CodeTemplatesList = () => {
         updateUrlParams(1, searchQuery, selectedTagId, selectedLanguage, newValue);
     };
 
-    const PaginationButton: React.FC<PaginationButtonProps> = ({ page, isActive, onClick, disabled = false, children }) => (
+    const PaginationButton: React.FC<PaginationButtonProps> = ({ isActive, onClick, disabled = false, children }) => (
         <button
             onClick={onClick}
             disabled={disabled}
             className={`px-4 py-2 text-sm font-medium rounded-md transition-colors
-                ${isActive 
-                    ? 'bg-blue-500 text-white hover:bg-blue-600' 
+                ${isActive
+                    ? 'bg-blue-500 text-white hover:bg-blue-600'
                     : isDarkMode
                         ? 'text-gray-300 hover:bg-gray-800'
                         : 'text-gray-700 hover:bg-gray-100'
-                } 
+                }
                 ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
             `}
         >
@@ -197,7 +213,7 @@ const CodeTemplatesList = () => {
 
         const pages = [];
         const showEllipsis = totalPages > 7;
-        
+
         if (showEllipsis) {
             if (currentPage <= 3) {
                 // Show first 3 pages + ellipsis + last page
@@ -423,8 +439,15 @@ const CodeTemplatesList = () => {
                                             </p>
                                         </div>
 
-                                        {/* Template Description */}
-                                        <div 
+                                        {/* Template explanation */}
+                                        <div className={`space-y-4 text-sm px-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                            <p className="leading-relaxed tracking-wide">
+                                                {template.explanation}
+                                            </p>
+                                        </div>
+
+                                        {/* Template code */}
+                                        <div
                                             className={`rounded-lg p-4 font-mono text-sm overflow-hidden h-48 relative group
                                                 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}
                                         >

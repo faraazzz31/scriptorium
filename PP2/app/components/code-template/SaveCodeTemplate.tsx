@@ -65,9 +65,9 @@ export default function SaveCodeTemplate({ code, language, isOpen, onClose, onSw
 
     const getLanguageMode = () => {
         switch (language) {
-            case 'python': return python();
-            case 'javascript': return javascript();
-            case 'java': return java();
+            case 'Python': return python();
+            case 'Javascript': return javascript();
+            case 'Java': return java();
             case 'c':
             case 'cpp': return cpp();
             default: return javascript();

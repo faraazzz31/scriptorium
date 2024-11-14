@@ -34,6 +34,7 @@ async function handler (req: AuthenticatedRequest): Promise<NextResponse<CodeTem
 
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
+    const language = searchParams.get('language');
     const query = searchParams.get('query');
     const tag_id = searchParams.get('tag_id');
 
@@ -60,6 +61,10 @@ async function handler (req: AuthenticatedRequest): Promise<NextResponse<CodeTem
                     }
                 }
             ];
+        }
+
+        if (language) {
+            where.language = language;
         }
 
         if (tag_id) {
@@ -126,7 +131,7 @@ async function handler (req: AuthenticatedRequest): Promise<NextResponse<CodeTem
             ]
         });
 
-        console.log(`codeTemplates: ${JSON.stringify(codeTemplates)}`);
+        // console.log(`codeTemplates: ${JSON.stringify(codeTemplates)}`);
 
         const totalPages = Math.ceil(totalCount / limit);
 
