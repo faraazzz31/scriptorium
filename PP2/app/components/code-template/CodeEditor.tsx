@@ -41,9 +41,9 @@ export const CodeEditor = ({
 }: CodeEditorProps) => {
     const getLanguageMode = (language: string) => {
         switch (language) {
-            case 'python': return python();
-            case 'javascript': return javascript();
-            case 'java': return java();
+            case 'Python': return python();
+            case 'JavaScript': return javascript();
+            case 'Java': return java();
             case 'c':
             case 'cpp': return cpp();
             default: return javascript();

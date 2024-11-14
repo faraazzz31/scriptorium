@@ -25,12 +25,6 @@ interface ErrorResponse {
 }
 
 export async function GET (req: AuthenticatedRequest): Promise<NextResponse<TagFetchResponse | ErrorResponse>> {
-  const user = req.user;
-
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   try {
     const tags = await prisma.tag.findMany({
       select: {

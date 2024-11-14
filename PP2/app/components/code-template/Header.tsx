@@ -1,6 +1,10 @@
 import { UserData } from '@/app/components/auth/types';
 import { Clock, Users, Edit2, Check, X, Trash2, GitFork, Eye } from 'lucide-react';
 import Link from 'next/link';
+import { useState } from 'react';
+import { LoginModal } from '../auth/LoginModal';
+import { SignupModal } from '../auth/SignupModal';
+import ForkCodeTemplate  from './ForkCodeTemplate';
 
 interface Template {
     id: number;
@@ -39,7 +43,6 @@ interface HeaderProps {
     setIsEditingMeta: (isEditing: boolean) => void;
     handleSave: () => void;
     handleDelete: () => void;
-    handleFork: () => void;
     handleTagSelect: (tag: { id: number; name: string }) => void;
 }
 
@@ -62,7 +65,6 @@ export const Header = ({
     setSelectedTags,
     handleSave,
     handleDelete,
-    handleFork,
 }: HeaderProps) => {
     // Container styles
     const containerStyles = isDarkMode
@@ -114,6 +116,10 @@ export const Header = ({
 
         return `${baseStyles} ${variantStyles}`;
     };
+
+    const [ isLoginModalOpen, setIsLoginModalOpen ] = useState<boolean>(false);
+    const [ isSignupModalOpen, setIsSignupModalOpen ] = useState<boolean>(false);
+    const [ isDialogOpen, setIsDialogOpen ] = useState<boolean>(false);
 
     const handleTagSelect = (tag: TagInterface) => {
         if (selectedTags.some((t) => t.id === tag.id)) {
@@ -213,7 +219,7 @@ export const Header = ({
                         <div className={`text-sm ${textStyles}`}>
                             Forked from{' '}
                             <Link
-                                href={`/templates/${template.forkOf.id}`}
+                                href={`/code-template/${template.forkOf.id}`}
                                 className={`${linkStyles} hover:underline`}
                             >
                                 {template.forkOf.title}
@@ -284,7 +290,7 @@ export const Header = ({
                         </>
                     ) : (
                         <button
-                            onClick={handleFork}
+                            onClick={() => setIsDialogOpen(true)}
                             className={isDarkMode
                                 ? "flex items-center px-3 py-1.5 md:px-4 md:py-2 rounded-md text-white bg-purple-600 hover:bg-purple-700"
                                 : "flex items-center px-3 py-1.5 md:px-4 md:py-2 rounded-md text-white bg-purple-500 hover:bg-purple-600"
@@ -295,6 +301,39 @@ export const Header = ({
                         </button>
                     )}
                 </div>
+
+                {/* Fork Code Template */}
+                <ForkCodeTemplate
+                    forkOfId={template.id}
+                    code={template.code}
+                    language={template.language}
+                    forkedTags={selectedTags}
+                    isOpen={isDialogOpen}
+                    onClose={() => setIsDialogOpen(false)}
+                    onSwitchToLogin={() => setIsLoginModalOpen(true)}
+                />
+
+                {/* Login Modal */}
+                <LoginModal
+                    isOpen={isLoginModalOpen}
+                    onClose={() => setIsLoginModalOpen(false)}
+                    onSwitchToSignup={() => {
+                        setIsLoginModalOpen(false);
+                        setIsSignupModalOpen(true);
+                    }}
+                    isDarkMode={isDarkMode}
+                />
+
+                {/* Signup Modal */}
+                <SignupModal
+                    isOpen={isSignupModalOpen}
+                    onClose={() => setIsSignupModalOpen(false)}
+                    onSwitchToLogin={() => {
+                        setIsLoginModalOpen(false);
+                        setIsSignupModalOpen(true);
+                    }}
+                    isDarkMode={isDarkMode}
+                />
             </div>
         </div>
     );

@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { Header } from '@/app/components/code-template/Header';
 import { CodeEditor } from '@/app/components/code-template/CodeEditor';
 import { InputOutput } from '@/app/components/code-template/InputOutput';
-import { ForksList } from '@/app/components/code-template/ForksList';
+import ForksList from '@/app/components/code-template/ForksList';
 import { DeleteConfirmationModal } from './DeleteConfirmation';
 
 interface CodeTemplateDetailsProps {
@@ -98,28 +98,39 @@ const CodeTemplateDetails = ({ templateId }: CodeTemplateDetailsProps) => {
     const runCode = async (): Promise<void> => {
         setOutput('Running...');
         setIsRunning(true);
-
+    
         try {
-            const apiEndpoint: string = `/api/run-${template?.language}`;
+            const apiEndpoint: string = `/api/run-${template?.language.toLowerCase()}`; // Ensure lowercase
             const response: Response = await fetch(apiEndpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     code: isEditing ? editedCode : template?.code,
-                    input
+                    input: input.trim() // Trim input to remove extra whitespace
                 }),
             });
-
+    
             const data = await response.json();
-
+    
             if (response.ok) {
-                setOutput(data.output || 'No output');
+                // Handle successful execution
+                if (data.output !== undefined) {
+                    setOutput(data.output);
+                } else if (data.error) {
+                    // Handle runtime errors
+                    setOutput(`Runtime Error:\n${data.error}`);
+                } else {
+                    setOutput('Program executed successfully with no output.');
+                }
             } else {
-                setOutput(data.error || `Error: ${response.status} ${response.statusText}`);
+                // Handle API errors
+                const errorMessage = data.error || data.message || 'An error occurred while running the code';
+                setOutput(`Error: ${errorMessage}`);
             }
         } catch (error: any) {
+            // Handle network or parsing errors
             console.error('Error in runCode:', error);
-            setOutput(`Error: ${error.message}`);
+            setOutput(`Error executing code: ${error.message || 'Unknown error occurred'}`);
         } finally {
             setIsRunning(false);
         }
@@ -172,37 +183,6 @@ const CodeTemplateDetails = ({ templateId }: CodeTemplateDetailsProps) => {
         } finally {
             setIsSaving(false);
             setTimeout(() => setSaveMessage(''), 3000);
-        }
-    };
-
-    const handleFork = async () => {
-        try {
-            const response = await fetch(`/api/code-template/save`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-                },
-                body: JSON.stringify({
-                    title: template?.title ?? '',
-                    explanation: template?.explanation ?? '',
-                    code: template?.code ?? '',
-                    language: template?.language ?? 'javascript',
-                    tag_ids: template?.tags.map((tag) => tag.id),
-                    authorId: user?.id,
-                    forkOfId: template?.id,
-                }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to fork template');
-            }
-
-            const data = await response.json();
-            // Redirect to the new forked template
-            router.push(`/code-template/${data.id}`);
-        } catch (error) {
-            console.error('Error forking template:', error);
         }
     };
 
@@ -273,7 +253,6 @@ const CodeTemplateDetails = ({ templateId }: CodeTemplateDetailsProps) => {
                     setIsEditingMeta={setIsEditingMeta}
                     handleSave={handleSave}
                     handleDelete={handleDelete}
-                    handleFork={handleFork}
                     isDarkMode={isDarkMode}
                     availableTags={availableTags}
                     selectedTags={selectedTags}
