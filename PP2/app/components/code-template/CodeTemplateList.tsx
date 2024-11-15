@@ -128,7 +128,28 @@ const CodeTemplatesList = () => {
         fetchTemplates(validPage, query, tagId, language, showOwn);
     }, [searchParams, totalPages, fetchTemplates, fetchTags]);
 
-    const availableLanguages = ['JavaScript', 'Python', 'Java', 'C', 'C++'];
+    const availableLanguages = [
+        {
+            key: 'python',
+            name: 'Python',
+        },
+        {
+            key: 'javascript',
+            name: 'JavaScript',
+        },
+        {
+            key: 'java',
+            name: 'Java',
+        },
+        {
+            key: 'c',
+            name: 'C',
+        },
+        {
+            key: 'cpp',
+            name: 'C++',
+        }
+    ]
 
     const updateUrlParams = useCallback((
         page: number,
@@ -385,17 +406,17 @@ const CodeTemplatesList = () => {
                             <div className="flex flex-wrap gap-2">
                                 {availableLanguages.map((language) => (
                                     <button
-                                        key={language}
-                                        onClick={() => handleLanguageSelect(language)}
+                                        key={language.key}
+                                        onClick={() => handleLanguageSelect(language.key)}
                                         className={`px-4 py-2 rounded-lg text-sm font-medium transition-all transform hover:scale-105
-                                        ${selectedLanguage === language
+                                        ${selectedLanguage === language.key
                                             ? 'bg-blue-500 text-white shadow-md'
                                             : isDarkMode
                                                 ? 'bg-gray-800 text-gray-300 border border-gray-700 hover:bg-gray-750'
                                                 : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
                                         }`}
                                     >
-                                        {language}
+                                        {language.name}
                                     </button>
                                 ))}
                             </div>
@@ -416,7 +437,7 @@ const CodeTemplatesList = () => {
                                     key={template.id}
                                     onClick={() => router.push(`/code-template/${template.id}`)}
                                     className={`rounded-xl transition-all transform hover:scale-102 hover:-translate-y-1 cursor-pointer
-                                    ${isDarkMode 
+                                    ${isDarkMode
                                         ? 'bg-gray-800 border border-gray-700 hover:shadow-lg hover:shadow-blue-500/10' 
                                         : 'bg-white border border-gray-200 hover:shadow-xl'}`}
                                 >
@@ -486,7 +507,7 @@ const CodeTemplatesList = () => {
                                             </span>
                                             <span className="flex items-center gap-1">
                                                 <Code2 className="w-4 h-4" />
-                                                {template.language}
+                                                {availableLanguages.find(language => language.key === template.language)?.name || template.language}
                                             </span>
                                         </div>
                                     </div>
