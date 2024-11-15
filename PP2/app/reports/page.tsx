@@ -198,7 +198,6 @@ export default function ReportsPage() {
                             <ReportCard
                                 key={`${item.type}-${item.id}`}
                                 item={item}
-                                isDarkMode={isDarkMode}
                                 onViewContent={setSelectedContent}
                                 onHideContent={handleHideContent}
                             />
@@ -209,7 +208,6 @@ export default function ReportsPage() {
                 {selectedContent && (
                     <ContentModal
                         content={selectedContent}
-                        isDarkMode={isDarkMode}
                         onClose={() => setSelectedContent(null)}
                     />
                 )}
