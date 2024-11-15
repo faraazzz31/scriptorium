@@ -49,7 +49,7 @@ export default function ForkCodeTemplate({ forkOfId, code, language, isOpen, for
             setSuccessMessage('');
             fetchTags();
         }
-    }, [isOpen]);
+    }, [isOpen, forkedTags]);
 
     const fetchTags = async () => {
         try {
