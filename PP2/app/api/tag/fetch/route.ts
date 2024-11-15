@@ -1,17 +1,9 @@
 // Used Github co-pilot to help me write this code
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
-
-interface AuthenticatedRequest extends NextRequest {
-  user?: {
-    id: number;
-    email: string;
-    role: string;
-  };
-}
 
 interface TagFetchResponse {
   tags: {
@@ -24,7 +16,7 @@ interface ErrorResponse {
   error: string;
 }
 
-export async function GET (req: AuthenticatedRequest): Promise<NextResponse<TagFetchResponse | ErrorResponse>> {
+export async function GET (): Promise<NextResponse<TagFetchResponse | ErrorResponse>> {
   try {
     const tags = await prisma.tag.findMany({
       select: {
