@@ -23,7 +23,11 @@ interface CommentFetchAllResponse {
     content: string;
     upvotes: number;
     downvotes: number;
-    authorId: number;
+    author: {
+      id: number;
+      firstName: string | null;
+      lastName: string | null;
+    };
     blogPostId: number | null;
     parentId: number | null;
   }[];
@@ -91,13 +95,18 @@ export async function handler(req: AuthenticatedRequest): Promise<NextResponse<C
         content: true,
         upvotes: true,
         downvotes: true,
-        authorId: true,
+        author: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+          }
+        },
         blogPostId: true,
         parentId: true,
+        createdAt: true,
       }
     });
-
-    console.log(`comments: ${JSON.stringify(comments)}`);
 
     if (sorting === 'Most valued') {
       comments = comments.sort((a, b) => valueScore(b.upvotes, b.downvotes) - valueScore(a.upvotes, a.downvotes));

@@ -1,7 +1,7 @@
 // Used Github co-pilot to help me write this code
 
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient, Prisma } from '@prisma/client';
+import { PrismaClient, Prisma, User } from '@prisma/client';
 import { parseStringToNumberArray } from '@/app/utils/parseString';
 import { valueScore, controversyScore } from '@/app/utils/sortingScore';
 
@@ -32,9 +32,15 @@ interface BlogPostFetchAllResponse {
     codeTemplates: {
       id: number;
       title: string;
+      author: User;
     }[];
-    authorId: number;
     isHidden: boolean;
+    author: {
+      id: number;
+      firstName: string | null;
+      lastName: string | null;
+    };
+    createdAt: Date;
   }[];
 }
 
@@ -43,6 +49,7 @@ interface ErrorResponse {
 }
 
 export async function handler(req: AuthenticatedRequest): Promise<NextResponse<BlogPostFetchAllResponse | ErrorResponse>> {
+  console.log(`user: ${JSON.stringify(req.user)}`);
   const { searchParams } = new URL(req.url);
 
   const page = parseInt(searchParams.get('page') || '1');
@@ -140,22 +147,26 @@ export async function handler(req: AuthenticatedRequest): Promise<NextResponse<B
           select: {
             id: true,
             title: true,
+            author: true,
           }
         },
-        authorId: true,
         isHidden: true,
+        author: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+          }
+        },
+        createdAt: true,
       }
     });
-
-    console.log(`blogPosts: ${JSON.stringify(blogPosts)}`);
 
     if (sorting === 'Most valued') {
       blogPosts = blogPosts.sort((a, b) => valueScore(b.upvotes, b.downvotes) - valueScore(a.upvotes, a.downvotes));
     } else if (sorting === 'Most controversial') {
       blogPosts = blogPosts.sort((a, b) => controversyScore(b.upvotes, b.downvotes) - controversyScore(a.upvotes, a.downvotes));
     }
-
-    console.log(`blogPosts after sorting: ${JSON.stringify(blogPosts)}`);
 
     const totalPages = Math.ceil(blogPosts.length / limit);
 
