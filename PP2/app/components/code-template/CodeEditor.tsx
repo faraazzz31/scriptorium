@@ -41,9 +41,9 @@ export const CodeEditor = ({
 }: CodeEditorProps) => {
     const getLanguageMode = (language: string) => {
         switch (language) {
-            case 'Python': return python();
-            case 'JavaScript': return javascript();
-            case 'Java': return java();
+            case 'python': return python();
+            case 'javascript': return javascript();
+            case 'java': return java();
             case 'c':
             case 'cpp': return cpp();
             default: return javascript();
@@ -57,7 +57,7 @@ export const CodeEditor = ({
         `}>
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
                 <span className={`
-                    px-3 py-1 text-sm font-medium rounded-md 
+                    px-3 py-1 text-sm font-medium rounded-md
                     ${isDarkMode ? 'bg-blue-700 text-white' : 'bg-blue-500 text-white'}
                 `}>
                     {language.toUpperCase()}

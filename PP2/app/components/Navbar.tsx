@@ -20,6 +20,8 @@ const Navbar: React.FC<NavbarProps> = ({ isDarkMode, toggleDarkMode }) => {
     const [showLoginModal, setShowLoginModal] = useState(false);
     const [showSignupModal, setShowSignupModal] = useState(false);
 
+    const isAdmin = user?.role === 'ADMIN';
+
 
     return (
         <nav className={`border-b ${isDarkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'}`}>
@@ -49,6 +51,12 @@ const Navbar: React.FC<NavbarProps> = ({ isDarkMode, toggleDarkMode }) => {
                             <Link href="/code-templates" className={`${isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-black'} px-3 py-2 rounded-md text-sm font-medium`}>
                                 Code Templates
                             </Link>
+                            {/* Show Report link only if user is logged in and is an admin */}
+                            {user && isAdmin && (
+                                <Link href="/reports" className={`${isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-black'} px-3 py-2 rounded-md text-sm font-medium`}>
+                                    Reports
+                                </Link>
+                            )}
                         </div>
                     </div>
 
@@ -150,7 +158,7 @@ const Navbar: React.FC<NavbarProps> = ({ isDarkMode, toggleDarkMode }) => {
             {isMenuOpen && (
                 <div className="md:hidden">
                     <div className={`px-2 pt-2 pb-3 space-y-1 ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
-                        <Link href="/editor"
+                        <Link href="/"
                             className={`block px-3 py-2 rounded-md text-base font-medium ${isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-black'}`}>
                             Code Editor
                         </Link>
@@ -162,10 +170,17 @@ const Navbar: React.FC<NavbarProps> = ({ isDarkMode, toggleDarkMode }) => {
                             className={`block px-3 py-2 rounded-md text-base font-medium ${isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-black'}`}>
                             Code Templates
                         </Link>
-                        <Link href="/login"
+                        {/* Show Report link in mobile menu only if user is logged in and is an admin */}
+                        {user && isAdmin && (
+                            <Link href="/reports"
+                                  className={`block px-3 py-2 rounded-md text-base font-medium ${isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-black'}`}>
+                                Reports
+                            </Link>
+                        )}
+                        <button onClick={() => setShowLoginModal(true)}
                             className={`block px-3 py-2 rounded-md text-base font-medium ${isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-black'}`}>
                             Login
-                        </Link>
+                        </button>
                         <div className="px-3 py-2">
                             <button
                                 onClick={toggleDarkMode}

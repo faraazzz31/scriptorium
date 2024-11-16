@@ -19,13 +19,13 @@ interface CodeMap {
 }
 
 const defaultCode: CodeMap = {
-  Java: `public class Main {
+  java: `public class Main {
     public static void main(String[] args) {
         System.out.println("Hello, World!");
     }
 }`,
-  Python: `print("Hello, World!")`,
-  JavaScript: `console.log("Hello, World!");`,
+  python: `print("Hello, World!")`,
+  javascript: `console.log("Hello, World!");`,
   c: `#include <stdio.h>
 
 int main() {
@@ -41,9 +41,9 @@ int main() {
 };
 
 export default function Home(): JSX.Element {
-  const [code, setCode] = useState<string>(defaultCode.Java);
+  const [code, setCode] = useState<string>(defaultCode.java);
   const [output, setOutput] = useState<string>('');
-  const [language, setLanguage] = useState<string>('Java');
+  const [language, setLanguage] = useState<string>('java');
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [input, setInput] = useState<string>('');
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
@@ -85,9 +85,9 @@ export default function Home(): JSX.Element {
 
   const getLanguageMode = () => {
     switch (language) {
-      case 'Python': return python();
-      case 'JavaScript': return javascript();
-      case 'Java': return java();
+      case 'python': return python();
+      case 'javascript': return javascript();
+      case 'java': return java();
       case 'c':
       case 'cpp': return cpp();
       default: return javascript();
@@ -111,9 +111,9 @@ export default function Home(): JSX.Element {
                   onChange={(e) => setLanguage(e.target.value)}
                   className={`p-2 rounded ${isDarkMode ? 'bg-gray-700' : 'bg-white border border-gray-300'}`}
                 >
-                  <option value="Java">Java</option>
-                  <option value="Python">Python</option>
-                  <option value="JavaScript">JavaScript</option>
+                  <option value="java">Java</option>
+                  <option value="python">Python</option>
+                  <option value="javascript">JavaScript</option>
                   <option value="c">C</option>
                   <option value="cpp">C++</option>
                 </select>
