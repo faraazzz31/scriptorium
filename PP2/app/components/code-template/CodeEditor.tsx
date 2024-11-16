@@ -57,7 +57,7 @@ export const CodeEditor = ({
         `}>
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
                 <span className={`
-                    px-3 py-1 text-sm font-medium rounded-md 
+                    px-3 py-1 text-sm font-medium rounded-md
                     ${isDarkMode ? 'bg-blue-700 text-white' : 'bg-blue-500 text-white'}
                 `}>
                     {language.toUpperCase()}

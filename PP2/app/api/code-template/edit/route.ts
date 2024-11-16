@@ -25,6 +25,7 @@ interface CodeTemplateEditResponse {
     id: number;
     title: string;
     explanation: string | null;
+    language: string;
     code: string;
     tags: {
         id: number;
