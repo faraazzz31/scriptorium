@@ -1,4 +1,3 @@
-// app/reports/page.tsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -7,6 +6,7 @@ import { useTheme } from '@/app/components/theme/ThemeContext';
 import { FilterButtons } from '@/app/components/reports/FilterButtons';
 import { ReportCard } from '@/app/components/reports/ReportCard';
 import { ContentModal } from '@/app/components/reports/ContentModal';
+import Pagination from '@/app/components/reports/Pagination';
 
 export interface AuthorInfo {
     id: number;
@@ -66,6 +66,8 @@ export default function ReportsPage() {
     const [selectedContent, setSelectedContent] = useState<ReportContent | null>(null);
     const [filterType, setFilterType] = useState<'ALL' | 'BLOG_POST' | 'COMMENT'>('ALL');
     const [filterStatus, setFilterStatus] = useState<'PENDING' | 'RESOLVED' | null>(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
 
     const refreshAccessToken = async (refreshToken: string) => {
         try {
@@ -135,6 +137,8 @@ export default function ReportsPage() {
             const queryParams = new URLSearchParams();
             if (filterType !== 'ALL') queryParams.append('type', filterType);
             if (filterStatus) queryParams.append('status', filterStatus);
+            queryParams.append('page', currentPage.toString());
+            queryParams.append('limit', '9'); // 3x3 grid layout
 
             const url = `/api/admin/sort-reports?${queryParams}`;
             const response = await fetchWithAuth(url);
@@ -142,6 +146,7 @@ export default function ReportsPage() {
 
             if (!response.ok) throw new Error(data.error || 'Failed to fetch reports');
             setReports(data.results);
+            setTotalPages(data.pagination.pages);
         } catch (err) {
             console.error('Error fetching reports:', err);
             setError(err instanceof Error ? err.message : 'An error occurred');
@@ -169,8 +174,17 @@ export default function ReportsPage() {
     };
 
     useEffect(() => {
-        fetchReports();
+        setCurrentPage(1); // Reset to first page when filters change
     }, [filterType, filterStatus]);
+
+    useEffect(() => {
+        fetchReports();
+    }, [filterType, filterStatus, currentPage]);
+
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
     return (
         <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'}`}>
@@ -192,17 +206,27 @@ export default function ReportsPage() {
                     <div className="text-center py-8">Loading reports...</div>
                 ) : error ? (
                     <div className="text-center text-red-500 py-8">{error}</div>
+                ) : reports.length === 0 ? (
+                    <div className="text-center py-8">No reports found</div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {reports.map((item) => (
-                            <ReportCard
-                                key={`${item.type}-${item.id}`}
-                                item={item}
-                                onViewContent={setSelectedContent}
-                                onHideContent={handleHideContent}
-                            />
-                        ))}
-                    </div>
+                    <>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {reports.map((item) => (
+                                <ReportCard
+                                    key={`${item.type}-${item.id}`}
+                                    item={item}
+                                    onViewContent={setSelectedContent}
+                                    onHideContent={handleHideContent}
+                                />
+                            ))}
+                        </div>
+
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={handlePageChange}
+                        />
+                    </>
                 )}
 
                 {selectedContent && (
