@@ -1,6 +1,6 @@
 'use client';
 
-import { AlertCircle, Check, Eye, FileText, MessageSquare, Clock, AlertTriangle, User, ChevronDown, ChevronUp } from 'lucide-react';
+import { AlertCircle, Check, Eye, FileText, MessageSquare, AlertTriangle, User, ChevronDown, ChevronUp, BookOpenText } from 'lucide-react';
 import { type ReportContent } from '@/app/reports/page';
 import { useTheme } from '@/app/components/theme/ThemeContext';
 import { useState } from 'react';
@@ -135,7 +135,7 @@ export function ReportCard({ item, onViewContent, onHideContent }: ReportCardPro
                             {/* Explanation */}
                             <div>
                                 <div className="flex items-center gap-2 mb-1">
-                                    <Clock className="h-4 w-4 text-blue-500" />
+                                    <BookOpenText className="h-4 w-4 text-blue-500" />
                                     <h4 className={`text-sm font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>
                                         Explanation
                                     </h4>
