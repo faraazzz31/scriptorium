@@ -22,8 +22,39 @@ const Navbar: React.FC<NavbarProps> = ({ isDarkMode, toggleDarkMode }) => {
 
     const isAdmin = user?.role === 'ADMIN';
 
+    const handleLoginClick = () => {
+        setIsMenuOpen(false); // Close mobile menu if open
+        setShowLoginModal(true);
+    };
+
+    const handleModalClose = () => {
+        setShowLoginModal(false);
+        setShowSignupModal(false);
+    };
+
     return (
-    <>
+        <>
+            {/* Modals - Moved outside the nav element */}
+            <LoginModal
+                isOpen={showLoginModal}
+                onClose={handleModalClose}
+                onSwitchToSignup={() => {
+                    setShowLoginModal(false);
+                    setShowSignupModal(true);
+                }}
+                isDarkMode={isDarkMode}
+            />
+
+            <SignupModal
+                isOpen={showSignupModal}
+                onClose={handleModalClose}
+                onSwitchToLogin={() => {
+                    setShowSignupModal(false);
+                    setShowLoginModal(true);
+                }}
+                isDarkMode={isDarkMode}
+            />
+
         {/* Spacer div to prevent content from going under navbar */}
         <div className="h-16"></div>
 
@@ -154,14 +185,14 @@ const Navbar: React.FC<NavbarProps> = ({ isDarkMode, toggleDarkMode }) => {
                             </div>
                         ) : (
                             <button
-                                onClick={() => setShowLoginModal(true)}
+                                onClick={handleLoginClick}
                                 className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium tracking-wide
-                                    transition-all duration-200 
-                                    ${isDarkMode 
-                                        ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700' 
-                                        : 'bg-gradient-to-r from-blue-600 to-indigo-700 text-white hover:from-blue-700 hover:to-indigo-800'}`}
+                                        transition-all duration-200 
+                                        ${isDarkMode
+                                    ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700'
+                                    : 'bg-gradient-to-r from-blue-600 to-indigo-700 text-white hover:from-blue-700 hover:to-indigo-800'}`}
                             >
-                                <LogIn size={18} />
+                                <LogIn size={18}/>
                                 <span>Login</span>
                             </button>
                         )}
@@ -170,9 +201,9 @@ const Navbar: React.FC<NavbarProps> = ({ isDarkMode, toggleDarkMode }) => {
                         <button
                             onClick={toggleDarkMode}
                             className={`p-2 rounded-lg transition-all duration-200 transform hover:scale-105
-                                ${isDarkMode 
-                                    ? 'bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 hover:from-yellow-300 hover:to-orange-300' 
-                                    : 'bg-gradient-to-r from-gray-800 to-gray-900 text-white hover:from-gray-700 hover:to-gray-800'}`}
+                                ${isDarkMode
+                                ? 'bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 hover:from-yellow-300 hover:to-orange-300'
+                                : 'bg-gradient-to-r from-gray-800 to-gray-900 text-white hover:from-gray-700 hover:to-gray-800'}`}
                         >
                             {isDarkMode ? <Sun size={18}/> : <Moon size={18}/>}
                         </button>
@@ -199,51 +230,51 @@ const Navbar: React.FC<NavbarProps> = ({ isDarkMode, toggleDarkMode }) => {
                     <div className={`px-4 pt-2 pb-3 space-y-1 shadow-lg
                         ${isDarkMode ? 'bg-gray-900' : 'bg-white'}`}>
                         <Link href="/"
-                            className={`block px-4 py-2 rounded-lg text-base font-medium tracking-wide transition-all duration-200
-                                ${isDarkMode 
-                                    ? 'text-gray-300 hover:text-white hover:bg-gray-800/80' 
-                                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`}>
+                              className={`block px-4 py-2 rounded-lg text-base font-medium tracking-wide transition-all duration-200
+                                ${isDarkMode
+                                  ? 'text-gray-300 hover:text-white hover:bg-gray-800/80'
+                                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`}>
                             Code Editor
                         </Link>
                         <Link href="/blog"
-                            className={`block px-4 py-2 rounded-lg text-base font-medium tracking-wide transition-all duration-200
-                                ${isDarkMode 
-                                    ? 'text-gray-300 hover:text-white hover:bg-gray-800/80' 
-                                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`}>
+                              className={`block px-4 py-2 rounded-lg text-base font-medium tracking-wide transition-all duration-200
+                                ${isDarkMode
+                                  ? 'text-gray-300 hover:text-white hover:bg-gray-800/80'
+                                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`}>
                             Blog Posts
                         </Link>
                         <Link href="/code-templates"
-                            className={`block px-4 py-2 rounded-lg text-base font-medium tracking-wide transition-all duration-200
-                                ${isDarkMode 
-                                    ? 'text-gray-300 hover:text-white hover:bg-gray-800/80' 
-                                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`}>
+                              className={`block px-4 py-2 rounded-lg text-base font-medium tracking-wide transition-all duration-200
+                                ${isDarkMode
+                                  ? 'text-gray-300 hover:text-white hover:bg-gray-800/80'
+                                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`}>
                             Code Templates
                         </Link>
                         {user && isAdmin && (
                             <Link href="/reports"
-                                className={`block px-4 py-2 rounded-lg text-base font-medium tracking-wide transition-all duration-200
-                                    ${isDarkMode 
-                                        ? 'text-gray-300 hover:text-white hover:bg-gray-800/80' 
-                                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`}>
+                                  className={`block px-4 py-2 rounded-lg text-base font-medium tracking-wide transition-all duration-200
+                                    ${isDarkMode
+                                      ? 'text-gray-300 hover:text-white hover:bg-gray-800/80'
+                                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`}>
                                 Reports
                             </Link>
                         )}
                         <div className={`border-t my-2 ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}></div>
-                        <button 
-                            onClick={() => setShowLoginModal(true)}
+                        <button
+                            onClick={handleLoginClick}
                             className={`w-full text-left px-4 py-2 rounded-lg text-base font-medium tracking-wide transition-all duration-200
-                                ${isDarkMode 
-                                    ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700' 
-                                    : 'bg-gradient-to-r from-blue-600 to-indigo-700 text-white hover:from-blue-700 hover:to-indigo-800'}`}>
+                                    ${isDarkMode
+                                ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700'
+                                : 'bg-gradient-to-r from-blue-600 to-indigo-700 text-white hover:from-blue-700 hover:to-indigo-800'}`}>
                             Login
                         </button>
                         <div className="px-4 py-2">
                             <button
                                 onClick={toggleDarkMode}
                                 className={`p-2 rounded-lg transition-all duration-200
-                                    ${isDarkMode 
-                                        ? 'bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 hover:from-yellow-300 hover:to-orange-300' 
-                                        : 'bg-gradient-to-r from-gray-800 to-gray-900 text-white hover:from-gray-700 hover:to-gray-800'}`}
+                                    ${isDarkMode
+                                    ? 'bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 hover:from-yellow-300 hover:to-orange-300'
+                                    : 'bg-gradient-to-r from-gray-800 to-gray-900 text-white hover:from-gray-700 hover:to-gray-800'}`}
                             >
                                 {isDarkMode ? <Sun size={18}/> : <Moon size={18}/>}
                             </button>
@@ -251,26 +282,6 @@ const Navbar: React.FC<NavbarProps> = ({ isDarkMode, toggleDarkMode }) => {
                     </div>
                 </div>
             )}
-
-            <LoginModal
-                isOpen={showLoginModal}
-                onClose={() => setShowLoginModal(false)}
-                onSwitchToSignup={() => {
-                    setShowLoginModal(false);
-                    setShowSignupModal(true);
-                }}
-                isDarkMode={isDarkMode}
-            />
-
-            <SignupModal
-                isOpen={showSignupModal}
-                onClose={() => setShowSignupModal(false)}
-                onSwitchToLogin={() => {
-                    setShowSignupModal(false);
-                    setShowLoginModal(true);
-                }}
-                isDarkMode={isDarkMode}
-            />
         </nav>
         </>
     );
