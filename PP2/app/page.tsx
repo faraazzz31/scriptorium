@@ -7,6 +7,8 @@ import { python } from '@codemirror/lang-python';
 import { javascript } from '@codemirror/lang-javascript';
 import { java } from '@codemirror/lang-java';
 import { cpp } from '@codemirror/lang-cpp';
+import { php } from '@codemirror/lang-php';
+import { go } from '@codemirror/lang-go';
 import { Play } from 'lucide-react';
 import Navbar from '@/app/components/Navbar';
 import { useTheme } from '@/app/components/theme/ThemeContext';
@@ -37,8 +39,29 @@ int main() {
 int main() {
     std::cout << "Hello, World!" << std::endl;
     return 0;
-}`
+}`,
+  typescript: `console.log("Hello, World!");`,
+  go: `package main
+
+import "fmt"
+
+func main() {
+    fmt.Println("Hello, World!")
+}`,
+  ruby: `puts "Hello, World!"`,
+  kotlin: `fun main() {
+    println("Hello, World!")
+}`,
+  php: `<?php
+echo "Hello, World!";
+?>`
 };
+
+// New type for the execute response
+interface ExecuteResponse {
+  output?: string;
+  error?: string;
+}
 
 export default function Home(): JSX.Element {
   const [code, setCode] = useState<string>(defaultCode.java);
@@ -61,14 +84,17 @@ export default function Home(): JSX.Element {
     setIsRunning(true);
 
     try {
-      const apiEndpoint: string = `/api/run-${language}`;
-      const response: Response = await fetch(apiEndpoint, {
+      const response = await fetch('/api/execute', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code, input }),
+        body: JSON.stringify({
+          language,
+          code,
+          input
+        }),
       });
 
-      const data = await response.json();
+      const data: ExecuteResponse = await response.json();
 
       if (response.ok) {
         setOutput(data.output || 'No output');
@@ -90,129 +116,135 @@ export default function Home(): JSX.Element {
       case 'java': return java();
       case 'c':
       case 'cpp': return cpp();
+      case 'php': return php();
+      case 'go': return go();
       default: return javascript();
     }
   };
 
   return (
-    <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'}`}>
-      {/* Navigation Bar */}
-      <Navbar isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
+      <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'}`}>
+        {/* Navigation Bar */}
+        <Navbar isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
 
-      {/* Main Content */}
-      <div className="container mx-auto p-4">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div className="space-y-4">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center space-x-2">
-                <label className="font-semibold">Language:</label>
-                <select
-                  value={language}
-                  onChange={(e) => setLanguage(e.target.value)}
-                  className={`p-2 rounded ${isDarkMode ? 'bg-gray-700' : 'bg-white border border-gray-300'}`}
+        {/* Main Content */}
+        <div className="container mx-auto p-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center space-x-2">
+                  <label className="font-semibold">Language:</label>
+                  <select
+                      value={language}
+                      onChange={(e) => setLanguage(e.target.value)}
+                      className={`p-2 rounded ${isDarkMode ? 'bg-gray-700' : 'bg-white border border-gray-300'}`}
+                  >
+                    <option value="java">Java</option>
+                    <option value="python">Python</option>
+                    <option value="javascript">JavaScript</option>
+                    <option value="c">C</option>
+                    <option value="cpp">C++</option>
+                    <option value="typescript">TypeScript</option>
+                    <option value="go">Go</option>
+                    <option value="ruby">Ruby</option>
+                    <option value="kotlin">Kotlin</option>
+                    <option value="php">PHP</option>
+                  </select>
+                </div>
+
+                <button
+                    onClick={() => setIsDialogOpen(true)}
+                    className="p-2 rounded bg-blue-500 hover:bg-blue-600 text-white flex items-center h-[35px]"
                 >
-                  <option value="java">Java</option>
-                  <option value="python">Python</option>
-                  <option value="javascript">JavaScript</option>
-                  <option value="c">C</option>
-                  <option value="cpp">C++</option>
-                </select>
+                  <svg
+                      className="w-4 h-4 mr-2"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                  >
+                    <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"
+                    />
+                  </svg>
+                  Save Template
+                </button>
+              </div>
+
+              <CodeMirror
+                  value={code}
+                  height="400px"
+                  theme={isDarkMode ? oneDark : undefined}
+                  extensions={[getLanguageMode()]}
+                  onChange={(value) => setCode(value)}
+                  className="border rounded"
+              />
+
+              <div>
+                <label className="block font-semibold mb-2">Input:</label>
+                <textarea
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    placeholder="Enter input(s) in separate lines here..."
+                    className={`w-full p-2 rounded h-24 ${isDarkMode ? 'bg-gray-700' : 'bg-white border border-gray-300'}`}
+                />
               </div>
 
               <button
-                onClick={() => setIsDialogOpen(true)}
-                className="p-2 rounded bg-blue-500 hover:bg-blue-600 text-white flex items-center h-[35px]"
+                  onClick={runCode}
+                  disabled={isRunning}
+                  className={`flex items-center justify-center w-full p-2 rounded font-semibold ${
+                      isDarkMode
+                          ? 'bg-teal-600 hover:bg-teal-700 text-white'
+                          : 'bg-emerald-500 hover:bg-emerald-600 text-white'
+                  } ${isRunning ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
-                <svg
-                  className="w-4 h-4 mr-2"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"
-                  />
-                </svg>
-                Save Template
+                <Play size={20} className="mr-2" />
+                {isRunning ? 'Running...' : 'Run Code'}
               </button>
             </div>
 
-            <CodeMirror
-              value={code}
-              height="400px"
-              theme={isDarkMode ? oneDark : undefined}
-              extensions={[getLanguageMode()]}
-              onChange={(value) => setCode(value)}
-              className="border rounded"
-            />
-
             <div>
-              <label className="block font-semibold mb-2">Input:</label>
-              <textarea
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Enter input(s) in separate lines here..."
-                className={`w-full p-2 rounded h-24 ${isDarkMode ? 'bg-gray-700' : 'bg-white border border-gray-300'}`}
-              />
-            </div>
-
-            <button
-              onClick={runCode}
-              disabled={isRunning}
-              className={`flex items-center justify-center w-full p-2 rounded font-semibold ${
-                isDarkMode
-                  ? 'bg-teal-600 hover:bg-teal-700 text-white'
-                  : 'bg-emerald-500 hover:bg-emerald-600 text-white'
-              } ${isRunning ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              <Play size={20} className="mr-2" />
-              {isRunning ? 'Running...' : 'Run Code'}
-            </button>
-          </div>
-
-          <div>
-            <h2 className="text-xl font-semibold mb-2">Output:</h2>
-            <pre
-              className={`p-4 rounded-lg h-[calc(100vh-12rem)] overflow-auto ${
-                isDarkMode ? 'bg-gray-800' : 'bg-white border border-gray-300'
-              }`}
-            >
+              <h2 className="text-xl font-semibold mb-2">Output:</h2>
+              <pre
+                  className={`p-4 rounded-lg h-[calc(100vh-12rem)] overflow-auto ${
+                      isDarkMode ? 'bg-gray-800' : 'bg-white border border-gray-300'
+                  }`}
+              >
               {output}
             </pre>
+            </div>
           </div>
         </div>
-      </div>
-  
-      {/* Save Code Template Dialog */}
-      <SaveCodeTemplate
-        code={code}
-        language={language}
-        isOpen={isDialogOpen}
-        onClose={() => setIsDialogOpen(false)}
-        onSwitchToLogin={() => setIsLoginModalOpen(true)}
-      />
-      {/* Login Modal */}
-      <LoginModal
-          isOpen={isLoginModalOpen}
-          onClose={() => setIsLoginModalOpen(false)}
-          onSwitchToSignup={() => {
-            setIsLoginModalOpen(false);
-            setIsSignupModalOpen(true);
-          }}
-          isDarkMode={isDarkMode}
-      />
-      <SignupModal
-          isOpen={isSignupModalOpen}
-          onClose={() => setIsSignupModalOpen(false)}
-          onSwitchToLogin={() => {
+
+        {/* Modals */}
+        <SaveCodeTemplate
+            code={code}
+            language={language}
+            isOpen={isDialogOpen}
+            onClose={() => setIsDialogOpen(false)}
+            onSwitchToLogin={() => setIsLoginModalOpen(true)}
+        />
+        <LoginModal
+            isOpen={isLoginModalOpen}
+            onClose={() => setIsLoginModalOpen(false)}
+            onSwitchToSignup={() => {
               setIsLoginModalOpen(false);
               setIsSignupModalOpen(true);
-          }}
-          isDarkMode={isDarkMode}
-      />
-    </div>
+            }}
+            isDarkMode={isDarkMode}
+        />
+        <SignupModal
+            isOpen={isSignupModalOpen}
+            onClose={() => setIsSignupModalOpen(false)}
+            onSwitchToLogin={() => {
+              setIsLoginModalOpen(false);
+              setIsSignupModalOpen(true);
+            }}
+            isDarkMode={isDarkMode}
+        />
+      </div>
   );
 }
