@@ -21,8 +21,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         try {
             const response = await fetch('/api/auth/refresh', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ refreshToken })
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${refreshToken}`
+                },
             });
 
             if (response.ok) {
@@ -68,6 +70,39 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     }, [refreshAccessToken, handleLogout]);
 
+    // Add periodic refresh effect
+    useEffect(() => {
+        let intervalId: NodeJS.Timeout;
+
+        const performPeriodicRefresh = async () => {
+            const refreshToken = localStorage.getItem('refreshToken');
+            if (refreshToken) {
+                console.log('Performing periodic token refresh');
+                const newAccessToken = await refreshAccessToken(refreshToken);
+                if (!newAccessToken) {
+                    console.log('Token refresh failed, logging out');
+                    handleLogout();
+                }
+            }
+        };
+
+        // Only start interval if we have a user logged in
+        if (user) {
+            // Set up 10-minute interval (600000 ms)
+            intervalId = setInterval(performPeriodicRefresh, 600000);
+
+            // Perform initial refresh
+            performPeriodicRefresh();
+        }
+
+        // Cleanup on unmount or when user changes
+        return () => {
+            if (intervalId) {
+                clearInterval(intervalId);
+            }
+        };
+    }, [user, refreshAccessToken, handleLogout]);
+
     useEffect(() => {
         const initAuth = async () => {
             const accessToken = localStorage.getItem('accessToken');
@@ -105,19 +140,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const refetchUser = useCallback(async () => {
         const accessToken = localStorage.getItem('accessToken');
         if (accessToken) {
-        await fetchUserData(accessToken);
+            await fetchUserData(accessToken);
         }
     }, [fetchUserData]);
 
     return (
         <AuthContext.Provider value={{
-        user,
-        login,
-        logout: handleLogout,
-        loading,
-        refetchUser
+            user,
+            login,
+            logout: handleLogout,
+            loading,
+            refetchUser
         }}>
-        {children}
+            {children}
         </AuthContext.Provider>
     );
 };

@@ -24,7 +24,7 @@ async function main() {
             firstName: 'Admin',
             lastName: 'Admin',
             role: 'ADMIN',
-            avatar: 'https://example.com/avatar1.jpg',
+            avatar: 'avatars/avatar1.jpg',
             phone: '1234567890'
         }
     });
@@ -35,7 +35,7 @@ async function main() {
             password: userPassword,
             firstName: 'User',
             lastName: 'User',
-            avatar: 'https://example.com/avatar2.jpg',
+            avatar: 'avatars/avatar2.png',
             phone: '0987654321'
         }
     });
