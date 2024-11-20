@@ -137,6 +137,7 @@ export async function handler(req: AuthenticatedRequest): Promise<NextResponse<B
         description: true,
         upvotes: true,
         downvotes: true,
+        createdAt: true,
         tags: {
           select: {
             id: true,
@@ -158,7 +159,21 @@ export async function handler(req: AuthenticatedRequest): Promise<NextResponse<B
             lastName: true,
           }
         },
-        createdAt: true,
+        _count: {
+          select: {
+            comments: true
+          }
+        },
+        upvotedBy: {
+          select: {
+            id: true
+          }
+        },
+        downvotedBy: {
+          select: {
+            id: true
+          }
+        },
       }
     });
 

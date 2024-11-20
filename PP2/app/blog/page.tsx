@@ -7,6 +7,7 @@ import BlogPostCard from '@/app/components/blog/BlogPostCard';
 import ReportModal from '@/app/components/blog/ReportModal';
 import { BlogPost, User, Tag, CodeTemplate } from '@prisma/client';
 import Navbar from '../components/Navbar';
+import Toast from '../components/ui/Toast';
 import { useTheme } from '../components/theme/ThemeContext';
 import { useRouter } from 'next/navigation';
 
@@ -16,6 +17,11 @@ export interface BlogPostWithRelations extends BlogPost {
   codeTemplates: (CodeTemplate & {
     author: User;
   })[];
+  upvotedBy: { id: number }[];
+  downvotedBy: { id: number }[];
+  _count: {
+    comments: number;
+  };
 }
 
 interface FetchBlogPostsResponse {
@@ -35,6 +41,7 @@ export default function BlogPage() {
   const [sorting, setSorting] = useState<'Most valued' | 'Most controversial' | null>(null);
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportTarget, setReportTarget] = useState<{ type: 'BLOG_POST' | 'COMMENT', id: number } | null>(null);
+  const [showToast, setShowToast] = useState(false);
   
   const router = useRouter();
   const { isDarkMode, toggleDarkMode } = useTheme();
@@ -103,7 +110,7 @@ export default function BlogPage() {
   const handleShare = (postId: number) => {
     const url = `${window.location.origin}/blog/${postId}`;
     navigator.clipboard.writeText(url);
-    // Add toast notification here
+    setShowToast(true);
   };
 
   const handleReport = (type: 'BLOG_POST' | 'COMMENT', id: number) => {
@@ -176,6 +183,14 @@ export default function BlogPage() {
             setShowReportModal(false);
             setReportTarget(null);
           }}
+        />
+      )}
+
+      {/* Toast */}
+      {showToast && (
+        <Toast
+          message="Link copied to clipboard!"
+          onClose={() => setShowToast(false)}
         />
       )}
     </div>

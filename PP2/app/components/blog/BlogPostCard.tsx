@@ -1,13 +1,14 @@
-import { FC } from 'react';
+import { FC, useState, useEffect } from 'react';
 import { formatDistanceToNow } from 'date-fns';
-import { ArrowBigUp, ArrowBigDown, Share2, AlertTriangle } from 'lucide-react';
+import { ArrowBigUp, ArrowBigDown, Share2, AlertTriangle, MessageCircle } from 'lucide-react';
 import { BlogPostWithRelations } from '@/app/blog/page';
 import { useTheme } from '@/app/components/theme/ThemeContext';
+import { useAuth } from '../auth/AuthContext';
 
 interface BlogPostCardProps {
   post: BlogPostWithRelations;
   viewMode: 'compact' | 'card';
-  onVote: (postId: number, type: 'UPVOTE' | 'DOWNVOTE', change: 1 | -1) => void;
+  onVote: (postId: number, type: 'UPVOTE' | 'DOWNVOTE', change: 1 | -1) => Promise<void>;
   onShare: (postId: number) => void;
   onReport: (type: 'BLOG_POST' | 'COMMENT', id: number) => void;
   onSelect?: () => void;
@@ -24,8 +25,51 @@ const BlogPostCard: FC<BlogPostCardProps> = ({
   expanded = false,
 }) => {
   const { isDarkMode } = useTheme();
+  const { user } = useAuth();
   const isCompact = viewMode === 'compact';
   const descriptionLimit = expanded ? Infinity : 200;
+  // Check if the current user has voted on this post
+  const initialVote = user ?
+    (post.upvotedBy?.some(voter => voter.id === user.id) ? 'UPVOTE' : 
+    post.downvotedBy?.some(voter => voter.id === user.id) ? 'DOWNVOTE' :
+    null) :
+  null;
+  const [userVote, setUserVote] = useState<'UPVOTE' | 'DOWNVOTE' | null>(initialVote);
+
+  useEffect(() => {
+    if (user) {
+      setUserVote(
+        post.upvotedBy?.some(voter => voter.id === user.id) ? 'UPVOTE' : 
+        post.downvotedBy?.some(voter => voter.id === user.id) ? 'DOWNVOTE' : 
+        null
+      );
+    } else {
+      setUserVote(null);
+    }
+  }, [post.id, post.upvotedBy, post.downvotedBy, user]);
+
+  const handleVote = (type: 'UPVOTE' | 'DOWNVOTE') => async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!user) return;
+
+    try {
+      if (type === userVote) {
+        // Remove vote if clicking on the same vote type
+        await onVote(post.id, type, -1);
+        setUserVote(null);
+      } else {
+        // Remove previous vote if exists
+        if (userVote) {
+          await onVote(post.id, userVote, -1);
+        }
+        // Add new vote
+        await onVote(post.id, type, 1);
+        setUserVote(type);
+      }
+    } catch (error) {
+      console.error(`[BlogPostCard.handleVote] Error: ${error}`);
+    }
+  }
 
   return (
     <div
@@ -102,31 +146,50 @@ const BlogPostCard: FC<BlogPostCardProps> = ({
 
       {/* Actions */}
       <div className="flex items-center space-x-4">
+        {/* Vote buttons */}
         <div className="flex items-center space-x-2">
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onVote(post.id, 'UPVOTE', 1);
-            }}
+            onClick={handleVote('UPVOTE')}
             className={`p-1 rounded ${
               isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'
             }`}
           >
-            <ArrowBigUp className="w-5 h-5" />
+            <ArrowBigUp 
+              className={`w-5 h-5 ${
+                userVote === 'UPVOTE' ? 'text-green-500' : ''
+              }`} 
+            />
           </button>
           <span>{post.upvotes - post.downvotes}</span>
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onVote(post.id, 'DOWNVOTE', 1);
-            }}
+            onClick={handleVote('DOWNVOTE')}
             className={`p-1 rounded ${
               isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'
             }`}
           >
-            <ArrowBigDown className="w-5 h-5" />
+            <ArrowBigDown 
+              className={`w-5 h-5 ${
+                userVote === 'DOWNVOTE' ? 'text-red-500' : ''
+              }`} 
+            />
           </button>
         </div>
+        {/* Comment button */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onSelect?.();
+          }}
+          className={`flex items-center space-x-1 ${
+            isDarkMode 
+              ? 'text-gray-400 hover:text-gray-200' 
+              : 'text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          <MessageCircle className="w-5 h-5" />
+          <span>{post._count?.comments || 0}</span>
+        </button>
+        {/* Share button */}
         <button
           onClick={(e) => {
             e.stopPropagation();
