@@ -15,7 +15,6 @@ interface CommentWithRelations extends Comment {
 interface CommentCardProps {
   comment: CommentWithRelations;
   level?: number;
-  onVote: (commentId: number, type: 'UPVOTE' | 'DOWNVOTE', change: 1 | -1) => Promise<void>;
   onReport: (type: 'COMMENT', id: number) => void;
   onReply: (commentId: number) => void;
   selectedCommentId: number | null;
@@ -28,7 +27,6 @@ interface CommentCardProps {
 const CommentCard: FC<CommentCardProps> = ({
   comment,
   level = 0,
-  onVote,
   onReport,
   onReply,
   selectedCommentId,
@@ -39,7 +37,13 @@ const CommentCard: FC<CommentCardProps> = ({
 }) => {
   const { isDarkMode } = useTheme();
   const { user } = useAuth();
-  const [userVote, setUserVote] = useState<'UPVOTE' | 'DOWNVOTE' | null>(null);
+  console.log(`[CommentCard] comment:`, comment);
+  const initialVote = user ?
+    (comment.upvotedBy?.some(voter => voter.id === user.id) ? 'UPVOTE' : 
+    comment.downvotedBy?.some(voter => voter.id === user.id) ? 'DOWNVOTE' :
+    null) :
+  null;
+  const [userVote, setUserVote] = useState<'UPVOTE' | 'DOWNVOTE' | null>(initialVote);
 
   useEffect(() => {
     if (user) {
@@ -52,6 +56,29 @@ const CommentCard: FC<CommentCardProps> = ({
       setUserVote(null);
     }
   }, [comment.id, comment.upvotedBy, comment.downvotedBy, user]);
+
+  const onVote = async (commentId: number, type: 'UPVOTE' | 'DOWNVOTE', change: 1 | -1) => {
+    if (!user) return;
+
+    try {
+      const response = await fetch('/api/comment/change-vote', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+        },
+        body: JSON.stringify({ commentId, type, change }),
+      });
+      
+      if (response.ok) {
+        const updatedComment = await response.json();
+        comment.upvotes = updatedComment.upvotes;
+        comment.downvotes = updatedComment.downvotes;
+      }
+    } catch (error) {
+      console.error('Error voting:', error);
+    }
+  };
 
   const handleVote = async (type: 'UPVOTE' | 'DOWNVOTE') => {
     if (!user) return;
@@ -189,7 +216,6 @@ const CommentCard: FC<CommentCardProps> = ({
                 key={reply.id}
                 comment={reply}
                 level={level + 1}
-                onVote={onVote}
                 onReport={onReport}
                 onReply={onReply}
                 selectedCommentId={selectedCommentId}

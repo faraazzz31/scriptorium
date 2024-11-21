@@ -175,25 +175,6 @@ const CommentSection: FC<CommentSectionProps> = ({ postId }) => {
     );
   };
 
-  const handleVote = async (commentId: number, type: 'UPVOTE' | 'DOWNVOTE', change: 1 | -1) => {
-    try {
-      const response = await fetch('/api/comment/change-vote', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-        },
-        body: JSON.stringify({ commentId, type, change }),
-      });
-      
-      if (response.ok) {
-        await fetchComments(); // Refresh comments to show updated votes
-      }
-    } catch (error) {
-      console.error('Error voting:', error);
-    }
-  };
-
   const handleSubmitComment = async (parentId?: number) => {
     if (!user || !newComment.trim()) return;
     try {
@@ -292,7 +273,6 @@ const CommentSection: FC<CommentSectionProps> = ({ postId }) => {
               <CommentCard
                 key={comment.id}
                 comment={comment}
-                onVote={handleVote}
                 onReport={(type, id) => {
                   console.log('Report:', type, id);
                 }}

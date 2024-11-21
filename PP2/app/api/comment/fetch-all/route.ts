@@ -30,6 +30,13 @@ interface CommentFetchAllResponse {
     };
     blogPostId: number | null;
     parentId: number | null;
+    upvotedBy: {
+      id: number;
+    }[];
+    downvotedBy: {
+      id: number;
+    }[];
+    createdAt: Date;
   }[];
 }
 
@@ -65,6 +72,16 @@ async function getReplies(commentId: number): Promise<Reply[]> {
       },
       blogPostId: true,
       parentId: true,
+      upvotedBy: {
+        select: {
+          id: true,
+        }
+      },
+      downvotedBy: {
+        select: {
+          id: true,
+        }
+      },
       createdAt: true,
     }
   });
@@ -136,6 +153,16 @@ export async function handler(req: AuthenticatedRequest): Promise<NextResponse<C
         },
         blogPostId: true,
         parentId: true,
+        upvotedBy: {
+          select: {
+            id: true,
+          }
+        },
+        downvotedBy: {
+          select: {
+            id: true,
+          }
+        },
         createdAt: true,
       }
     });

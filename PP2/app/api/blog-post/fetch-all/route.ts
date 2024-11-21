@@ -40,6 +40,15 @@ interface BlogPostFetchAllResponse {
       firstName: string | null;
       lastName: string | null;
     };
+    _count: {
+      comments: number;
+    };
+    upvotedBy: {
+      id: number;
+    }[];
+    downvotedBy: {
+      id: number;
+    }[];
     createdAt: Date;
   }[];
 }

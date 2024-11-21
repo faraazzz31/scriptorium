@@ -43,6 +43,7 @@ export default function BlogPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const limit = 10; // Number of posts per page
   const [loading, setLoading] = useState(false);
   const [viewMode, setViewMode] = useState<'compact' | 'card'>('card');
   const [sorting, setSorting] = useState<'Most valued' | 'Most controversial' | null>(null);
@@ -58,7 +59,7 @@ export default function BlogPage() {
     setLoading(true);
     try {
       const response = await fetch(
-        `/api/blog-post/fetch-all?page=${currentPage}&limit=10${sorting ? `&sorting=${sorting}` : ''}`
+        `/api/blog-post/fetch-all?page=${currentPage}&limit=${limit}${sorting ? `&sorting=${sorting}` : ''}`
       );
       const data: FetchBlogPostsResponse = await response.json();
       
