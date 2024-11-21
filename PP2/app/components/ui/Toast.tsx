@@ -1,14 +1,15 @@
 import { FC, useEffect, useState } from 'react';
 import { useTheme } from '../theme/ThemeContext';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, XCircle } from 'lucide-react';
 
 interface ToastProps {
   message: string;
   onClose: () => void;
   duration?: number;
+  type?: 'success' | 'error';
 }
 
-const Toast: FC<ToastProps> = ({ message, onClose, duration = 3000 }) => {
+const Toast: FC<ToastProps> = ({ message, onClose, duration = 3000, type = 'success' }) => {
   const { isDarkMode } = useTheme();
   const [isLeaving, setIsLeaving] = useState(false);
 
@@ -25,12 +26,7 @@ const Toast: FC<ToastProps> = ({ message, onClose, duration = 3000 }) => {
   }, [duration, onClose]);
 
   return (
-    <div 
-      className={`
-        fixed bottom-8 right-8 z-50
-        animate-slide-up
-      `}
-    >
+    <div className="fixed bottom-8 right-8 z-50 animate-slide-up">
       <div className={`
         min-w-[300px] px-6 py-4 rounded-lg shadow-lg
         flex items-center gap-3
@@ -41,11 +37,16 @@ const Toast: FC<ToastProps> = ({ message, onClose, duration = 3000 }) => {
           : 'bg-white text-gray-900 shadow-gray-200/50'
         }
       `}>
-        <CheckCircle className="w-6 h-6 text-green-500 flex-shrink-0" />
+        {type === 'success' ? (
+          <CheckCircle className="w-6 h-6 text-green-500 flex-shrink-0" />
+        ) : (
+          <XCircle className="w-6 h-6 text-red-500 flex-shrink-0" />
+        )}
         <p className="text-lg font-medium">{message}</p>
       </div>
     </div>
   );
 };
+
 
 export default Toast;

@@ -37,7 +37,6 @@ const CommentCard: FC<CommentCardProps> = ({
 }) => {
   const { isDarkMode } = useTheme();
   const { user } = useAuth();
-  console.log(`[CommentCard] comment:`, comment);
   const initialVote = user ?
     (comment.upvotedBy?.some(voter => voter.id === user.id) ? 'UPVOTE' : 
     comment.downvotedBy?.some(voter => voter.id === user.id) ? 'DOWNVOTE' :

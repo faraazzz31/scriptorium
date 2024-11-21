@@ -44,7 +44,6 @@ export default function BlogPage() {
   const [totalCount, setTotalCount] = useState(0);
   const limit = 10; // Number of posts per page
   const [loading, setLoading] = useState(false);
-  const [viewMode, setViewMode] = useState<'compact' | 'card'>('card');
   const [sorting, setSorting] = useState<'Most valued' | 'Most controversial' | null>(null);
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportTarget, setReportTarget] = useState<{ type: 'BLOG_POST' | 'COMMENT', id: number } | null>(null);
@@ -103,7 +102,6 @@ export default function BlogPage() {
   );
 
   const renderPagination = () => {
-    console.log(`[renderPagination] currentPage: ${currentPage}, totalPages: ${totalPages}`);
     if (totalPages <= 1) return null;
 
     const pages = [];
@@ -231,16 +229,6 @@ export default function BlogPage() {
               <option value="Most valued">Most Valued</option>
               <option value="Most controversial">Most Controversial</option>
             </select>
-            <button
-              onClick={() => setViewMode(prev => prev === 'card' ? 'compact' : 'card')}
-              className={`p-2 rounded font-semibold ${
-                isDarkMode
-                  ? 'bg-teal-600 hover:bg-teal-700 text-white'
-                  : 'bg-emerald-500 hover:bg-emerald-600 text-white'
-              }`}
-            >
-              {viewMode === 'card' ? 'Compact View' : 'Card View'}
-            </button>
           </div>
         </div>
 
@@ -259,7 +247,6 @@ export default function BlogPage() {
                   <BlogPostCard
                     key={post.id}
                     post={post}
-                    viewMode={viewMode}
                     onShare={handleShare}
                     onReport={handleReport}
                     onSelect={() => router.push(`/blog/${post.id}`)}
@@ -291,7 +278,7 @@ export default function BlogPage() {
         />
       )}
 
-      {/* Toast */}
+      {/* Share Toast */}
       {showToast && (
         <Toast
           message="Link copied to clipboard!"

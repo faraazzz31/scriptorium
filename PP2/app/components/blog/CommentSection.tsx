@@ -4,6 +4,7 @@ import type { Comment, User } from '@prisma/client';
 import { useTheme } from '../theme/ThemeContext';
 import CommentCard from './CommentCard';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import ReportModal from './ReportModal';
 
 interface CommentWithRelations extends Comment {
   author: User;
@@ -32,6 +33,8 @@ const CommentSection: FC<CommentSectionProps> = ({ postId }) => {
   const [newComment, setNewComment] = useState('');
   const [newCommentId, setNewCommentId] = useState<number | null>(null);
   const [selectedCommentId, setSelectedCommentId] = useState<number | null>(null);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportTarget, setReportTarget] = useState<{ type: 'BLOG_POST' | 'COMMENT', id: number } | null>(null);
   
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -207,6 +210,11 @@ const CommentSection: FC<CommentSectionProps> = ({ postId }) => {
     }
   };
 
+  const handleReport = (type: 'BLOG_POST' | 'COMMENT', id: number) => {
+    setReportTarget({ type, id });
+    setShowReportModal(true);
+  }
+
   useEffect(() => {
     if (newCommentId) {
       const commentElement = document.getElementById(`comment-${newCommentId}`);
@@ -216,8 +224,6 @@ const CommentSection: FC<CommentSectionProps> = ({ postId }) => {
       }
     }
   }, [comments, newCommentId]); // Depend on comments array to ensure rendering is complete
-
-  console.log(`[CommentSection] Rendering comments:`, comments);
 
   return (
     <div className="mt-6">
@@ -278,9 +284,7 @@ const CommentSection: FC<CommentSectionProps> = ({ postId }) => {
               <CommentCard
                 key={comment.id}
                 comment={comment}
-                onReport={(type, id) => {
-                  console.log('Report:', type, id);
-                }}
+                onReport={handleReport}
                 onReply={(commentId) => setSelectedCommentId(commentId)}
                 selectedCommentId={selectedCommentId}
                 onCancelReply={() => {
@@ -296,6 +300,18 @@ const CommentSection: FC<CommentSectionProps> = ({ postId }) => {
           {renderPagination()}
           {renderPageInfo()}
         </>
+      )}
+
+      {/* Report modal */}
+      {showReportModal && reportTarget && (
+        <ReportModal
+          type={reportTarget.type}
+          contentId={reportTarget.id}
+          onClose={() => {
+            setShowReportModal(false);
+            setReportTarget(null);
+          }}
+        />
       )}
     </div>
   );

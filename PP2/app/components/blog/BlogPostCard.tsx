@@ -7,7 +7,6 @@ import { useAuth } from '../auth/AuthContext';
 
 interface BlogPostCardProps {
   post: BlogPostWithRelations;
-  viewMode: 'compact' | 'card';
   onShare: (postId: number) => void;
   onReport: (type: 'BLOG_POST' | 'COMMENT', id: number) => void;
   onSelect?: () => void;
