@@ -10,6 +10,8 @@ import { BlogPostWithRelations } from '@/app/blog/page';
 import Navbar from '@/app/components/Navbar';
 import Toast from '@/app/components/ui/Toast';
 import { useTheme } from '@/app/components/theme/ThemeContext';
+import BlogPostModal from '@/app/components/blog/BlogPostModal';
+import DeleteModal from '@/app/components/blog/DeleteModal';
 
 export default function BlogPostPage() {
   const [post, setPost] = useState<BlogPostWithRelations | null>(null);
@@ -17,10 +19,21 @@ export default function BlogPostPage() {
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportTarget, setReportTarget] = useState<{ type: 'BLOG_POST' | 'COMMENT', id: number } | null>(null);
   const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState<'success' | 'error'>('success');
+  const [editingPost, setEditingPost] = useState<BlogPostWithRelations | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   const params = useParams();
   const router = useRouter();
   const { isDarkMode, toggleDarkMode } = useTheme();
+
+  const showToastMessage = (message: string, type: 'success' | 'error' = 'success') => {
+    setToastMessage(message);
+    setToastType(type);
+    setShowToast(true);
+  };
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -42,10 +55,77 @@ export default function BlogPostPage() {
     fetchPost();
   }, [params.id, router]);
 
+  const handleEditPost = async (data: { title: string; description: string; tag_ids: number[] }) => {
+    try {
+      const response = await fetch('/api/blog-post/edit', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+        },
+        body: JSON.stringify({
+          blogPostId: post?.id,
+          ...data
+        }),
+      });
+  
+      if (response.ok) {
+        // After successful edit, fetch the complete post data again
+        const postResponse = await fetch(`/api/blog-post/${params.id}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+          }
+        });
+        if (postResponse.ok) {
+          const updatedPost = await postResponse.json();
+          setPost(updatedPost);
+          setEditingPost(null);
+          showToastMessage('Post updated successfully', 'success');
+        }
+      }
+    } catch (error) {
+      console.error('Error updating post:', error);
+      showToastMessage('Error updating post', 'error');
+    }
+  };
+  
+  const handleDeletePost = async () => {
+    setIsDeleting(true);
+    try {
+      const response = await fetch('/api/blog-post/delete', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+        },
+        body: JSON.stringify({ blogPostId: post?.id }),
+      });
+  
+      if (response.ok) {
+        setShowDeleteModal(false);
+        setIsDeleting(false);
+        handleDeleteSuccess();
+      }
+    } catch (error) {
+      console.error('Error deleting post:', error);
+      setShowDeleteModal(false);
+      setIsDeleting(false);
+      showToastMessage('Error deleting post', 'error');
+    }
+  };
+
+  const handleDeleteSuccess = () => {
+    showToastMessage('Post deleted successfully', 'success');
+    // Wait for a short moment to let the user see the toast
+    setTimeout(() => {
+      router.push('/blog');
+    }, 3000);
+  };
+
   const handleShare = (postId: number) => {
     const url = `${window.location.origin}/blog/${postId}`;
     navigator.clipboard.writeText(url);
-    setShowToast(true);
+    showToastMessage('Link copied to clipboard!', 'success');
   };
 
   const handleReport = (type: 'BLOG_POST' | 'COMMENT', id: number) => {
@@ -90,10 +170,12 @@ export default function BlogPostPage() {
         
         <BlogPostCard
           post={post}
-          viewMode="card"
           onShare={handleShare}
           onReport={handleReport}
+          onEdit={setEditingPost}
+          onDelete={() => setShowDeleteModal(true)}
           expanded
+          showEditDelete={true}
         />
         
         <div className="mt-8">
@@ -116,10 +198,30 @@ export default function BlogPostPage() {
       {/* Toast */}
       {showToast && (
         <Toast
-          message="Link copied to clipboard!"
+          message={toastMessage}
           onClose={() => setShowToast(false)}
+          type={toastType}
         />
       )}
+
+      {/* Edit Modal */}
+      <BlogPostModal
+        isOpen={!!editingPost}
+        onClose={() => setEditingPost(null)}
+        onSubmit={handleEditPost}
+        initialData={post}
+        mode="edit"
+      />
+
+      {/* Delete Modal */}
+      <DeleteModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDeletePost}
+        onSuccess={handleDeleteSuccess}
+        title={post?.title || ''}
+        loading={isDeleting}
+      />
     </div>
   );
 }

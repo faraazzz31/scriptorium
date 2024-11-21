@@ -8,7 +8,9 @@ import Navbar from '../components/Navbar';
 import Toast from '../components/ui/Toast';
 import { useTheme } from '../components/theme/ThemeContext';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { useAuth } from '../components/auth/AuthContext';
+import BlogPostModal from '../components/blog/BlogPostModal';
 
 export interface BlogPostWithRelations extends BlogPost {
   author: User;
@@ -48,9 +50,13 @@ export default function BlogPage() {
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportTarget, setReportTarget] = useState<{ type: 'BLOG_POST' | 'COMMENT', id: number } | null>(null);
   const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState<'success' | 'error'>('success');
+  const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   
   const router = useRouter();
   const { isDarkMode, toggleDarkMode } = useTheme();
+  const { user } = useAuth();
 
   const fetchPosts = useCallback(async () => {    
     setLoading(true);
@@ -192,12 +198,35 @@ export default function BlogPage() {
   const handleShare = (postId: number) => {
     const url = `${window.location.origin}/blog/${postId}`;
     navigator.clipboard.writeText(url);
+    setToastMessage('Link copied to clipboard!');
+    setToastType('success');
     setShowToast(true);
   };
 
   const handleReport = (type: 'BLOG_POST' | 'COMMENT', id: number) => {
     setReportTarget({ type, id });
     setShowReportModal(true);
+  };
+
+  const handleCreatePost = async (data: { title: string; description: string; tag_ids: number[] }) => {
+    try {
+      const response = await fetch('/api/blog-post/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`
+        },
+        body: JSON.stringify(data)
+      });
+  
+      if (response.ok) {
+        await fetchPosts();
+        setToastMessage('Post created successfully!');
+        setShowToast(true);
+      }
+    } catch (error) {
+      console.error('Error creating post:', error);
+    }
   };
 
   return (
@@ -230,6 +259,19 @@ export default function BlogPage() {
               <option value="Most controversial">Most Controversial</option>
             </select>
           </div>
+          {user && (
+            <button
+              onClick={() => setIsPostModalOpen(true)}
+              className={`px-4 py-2 rounded-lg text-white flex items-center gap-2 transition-all ${
+                isDarkMode
+                  ? 'bg-teal-600 hover:bg-teal-700'
+                  : 'bg-emerald-500 hover:bg-emerald-600'
+              }`}
+            >
+              <Plus className="w-5 h-5" />
+              <span>New Post</span>
+            </button>
+          )}
         </div>
 
         {/* Posts List */}
@@ -250,6 +292,7 @@ export default function BlogPage() {
                     onShare={handleShare}
                     onReport={handleReport}
                     onSelect={() => router.push(`/blog/${post.id}`)}
+                    showEditDelete={false}
                   />
                 ))}
               </div>
@@ -281,10 +324,21 @@ export default function BlogPage() {
       {/* Share Toast */}
       {showToast && (
         <Toast
-          message="Link copied to clipboard!"
+          message={toastMessage}
           onClose={() => setShowToast(false)}
+          type={toastType}
         />
       )}
+
+      {/* Blog Post Modal for Creating New Post */}
+      <BlogPostModal
+        isOpen={isPostModalOpen}
+        onClose={() => {
+          setIsPostModalOpen(false);
+        }}
+        onSubmit={handleCreatePost}
+        mode='create'
+      />
     </div>
   );
 }

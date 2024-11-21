@@ -1,6 +1,6 @@
 import { FC, useState, useEffect } from 'react';
 import { formatDistanceToNow } from 'date-fns';
-import { ArrowBigUp, ArrowBigDown, Share2, AlertTriangle, MessageCircle } from 'lucide-react';
+import { ArrowBigUp, ArrowBigDown, Share2, AlertTriangle, MessageCircle, Pencil, Trash2 } from 'lucide-react';
 import { BlogPostWithRelations } from '@/app/blog/page';
 import { useTheme } from '@/app/components/theme/ThemeContext';
 import { useAuth } from '../auth/AuthContext';
@@ -11,6 +11,9 @@ interface BlogPostCardProps {
   onReport: (type: 'BLOG_POST' | 'COMMENT', id: number) => void;
   onSelect?: () => void;
   expanded?: boolean;
+  onEdit?: (post: BlogPostWithRelations) => void;
+  onDelete?: (postId: number) => void;
+  showEditDelete?: boolean;
 }
 
 const BlogPostCard: FC<BlogPostCardProps> = ({
@@ -19,6 +22,9 @@ const BlogPostCard: FC<BlogPostCardProps> = ({
   onReport,
   onSelect,
   expanded = false,
+  onEdit,
+  onDelete,
+  showEditDelete = false,
 }) => {
   const { isDarkMode } = useTheme();
   const { user } = useAuth();
@@ -30,6 +36,10 @@ const BlogPostCard: FC<BlogPostCardProps> = ({
     null) :
   null;
   const [userVote, setUserVote] = useState<'UPVOTE' | 'DOWNVOTE' | null>(initialVote);
+
+  console.log('Current user:', user?.id, typeof user?.id);
+  console.log('Post author:', post.author.id, typeof post.author.id);
+  console.log('Are they equal?:', user?.id === post.author.id);
 
   useEffect(() => {
     if (user) {
@@ -241,6 +251,41 @@ const BlogPostCard: FC<BlogPostCardProps> = ({
           <Share2 className="w-5 h-5" />
           <span>Share</span>
         </button>
+
+        {/* Only show edit/delete buttons if user owns the post */}
+        {showEditDelete && user?.id === post.author.id && (
+          <>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit?.(post);
+              }}
+              className={`flex items-center space-x-1 ${
+                isDarkMode 
+                  ? 'text-gray-400 hover:text-gray-200' 
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <Pencil className="w-5 h-5" />
+              <span>Edit</span>
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete?.(post.id);
+              }}
+              className={`flex items-center space-x-1 ${
+                isDarkMode 
+                  ? 'text-gray-400 hover:text-gray-200' 
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <Trash2 className="w-5 h-5" />
+              <span>Delete</span>
+            </button>
+          </>
+        )}
+
         <button
           onClick={(e) => {
             e.stopPropagation();
