@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useInView } from 'react-intersection-observer';
 import { useAuth } from '@/app/components/auth/AuthContext';
 import BlogPostCard from '@/app/components/blog/BlogPostCard';
 import ReportModal from '@/app/components/blog/ReportModal';
@@ -10,6 +9,7 @@ import Navbar from '../components/Navbar';
 import Toast from '../components/ui/Toast';
 import { useTheme } from '../components/theme/ThemeContext';
 import { useRouter } from 'next/navigation';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 export interface BlogPostWithRelations extends BlogPost {
   author: User;
@@ -31,12 +31,19 @@ interface FetchBlogPostsResponse {
   sorting: string | null;
 }
 
-// Main Component
+interface PaginationButtonProps {
+  isActive: boolean;
+  onClick: () => void;
+  disabled?: boolean;
+  children: React.ReactNode;
+}
+
 export default function BlogPage() {
   const [posts, setPosts] = useState<BlogPostWithRelations[]>([]);
-  const [page, setPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
   const [viewMode, setViewMode] = useState<'compact' | 'card'>('card');
   const [sorting, setSorting] = useState<'Most valued' | 'Most controversial' | null>(null);
   const [showReportModal, setShowReportModal] = useState(false);
@@ -46,38 +53,144 @@ export default function BlogPage() {
   const router = useRouter();
   const { isDarkMode, toggleDarkMode } = useTheme();
   const { user } = useAuth();
-  const { ref, inView } = useInView({
-    threshold: 0,
-  });
 
-  const fetchPosts = useCallback(async () => {
-    if (loading || !hasMore) return;
-    
+  const fetchPosts = useCallback(async () => {    
     setLoading(true);
     try {
       const response = await fetch(
-        `/api/blog-post/fetch-all?page=${page}&limit=10${sorting ? `&sorting=${sorting}` : ''}`
+        `/api/blog-post/fetch-all?page=${currentPage}&limit=10${sorting ? `&sorting=${sorting}` : ''}`
       );
       const data: FetchBlogPostsResponse = await response.json();
       
-      setPosts(prevPosts => {
-        if (prevPosts.length === 0) return data.data;
-        else return [...prevPosts, ...data.data];
-      });
-      setHasMore(page < data.totalPages);
-      setPage(prev => prev + 1);
+      setPosts(data.data);
+      setTotalPages(data.totalPages);
+      setTotalCount(data.totalCount);
     } catch (error) {
       console.error('Error fetching posts:', error);
     } finally {
       setLoading(false);
     }
-  }, [page, sorting, loading, hasMore]);
+  }, [currentPage, sorting]);
 
   useEffect(() => {
-    if (inView) {
-      fetchPosts();
+    setCurrentPage(1); // Reset to first page when sorting changes
+  }, [sorting]);
+
+  useEffect(() => {
+    fetchPosts();
+  }, [fetchPosts]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const PaginationButton: React.FC<PaginationButtonProps> = ({ isActive, onClick, disabled = false, children }) => (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={`px-4 py-2 text-sm font-medium rounded-md transition-colors
+        ${isActive
+          ? 'bg-blue-500 text-white hover:bg-blue-600'
+          : isDarkMode
+            ? 'text-gray-300 hover:bg-gray-800'
+            : 'text-gray-700 hover:bg-gray-100'
+        }
+        ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+      `}
+    >
+      {children}
+    </button>
+  );
+
+  const renderPagination = () => {
+    console.log(`[renderPagination] currentPage: ${currentPage}, totalPages: ${totalPages}`);
+    if (totalPages <= 1) return null;
+
+    const pages = [];
+    const showEllipsis = totalPages > 7;
+
+    if (showEllipsis) {
+      if (currentPage <= 3) {
+        for (let i = 1; i <= Math.min(3, totalPages); i++) {
+          pages.push(i);
+        }
+        if (totalPages > 4) {
+          pages.push('ellipsis');
+          pages.push(totalPages);
+        }
+      } else if (currentPage >= totalPages - 2) {
+        pages.push(1);
+        if (totalPages > 4) {
+          pages.push('ellipsis');
+        }
+        for (let i = Math.max(totalPages - 2, 2); i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        pages.push(1);
+        pages.push('ellipsis');
+        pages.push(currentPage - 1);
+        pages.push(currentPage);
+        pages.push(currentPage + 1);
+        if (currentPage + 2 < totalPages) {
+          pages.push('ellipsis');
+        }
+        pages.push(totalPages);
+      }
+    } else {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
     }
-  }, [inView, fetchPosts]);
+
+    return (
+      <div className="flex items-center justify-center gap-2 mt-8">
+        <PaginationButton
+          isActive={false}
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+        >
+          <ChevronLeft className="w-4 h-4" />
+        </PaginationButton>
+
+        {pages.map((page, index) => (
+          page === 'ellipsis' ? (
+            <span key={`ellipsis-${index}`} className="px-4 py-2">...</span>
+          ) : (
+            <PaginationButton
+              key={page}
+              isActive={currentPage === page}
+              onClick={() => handlePageChange(Number(page))}
+            >
+              {page}
+            </PaginationButton>
+          )
+        ))}
+
+        <PaginationButton
+          isActive={false}
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+        >
+          <ChevronRight className="w-4 h-4" />
+        </PaginationButton>
+      </div>
+    );
+  };
+
+  const renderPageInfo = () => {
+    if (totalCount === 0) return null;
+
+    const startItem = (currentPage - 1) * 10 + 1;
+    const endItem = Math.min(currentPage * 10, totalCount);
+
+    return (
+      <div className={`text-sm text-center mt-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+        Showing {startItem}-{endItem} of {totalCount} posts
+      </div>
+    );
+  };
 
   const handleVote = async (postId: number, type: 'UPVOTE' | 'DOWNVOTE', change: 1 | -1) => {
     if (!user) return;
@@ -152,25 +265,37 @@ export default function BlogPage() {
 
         {/* Posts List */}
         <div className="space-y-4">
-          {posts.map(post => (
-            <BlogPostCard
-              key={post.id}
-              post={post}
-              viewMode={viewMode}
-              onVote={handleVote}
-              onShare={handleShare}
-              onReport={handleReport}
-              onSelect={() => router.push(`/blog/${post.id}`)}
-            />
-          ))}
-          {loading && (
+          {loading ? (
             <div className="flex justify-center p-4">
               <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${
                 isDarkMode ? 'border-white' : 'border-gray-900'
               }`} />
             </div>
+          ) : posts.length > 0 ? (
+            <>
+              <div className="space-y-4">
+                {posts.map(post => (
+                  <BlogPostCard
+                    key={post.id}
+                    post={post}
+                    viewMode={viewMode}
+                    onVote={handleVote}
+                    onShare={handleShare}
+                    onReport={handleReport}
+                    onSelect={() => router.push(`/blog/${post.id}`)}
+                  />
+                ))}
+              </div>
+              {renderPagination()}
+              {renderPageInfo()}
+            </>
+          ) : (
+            <div className="flex flex-col items-center justify-center h-64">
+              <p className={`text-lg ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                No posts found
+              </p>
+            </div>
           )}
-          <div ref={ref} />
         </div>
       </div>
 

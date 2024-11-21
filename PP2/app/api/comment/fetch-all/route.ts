@@ -37,59 +37,91 @@ interface ErrorResponse {
   error: string;
 }
 
+interface Reply {
+  id: number;
+  content: string;
+  upvotes: number;
+  downvotes: number;
+  blogPostId: number | null;
+  parentId: number | null;
+  createdAt: Date;
+}
+
+// Recursive function to get all replies
+async function getReplies(commentId: number): Promise<Reply[]> {
+  const replies = await prisma.comment.findMany({
+    where: { parentId: commentId },
+    select: {
+      id: true,
+      content: true,
+      upvotes: true,
+      downvotes: true,
+      author: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+        }
+      },
+      blogPostId: true,
+      parentId: true,
+      createdAt: true,
+    }
+  });
+
+  // Get replies for each reply recursively
+  const repliesWithChildren = await Promise.all(
+    replies.map(async (reply) => ({
+      ...reply,
+      replies: await getReplies(reply.id)
+    }))
+  );
+
+  return repliesWithChildren;
+}
+
 export async function handler(req: AuthenticatedRequest): Promise<NextResponse<CommentFetchAllResponse | ErrorResponse>> {
   const { searchParams } = new URL(req.url);
-
   const page = parseInt(searchParams.get('page') || '1');
   const limit = parseInt(searchParams.get('limit') || '10');
   const content = searchParams.get('content');
   const authorId = searchParams.get('authorId');
   const blogPostId = searchParams.get('blogPostId');
-  const parentId = searchParams.get('parentId');
   const sorting = searchParams.get('sorting');
 
-  console.log(`page: ${page}, limit: ${limit}, authorId: ${authorId}, parentId: ${parentId}, content: ${content}, sorting: ${sorting}`);
-
   try {
-    const where: Prisma.CommentWhereInput = {};
+    // Base where clause for top-level comments
+    const where: Prisma.CommentWhereInput = {
+      parentId: null, // Only fetch top-level comments for pagination
+    };
 
     if (content) {
       where.content = {
         contains: content.toLocaleLowerCase()
       };
     }
-
     if (authorId) {
       where.authorId = parseInt(authorId);
     }
-
-    // Check if both blogPostId and parentId are provided
-    if (blogPostId && parentId) {
-      return NextResponse.json({ error: 'Both blogPostId and parentId cannot be provided. A comment can only belong to either blog post or another comment, but not both' }, { status: 400 });
-    }
-
     if (blogPostId) {
       where.blogPostId = parseInt(blogPostId);
     }
 
-    if (parentId) {
-      where.parentId = parseInt(parentId);
-    }
-
-    console.log(`where: ${JSON.stringify(where)}`);
-
+    // Count total top-level comments for pagination
     const totalCount = await prisma.comment.count({
       where: where,
     });
 
-    console.log(`totalCount: ${totalCount}`);
-
     const offset = (page - 1) * limit;
 
-    let comments = await prisma.comment.findMany({
+    // Get paginated top-level comments
+    const topLevelComments = await prisma.comment.findMany({
       skip: offset,
       take: limit,
       where: where,
+      orderBy: {
+        createdAt: 'desc', // You can modify this based on your needs
+      },
       select: {
         id: true,
         content: true,
@@ -108,22 +140,35 @@ export async function handler(req: AuthenticatedRequest): Promise<NextResponse<C
       }
     });
 
+    // Add replies to each top-level comment
+    const commentsWithReplies = await Promise.all(
+      topLevelComments.map(async (comment) => ({
+        ...comment,
+        replies: await getReplies(comment.id)
+      }))
+    );
+
+    // Apply sorting if needed
+    let sortedComments = commentsWithReplies;
     if (sorting === 'Most valued') {
-      comments = comments.sort((a, b) => valueScore(b.upvotes, b.downvotes) - valueScore(a.upvotes, a.downvotes));
+      sortedComments = sortedComments.sort(
+        (a, b) => valueScore(b.upvotes, b.downvotes) - valueScore(a.upvotes, a.downvotes)
+      );
     } else if (sorting === 'Most controversial') {
-      comments = comments.sort((a, b) => controversyScore(b.upvotes, b.downvotes) - controversyScore(a.upvotes, a.downvotes));
+      sortedComments = sortedComments.sort(
+        (a, b) => controversyScore(b.upvotes, b.downvotes) - controversyScore(a.upvotes, a.downvotes)
+      );
     }
 
-    console.log(`comments after sorting: ${JSON.stringify(comments)}`);
-
-    const totalPages = Math.ceil(comments.length / limit);
+    const totalPages = Math.ceil(totalCount / limit);
 
     return NextResponse.json({
       sorting: sorting ? sorting : 'No sorting',
       totalPages: totalPages,
       totalCount: totalCount,
-      data: comments,
+      data: sortedComments,
     });
+
   } catch (error) {
     console.error(`Error in /app/api/comment/fetch-all: ${error}`);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

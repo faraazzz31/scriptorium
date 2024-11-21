@@ -123,8 +123,6 @@ export async function handler(req: AuthenticatedRequest): Promise<NextResponse<B
       where: where,
     });
 
-    console.log(`totalCount: ${totalCount}`);
-
     const offset = (page - 1) * limit;
 
     let blogPosts = await prisma.blogPost.findMany({
@@ -183,7 +181,7 @@ export async function handler(req: AuthenticatedRequest): Promise<NextResponse<B
       blogPosts = blogPosts.sort((a, b) => controversyScore(b.upvotes, b.downvotes) - controversyScore(a.upvotes, a.downvotes));
     }
 
-    const totalPages = Math.ceil(blogPosts.length / limit);
+    const totalPages = Math.ceil(totalCount / limit);
 
     return NextResponse.json({
       sorting: sorting ? sorting : 'No sorting',
