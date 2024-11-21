@@ -77,7 +77,7 @@ export default function BlogPage() {
 
   useEffect(() => {
     fetchPosts();
-  }, [fetchPosts]);
+  }, [fetchPosts, currentPage]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);

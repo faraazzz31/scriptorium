@@ -84,9 +84,6 @@ export async function handler(req: AuthenticatedRequest): Promise<NextResponse<B
   const tag_ids = tag_ids_param ? parseStringToNumberArray(tag_ids_param) : [];
   const code_template_ids = code_template_ids_param ? parseStringToNumberArray(code_template_ids_param) : [];
 
-
-  console.log(`page: ${page}, limit: ${limit}, title: ${title}, description: ${description}, tag_ids: ${tag_ids}, code_template_ids: ${code_template_ids}, sorting: ${sorting}`);
-
   try {
     const where: Prisma.BlogPostWhereInput = {};
 
@@ -126,8 +123,6 @@ export async function handler(req: AuthenticatedRequest): Promise<NextResponse<B
       }));
     }
 
-    console.log(`where: ${JSON.stringify(where)}`);
-
     const totalCount = await prisma.blogPost.count({
       where: where,
     });
@@ -135,9 +130,10 @@ export async function handler(req: AuthenticatedRequest): Promise<NextResponse<B
     const offset = (page - 1) * limit;
 
     let blogPosts = await prisma.blogPost.findMany({
-      skip: offset,
-      take: limit,
       where: where,
+      orderBy: {
+        createdAt: 'desc',
+      },
       select: {
         id: true,
         title: true,
@@ -184,11 +180,15 @@ export async function handler(req: AuthenticatedRequest): Promise<NextResponse<B
       }
     });
 
+    // Sorting
     if (sorting === 'Most valued') {
       blogPosts = blogPosts.sort((a, b) => valueScore(b.upvotes, b.downvotes) - valueScore(a.upvotes, a.downvotes));
     } else if (sorting === 'Most controversial') {
       blogPosts = blogPosts.sort((a, b) => controversyScore(b.upvotes, b.downvotes) - controversyScore(a.upvotes, a.downvotes));
     }
+
+    // Paginate
+    blogPosts = blogPosts.slice(offset, offset + limit);
 
     const totalPages = Math.ceil(totalCount / limit);
 

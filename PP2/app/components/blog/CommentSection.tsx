@@ -56,8 +56,12 @@ const CommentSection: FC<CommentSectionProps> = ({ postId }) => {
   }, [postId, sorting, currentPage]);
 
   useEffect(() => {
+    setCurrentPage(1); // Reset to first page when sorting changes
+  }, [sorting]);
+
+  useEffect(() => {
     fetchComments();
-  }, [fetchComments]);
+  }, [fetchComments, currentPage]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -217,23 +221,6 @@ const CommentSection: FC<CommentSectionProps> = ({ postId }) => {
 
   return (
     <div className="mt-6">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-xl font-semibold">Comments</h3>
-        <select
-          value={sorting || ''}
-          onChange={(e) => setSorting(e.target.value as typeof sorting)}
-          className={`rounded-md px-3 py-2 border ${
-            isDarkMode 
-              ? 'bg-gray-800 border-gray-700' 
-              : 'bg-white border-gray-300'
-          }`}
-        >
-          <option value="">Latest</option>
-          <option value="Most valued">Most Valued</option>
-          <option value="Most controversial">Most Controversial</option>
-        </select>
-      </div>
-
       {/* New comment input */}
       {user && (
         <div className="mb-6">
@@ -260,6 +247,24 @@ const CommentSection: FC<CommentSectionProps> = ({ postId }) => {
           </button>
         </div>
       )}
+
+      {/* Comments sorting dropdown */}
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-xl font-semibold">Comments</h3>
+        <select
+          value={sorting || ''}
+          onChange={(e) => setSorting(e.target.value as typeof sorting)}
+          className={`rounded-md px-3 py-2 border ${
+            isDarkMode 
+              ? 'bg-gray-800 border-gray-700' 
+              : 'bg-white border-gray-300'
+          }`}
+        >
+          <option value="">Latest</option>
+          <option value="Most valued">Most Valued</option>
+          <option value="Most controversial">Most Controversial</option>
+        </select>
+      </div>
 
       {/* Comments list */}
       {loading ? (

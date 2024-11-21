@@ -169,7 +169,7 @@ const BlogPostCard: FC<BlogPostCardProps> = ({
       )}
 
       {/* Actions */}
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center space-x-6">
         {/* Vote buttons */}
         <div className="flex items-center space-x-3">
           <div className="flex items-center space-x-1">

@@ -132,12 +132,10 @@ export async function handler(req: AuthenticatedRequest): Promise<NextResponse<C
     const offset = (page - 1) * limit;
 
     // Get paginated top-level comments
-    const topLevelComments = await prisma.comment.findMany({
-      skip: offset,
-      take: limit,
+    let comments = await prisma.comment.findMany({
       where: where,
       orderBy: {
-        createdAt: 'desc', // You can modify this based on your needs
+        createdAt: 'desc',
       },
       select: {
         id: true,
@@ -167,25 +165,28 @@ export async function handler(req: AuthenticatedRequest): Promise<NextResponse<C
       }
     });
 
+    // Sorting
+    if (sorting === 'Most valued') {
+      comments = comments.sort(
+        (a, b) => valueScore(b.upvotes, b.downvotes) - valueScore(a.upvotes, a.downvotes)
+      );
+    } else if (sorting === 'Most controversial') {
+      comments = comments.sort(
+        (a, b) => controversyScore(b.upvotes, b.downvotes) - controversyScore(a.upvotes, a.downvotes)
+      );
+    } else {
+    }
+
+    // Paginate
+    comments = comments.slice(offset, offset + limit);
+
     // Add replies to each top-level comment
-    const commentsWithReplies = await Promise.all(
-      topLevelComments.map(async (comment) => ({
+    const sortedCommentsWithReplies = await Promise.all(
+      comments.map(async (comment) => ({
         ...comment,
         replies: await getReplies(comment.id)
       }))
     );
-
-    // Apply sorting if needed
-    let sortedComments = commentsWithReplies;
-    if (sorting === 'Most valued') {
-      sortedComments = sortedComments.sort(
-        (a, b) => valueScore(b.upvotes, b.downvotes) - valueScore(a.upvotes, a.downvotes)
-      );
-    } else if (sorting === 'Most controversial') {
-      sortedComments = sortedComments.sort(
-        (a, b) => controversyScore(b.upvotes, b.downvotes) - controversyScore(a.upvotes, a.downvotes)
-      );
-    }
 
     const totalPages = Math.ceil(totalCount / limit);
 
@@ -193,7 +194,7 @@ export async function handler(req: AuthenticatedRequest): Promise<NextResponse<C
       sorting: sorting ? sorting : 'No sorting',
       totalPages: totalPages,
       totalCount: totalCount,
-      data: sortedComments,
+      data: sortedCommentsWithReplies,
     });
 
   } catch (error) {
