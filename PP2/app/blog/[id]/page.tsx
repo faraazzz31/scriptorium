@@ -42,28 +42,6 @@ export default function BlogPostPage() {
     fetchPost();
   }, [params.id, router]);
 
-  const handleVote = async (postId: number, type: 'UPVOTE' | 'DOWNVOTE', change: 1 | -1) => {
-    try {
-      const response = await fetch('/api/blog-post/change-vote', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-        },
-        body: JSON.stringify({ blogPostId: postId, type, change }),
-      });
-      
-      if (response.ok) {
-        const updatedPost = await response.json();
-        setPost(prev => 
-          prev ? { ...prev, upvotes: updatedPost.upvotes, downvotes: updatedPost.downvotes } : null
-        );
-      }
-    } catch (error) {
-      console.error('Error voting:', error);
-    }
-  };
-
   const handleShare = (postId: number) => {
     const url = `${window.location.origin}/blog/${postId}`;
     navigator.clipboard.writeText(url);
@@ -113,7 +91,6 @@ export default function BlogPostPage() {
         <BlogPostCard
           post={post}
           viewMode="card"
-          onVote={handleVote}
           onShare={handleShare}
           onReport={handleReport}
           expanded

@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '@/app/components/auth/AuthContext';
 import BlogPostCard from '@/app/components/blog/BlogPostCard';
 import ReportModal from '@/app/components/blog/ReportModal';
 import { BlogPost, User, Tag, CodeTemplate } from '@prisma/client';
@@ -53,7 +52,6 @@ export default function BlogPage() {
   
   const router = useRouter();
   const { isDarkMode, toggleDarkMode } = useTheme();
-  const { user } = useAuth();
 
   const fetchPosts = useCallback(async () => {    
     setLoading(true);
@@ -193,34 +191,6 @@ export default function BlogPage() {
     );
   };
 
-  const handleVote = async (postId: number, type: 'UPVOTE' | 'DOWNVOTE', change: 1 | -1) => {
-    if (!user) return;
-    
-    try {
-      const response = await fetch('/api/blog-post/change-vote', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-        },
-        body: JSON.stringify({ blogPostId: postId, type, change }),
-      });
-      
-      if (response.ok) {
-        const updatedPost = await response.json();
-        setPosts(prevPosts =>
-          prevPosts.map(post =>
-            post.id === postId
-              ? { ...post, upvotes: updatedPost.upvotes, downvotes: updatedPost.downvotes }
-              : post
-          )
-        );
-      }
-    } catch (error) {
-      console.error('Error voting:', error);
-    }
-  };
-
   const handleShare = (postId: number) => {
     const url = `${window.location.origin}/blog/${postId}`;
     navigator.clipboard.writeText(url);
@@ -280,7 +250,6 @@ export default function BlogPage() {
                     key={post.id}
                     post={post}
                     viewMode={viewMode}
-                    onVote={handleVote}
                     onShare={handleShare}
                     onReport={handleReport}
                     onSelect={() => router.push(`/blog/${post.id}`)}

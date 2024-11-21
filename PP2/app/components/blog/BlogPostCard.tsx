@@ -8,7 +8,6 @@ import { useAuth } from '../auth/AuthContext';
 interface BlogPostCardProps {
   post: BlogPostWithRelations;
   viewMode: 'compact' | 'card';
-  onVote: (postId: number, type: 'UPVOTE' | 'DOWNVOTE', change: 1 | -1) => Promise<void>;
   onShare: (postId: number) => void;
   onReport: (type: 'BLOG_POST' | 'COMMENT', id: number) => void;
   onSelect?: () => void;
@@ -17,7 +16,6 @@ interface BlogPostCardProps {
 
 const BlogPostCard: FC<BlogPostCardProps> = ({
   post,
-  onVote,
   onShare,
   onReport,
   onSelect,
@@ -45,6 +43,29 @@ const BlogPostCard: FC<BlogPostCardProps> = ({
       setUserVote(null);
     }
   }, [post.id, post.upvotedBy, post.downvotedBy, user]);
+
+  const onVote = async (postId: number, type: 'UPVOTE' | 'DOWNVOTE', change: 1 | -1) => {
+    if (!user) return;
+    
+    try {
+      const response = await fetch('/api/blog-post/change-vote', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+        },
+        body: JSON.stringify({ blogPostId: postId, type, change }),
+      });
+      
+      if (response.ok) {
+        const updatedPost = await response.json();
+        post.upvotes = updatedPost.upvotes;
+        post.downvotes = updatedPost.downvotes;
+      }
+    } catch (error) {
+      console.error('Error voting:', error);
+    }
+  };
 
   const handleVote = (type: 'UPVOTE' | 'DOWNVOTE') => async (e: React.MouseEvent) => {
     e.stopPropagation();
