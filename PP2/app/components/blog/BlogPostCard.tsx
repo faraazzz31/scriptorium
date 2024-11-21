@@ -171,32 +171,46 @@ const BlogPostCard: FC<BlogPostCardProps> = ({
       {/* Actions */}
       <div className="flex items-center space-x-4">
         {/* Vote buttons */}
-        <div className="flex items-center space-x-2">
-          <button
-            onClick={handleVote('UPVOTE')}
-            className={`p-1 rounded ${
-              isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'
-            }`}
-          >
-            <ArrowBigUp 
-              className={`w-5 h-5 ${
-                userVote === 'UPVOTE' ? 'text-green-500' : ''
-              }`} 
-            />
-          </button>
-          <span>{post.upvotes - post.downvotes}</span>
-          <button
-            onClick={handleVote('DOWNVOTE')}
-            className={`p-1 rounded ${
-              isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'
-            }`}
-          >
-            <ArrowBigDown 
-              className={`w-5 h-5 ${
-                userVote === 'DOWNVOTE' ? 'text-red-500' : ''
-              }`} 
-            />
-          </button>
+        <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-1">
+            <button
+              onClick={handleVote('UPVOTE')}
+              className={`p-1 rounded ${
+                isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'
+              }`}
+            >
+              <ArrowBigUp
+                className={`w-5 h-5 ${
+                  userVote === 'UPVOTE' ? 'text-green-500' : ''
+                }`}
+              />
+            </button>
+            <span className={`text-sm font-medium ${
+              isDarkMode ? 'text-green-400' : 'text-green-600'
+            }`}>
+              {post.upvotes}
+            </span>
+          </div>
+
+          <div className="flex items-center space-x-1">
+            <button
+              onClick={handleVote('DOWNVOTE')}
+              className={`p-1 rounded ${
+                isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'
+              }`}
+            >
+              <ArrowBigDown
+                className={`w-5 h-5 ${
+                  userVote === 'DOWNVOTE' ? 'text-red-500' : ''
+                }`}
+              />
+            </button>
+            <span className={`text-sm font-medium ${
+              isDarkMode ? 'text-red-400' : 'text-red-600'
+            }`}>
+              {post.downvotes}
+            </span>
+          </div>
         </div>
         {/* Comment button */}
         <button
