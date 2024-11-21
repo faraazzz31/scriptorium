@@ -207,6 +207,16 @@ export default function BlogPage() {
       <Navbar isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
 
       <div className="container mx-auto p-4">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className={`text-3xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            Blog Posts
+          </h1>
+          <p className={`text-lg ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+            Share code and ideas: get feedback, votes, and comments
+          </p>
+        </div>
+
         {/* Controls */}
         <div className="flex justify-between items-center mb-6">
           <div className="flex space-x-4">
