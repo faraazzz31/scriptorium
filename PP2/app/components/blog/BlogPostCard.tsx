@@ -17,7 +17,6 @@ interface BlogPostCardProps {
 
 const BlogPostCard: FC<BlogPostCardProps> = ({
   post,
-  viewMode,
   onVote,
   onShare,
   onReport,
@@ -26,7 +25,6 @@ const BlogPostCard: FC<BlogPostCardProps> = ({
 }) => {
   const { isDarkMode } = useTheme();
   const { user } = useAuth();
-  const isCompact = viewMode === 'compact';
   const descriptionLimit = expanded ? Infinity : 200;
   // Check if the current user has voted on this post
   const initialVote = user ?
@@ -73,9 +71,14 @@ const BlogPostCard: FC<BlogPostCardProps> = ({
 
   return (
     <div
-      className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-sm ${
-        isCompact ? 'p-3' : 'p-6'
-      }`}
+      className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'}
+        rounded-lg shadow-sm
+        p-6
+        cursor-pointer
+        hover:shadow-lg
+        hover:scale-[1.01]
+        transition-all
+        duration-200`}
       onClick={onSelect}
     >
       {/* Header */}

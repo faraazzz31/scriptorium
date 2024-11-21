@@ -8,6 +8,7 @@ import CommentSection from '@/app/components/blog/CommentSection';
 import ReportModal from '@/app/components/blog/ReportModal';
 import { BlogPostWithRelations } from '@/app/blog/page';
 import Navbar from '@/app/components/Navbar';
+import Toast from '@/app/components/ui/Toast';
 import { useTheme } from '@/app/components/theme/ThemeContext';
 
 export default function BlogPostPage() {
@@ -15,6 +16,7 @@ export default function BlogPostPage() {
   const [loading, setLoading] = useState(true);
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportTarget, setReportTarget] = useState<{ type: 'BLOG_POST' | 'COMMENT', id: number } | null>(null);
+  const [showToast, setShowToast] = useState(false);
   
   const params = useParams();
   const router = useRouter();
@@ -65,7 +67,7 @@ export default function BlogPostPage() {
   const handleShare = (postId: number) => {
     const url = `${window.location.origin}/blog/${postId}`;
     navigator.clipboard.writeText(url);
-    // Add toast notification here
+    setShowToast(true);
   };
 
   const handleReport = (type: 'BLOG_POST' | 'COMMENT', id: number) => {
@@ -95,6 +97,7 @@ export default function BlogPostPage() {
   return (
     <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'}`}>
       <Navbar isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
+      {/* Main Content (Blog Post & Comments)*/}
       <div className="container mx-auto p-4">
         <button
           onClick={() => router.back()}
@@ -121,6 +124,7 @@ export default function BlogPostPage() {
         </div>
       </div>
 
+      {/* Report Modal */}
       {showReportModal && reportTarget && (
         <ReportModal
           type={reportTarget.type}
@@ -129,6 +133,14 @@ export default function BlogPostPage() {
             setShowReportModal(false);
             setReportTarget(null);
           }}
+        />
+      )}
+
+      {/* Toast */}
+      {showToast && (
+        <Toast
+          message="Link copied to clipboard!"
+          onClose={() => setShowToast(false)}
         />
       )}
     </div>

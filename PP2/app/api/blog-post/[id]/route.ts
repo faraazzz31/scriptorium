@@ -77,7 +77,22 @@ export async function GET(
             createdAt: 'desc'
           },
           take: 10, // Limit initial comments load
-        }
+        },
+        _count: {
+          select: {
+            comments: true
+          }
+        },
+        upvotedBy: {
+          select: {
+            id: true
+          }
+        },
+        downvotedBy: {
+          select: {
+            id: true
+          }
+        },
       }
     });
 
