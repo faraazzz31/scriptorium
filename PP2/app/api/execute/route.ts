@@ -425,13 +425,46 @@ async function executeCommand(
         stream.end();
     }
 
-    const output = await streamToString(stream);
-    const { ExitCode } = await exec.inspect();
+    // Create a timeout promise
+    const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => {
+            reject(new Error('Execution timeout'));
+        }, 10000); // 10 second timeout
+    });
 
-    return {
-        success: ExitCode === 0,
-        output: output.replace(/[\x00-\x09\x0B-\x1F\x7F-\x9F]/g, '').trim()
-    };
+    try {
+        // Race between stream reading and timeout
+        const output = await Promise.race([
+            streamToString(stream),
+            timeoutPromise
+        ]);
+
+        const { ExitCode } = await exec.inspect();
+
+        // If we get here, the command completed successfully
+        return {
+            success: ExitCode === 0,
+            output: output.replace(/[\x00-\x09\x0B-\x1F\x7F-\x9F]/g, '').trim()
+        };
+    } catch (error) {
+        if ((error as Error).message === 'Execution timeout') {
+            // Kill the running process if it timed out
+            try {
+                const killExec = await container.exec({
+                    Cmd: ['pkill', '-9', '-f', command],
+                    AttachStdout: true,
+                    AttachStderr: true
+                });
+                // @ts-ignore
+                await killExec.start();
+            } catch (killError) {
+                console.error('Error killing process:', killError);
+            }
+
+            throw new Error('Code execution timed out (possible infinite loop detected)');
+        }
+        throw error;
+    }
 }
 
 export async function POST(req: NextRequest): Promise<NextResponse<CodeResponse>> {
@@ -439,6 +472,8 @@ export async function POST(req: NextRequest): Promise<NextResponse<CodeResponse>
     if (!containerPool.initialized) {
         await containerPool.initialize();
     }
+
+    let containerInfo: ContainerInfo | null = null;
 
     try {
         const { language, code, input }: CodeRequest = await req.json();
@@ -450,7 +485,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<CodeResponse>
             );
         }
 
-        const containerInfo = await containerPool.getContainer(language);
+        containerInfo = await containerPool.getContainer(language);
         if (!containerInfo) {
             return NextResponse.json(
                 { error: 'No available containers' },
@@ -458,52 +493,66 @@ export async function POST(req: NextRequest): Promise<NextResponse<CodeResponse>
             );
         }
 
-        try {
-            const config = LANGUAGE_CONFIG[language];
-            const randomId = crypto.randomBytes(4).toString('hex');
-            const filename = config.getFilename
-                ? config.getFilename(randomId)
-                : `main${randomId}.${config.extension}`;
+        const config = LANGUAGE_CONFIG[language];
+        const randomId = crypto.randomBytes(4).toString('hex');
+        const filename = config.getFilename
+            ? config.getFilename(randomId)
+            : `main${randomId}.${config.extension}`;
 
-            const processedCode = config.processCode
-                ? config.processCode(code, filename)
-                : code;
+        const processedCode = config.processCode
+            ? config.processCode(code, filename)
+            : code;
 
-            // Create and upload code file
-            const tarBuffer = await createCodeTar(processedCode, filename);
-            await containerInfo.container.putArchive(tarBuffer, { path: '/app/workspace' });
+        // Create and upload code file
+        const tarBuffer = await createCodeTar(processedCode, filename);
+        await containerInfo.container.putArchive(tarBuffer, { path: '/app/workspace' });
 
-            // Compile if needed
-            if (config.compile && config.compileCommand) {
-                const { success: compileSuccess, output: compileOutput } = await executeCommand(
-                    containerInfo.container,
-                    config.compileCommand(filename)
-                );
+        // Compile if needed
+        if (config.compile && config.compileCommand) {
+            const { success: compileSuccess, output: compileOutput } = await executeCommand(
+                containerInfo.container,
+                config.compileCommand(filename)
+            );
 
-                if (!compileSuccess) {
-                    throw new Error(`Compilation failed: ${compileOutput}`);
-                }
+            if (!compileSuccess) {
+                throw new Error(`Compilation failed: ${compileOutput}`);
             }
+        }
 
-            // Run the code
+        try {
+            // Run the code with built-in timeout handling
             const { output: runOutput } = await executeCommand(
                 containerInfo.container,
-                `timeout 10s ${config.runCommand(filename)}`,
+                config.runCommand(filename),
                 input
             );
 
-            // Clean up workspace
-            await executeCommand(containerInfo.container, 'rm -rf /app/workspace/*');
-
-            return NextResponse.json({ output: runOutput.replace(/[\x00-\x09\x0B-\x1F\x7F-\x9F]/g, '').trim() });
+            return NextResponse.json({ output: runOutput });
         } finally {
-            containerPool.releaseContainer(containerInfo);
+            // Clean up workspace regardless of execution outcome
+            try {
+                await executeCommand(containerInfo.container, 'rm -rf /app/workspace/*');
+            } catch (cleanupError) {
+                console.error('Cleanup error:', cleanupError);
+            }
         }
     } catch (error) {
-        console.error('Execution error:', error);
+        const errorMessage = (error as Error).message;
+        const statusCode = errorMessage.includes('timeout') ? 408 : 400;
+
         return NextResponse.json(
-            { error: `Execution error: ${(error as Error).message}` },
-            { status: 400 }
+            { error: `Execution error: ${errorMessage}` },
+            { status: statusCode }
         );
+    } finally {
+        if (containerInfo) {
+            try {
+                // Ensure we kill any hanging processes before releasing the container
+                await executeCommand(containerInfo.container, 'pkill -9 -f main');
+                containerPool.releaseContainer(containerInfo);
+            } catch (error) {
+                console.error('Error in cleanup:', error);
+            }
+        }
     }
 }

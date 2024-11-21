@@ -4,6 +4,7 @@ import { Search, Code2, GitFork, Tag, ChevronLeft, ChevronRight } from 'lucide-r
 import { useAuth } from '@/app/components/auth/AuthContext';
 import { useTheme } from '@/app/components/theme/ThemeContext';
 import debounce from 'lodash/debounce';
+import { kebabCase } from 'lodash';
 
 interface CodeTemplate {
     id: number;
@@ -148,7 +149,27 @@ const CodeTemplatesList = () => {
         {
             key: 'cpp',
             name: 'C++',
-        }
+        },
+        {
+            key: 'php',
+            name: 'PHP',
+        },
+        {
+            key: 'go',
+            name: 'Go',
+        },
+        {
+            key: 'typescript',
+            name: 'TypeScript',
+        },
+        {
+            key: 'ruby',
+            name: 'Ruby',
+        },
+        {
+            key: 'kotlin',
+            name: 'Kotlin',
+        },
     ]
 
     const updateUrlParams = useCallback((

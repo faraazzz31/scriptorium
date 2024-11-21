@@ -7,6 +7,7 @@ import { FilterButtons } from '@/app/components/reports/FilterButtons';
 import { ReportCard } from '@/app/components/reports/ReportCard';
 import { ContentModal } from '@/app/components/reports/ContentModal';
 import Pagination from '@/app/components/reports/Pagination';
+import { useAuth } from '@/app/components/auth/AuthContext';
 
 export interface AuthorInfo {
     id: number;
@@ -69,25 +70,7 @@ export default function ReportsPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
 
-    const refreshAccessToken = async (refreshToken: string) => {
-        try {
-            const response = await fetch('/api/auth/refresh', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ refreshToken })
-            });
-
-            if (response.ok) {
-                const { accessToken } = await response.json();
-                localStorage.setItem('accessToken', accessToken);
-                return accessToken;
-            }
-            return null;
-        } catch (error) {
-            console.error('Error refreshing token:', error);
-            return null;
-        }
-    };
+    const { refetchUser } = useAuth();
 
     const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
         const accessToken = localStorage.getItem('accessToken');
@@ -106,20 +89,23 @@ export default function ReportsPage() {
             });
 
             if (response.status === 401) {
-                const refreshToken = localStorage.getItem('refreshToken');
-                if (refreshToken) {
-                    const newAccessToken = await refreshAccessToken(refreshToken);
-                    if (newAccessToken) {
-                        const retryResponse = await fetch(url, {
-                            ...options,
-                            headers: {
-                                ...defaultHeaders,
-                                'Authorization': `Bearer ${newAccessToken}`,
-                                ...options.headers
-                            }
-                        });
-                        return retryResponse;
-                    }
+
+                await refetchUser();
+
+                // Get the new token after refresh
+                const newAccessToken = localStorage.getItem('accessToken');
+
+                // If we still have a token, retry the request
+                if (newAccessToken) {
+                    const retryResponse = await fetch(url, {
+                        ...options,
+                        headers: {
+                            ...defaultHeaders,
+                            'Authorization': `Bearer ${newAccessToken}`,
+                            ...options.headers
+                        }
+                    });
+                    return retryResponse;
                 }
                 throw new Error('Authentication failed');
             }

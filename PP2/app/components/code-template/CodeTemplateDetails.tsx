@@ -33,6 +33,11 @@ interface KeyDownEvent extends React.KeyboardEvent {
     key: string;
 }
 
+interface ExecuteResponse {
+    output?: string;
+    error?: string;
+}
+
 const CodeTemplateDetails = ({ templateId }: CodeTemplateDetailsProps) => {
     const [template, setTemplate] = useState<Template | null>(null);
     const [isEditing, setIsEditing] = useState(false);
@@ -98,39 +103,31 @@ const CodeTemplateDetails = ({ templateId }: CodeTemplateDetailsProps) => {
     const runCode = async (): Promise<void> => {
         setOutput('Running...');
         setIsRunning(true);
-    
+
         try {
-            const apiEndpoint: string = `/api/run-${template?.language.toLowerCase()}`; // Ensure lowercase
-            const response: Response = await fetch(apiEndpoint, {
+            const language = template?.language;
+            const code = isEditing ? editedCode : template?.code;
+
+            const response = await fetch('/api/execute', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    code: isEditing ? editedCode : template?.code,
-                    input: input.trim() // Trim input to remove extra whitespace
+                    language,
+                    code,
+                    input
                 }),
             });
-    
-            const data = await response.json();
-    
+
+            const data: ExecuteResponse = await response.json();
+
             if (response.ok) {
-                // Handle successful execution
-                if (data.output !== undefined) {
-                    setOutput(data.output);
-                } else if (data.error) {
-                    // Handle runtime errors
-                    setOutput(`Runtime Error:\n${data.error}`);
-                } else {
-                    setOutput('Program executed successfully with no output.');
-                }
+                setOutput(data.output || 'No output');
             } else {
-                // Handle API errors
-                const errorMessage = data.error || data.message || 'An error occurred while running the code';
-                setOutput(`Error: ${errorMessage}`);
+                setOutput(data.error || `Error: ${response.status} ${response.statusText}`);
             }
         } catch (error: any) {
-            // Handle network or parsing errors
             console.error('Error in runCode:', error);
-            setOutput(`Error executing code: ${error.message || 'Unknown error occurred'}`);
+            setOutput(`Error: ${error.message}`);
         } finally {
             setIsRunning(false);
         }

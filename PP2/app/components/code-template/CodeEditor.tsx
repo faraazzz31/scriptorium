@@ -4,6 +4,8 @@ import { python } from '@codemirror/lang-python';
 import { javascript } from '@codemirror/lang-javascript';
 import { java } from '@codemirror/lang-java';
 import { cpp } from '@codemirror/lang-cpp';
+import { php } from '@codemirror/lang-php';
+import { go } from '@codemirror/lang-go';
 import { oneDark } from '@codemirror/theme-one-dark';
 
 interface KeyDownEvent extends React.KeyboardEvent {
@@ -39,13 +41,15 @@ export const CodeEditor = ({
     onRun,
     onKeyDown
 }: CodeEditorProps) => {
-    const getLanguageMode = (language: string) => {
+    const getLanguageMode = () => {
         switch (language) {
             case 'python': return python();
             case 'javascript': return javascript();
             case 'java': return java();
             case 'c':
             case 'cpp': return cpp();
+            case 'php': return php();
+            case 'go': return go();
             default: return javascript();
         }
     };
@@ -117,7 +121,7 @@ export const CodeEditor = ({
                     value={code}
                     height="400px"
                     theme={isDarkMode ? oneDark : undefined}
-                    extensions={[getLanguageMode(language)]}
+                    extensions={[getLanguageMode()]}
                     editable={isEditing}
                     onChange={onCodeChange}
                     onKeyDown={onKeyDown}
