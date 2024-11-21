@@ -170,196 +170,492 @@ async function main() {
         prisma.tag.create({ data: { name: 'object-oriented' } })
     ]);
 
-    // Code template data with correct language keys and distributed among users
+    // Creating code templates
     const codeTemplates = [
+        // Python code templates
         {
-            title: 'Python List Comprehension',
-            code: 'numbers = [1, 2, 3, 4, 5]\nsquares = [x**2 for x in numbers]',
-            language: 'python',
-            explanation: 'Creating a new list using Python list comprehension.',
-            authorId: users[1].id,  // Sarah
-            tags: [tags[2]] // arrays
-        },
-        {
-            title: 'JavaScript Arrow Function',
-            code: 'const add = (a, b) => a + b;',
-            language: 'javascript',
-            explanation: 'Modern JavaScript arrow function syntax.',
-            authorId: users[2].id,  // Mike
-            tags: [tags[3]] // functions
-        },
-         // Python Templates
-        {
-            title: 'Python List Comprehension',
-            code: 'numbers = [1, 2, 3, 4, 5]\nsquares = [x**2 for x in numbers]',
-            language: 'python',
-            explanation: 'Creating a new list using Python list comprehension.',
-            authorId: users[1].id,
-            tags: [tags[2]] // arrays
-        },
-        {
-            title: 'Python Dictionary Comprehension',
-            code: 'numbers = [1, 2, 3, 4, 5]\nsquare_dict = {n: n**2 for n in numbers}',
-            language: 'python',
-            explanation: 'Creating a dictionary using dictionary comprehension.',
-            authorId: users[2].id,
-            tags: [tags[6]] // data structures
-        },
-        {
-            title: 'Python Recursive Fibonacci',
-            code: `def fibonacci(n):
-        if n <= 1:
-            return n
-        return fibonacci(n-1) + fibonacci(n-2)`,
-            language: 'python',
-            explanation: 'Recursive function to calculate Fibonacci numbers.',
-            authorId: users[3].id,
-            tags: [tags[8]] // recursion
-        },
-        {
-            title: 'Python Quick Sort',
-            code: `def quicksort(arr):
-        if len(arr) <= 1:
-            return arr
-        pivot = arr[len(arr) // 2]
-        left = [x for x in arr if x < pivot]
-        middle = [x for x in arr if x == pivot]
-        right = [x for x in arr if x > pivot]
-        return quicksort(left) + middle + quicksort(right)`,
-            language: 'python',
-            explanation: 'Implementation of quicksort algorithm in Python.',
-            authorId: users[4].id,
-            tags: [tags[5]] // algorithms
-        },
+            title: 'Python Number Operations',
+            code: `def number_ops(numbers):
+    """Basic number operations"""
+    total = sum(numbers)
+    average = total / len(numbers)
+    maximum = max(numbers)
+    minimum = min(numbers)
+    
+    return {
+        'total': total,
+        'average': average,
+        'maximum': maximum,
+        'minimum': minimum
+    }
 
-        // JavaScript Templates
+# Example usage
+numbers = [1, 2, 3, 4, 5]
+result = number_ops(numbers)
+print(result)`,
+            language: 'python',
+            explanation: 'Basic number operations with lists.',
+            authorId: users[1].id,  // Sarah
+            tags: [tags[1]] // basics
+        },
         {
-            title: 'JavaScript Array Methods',
-            code: `const numbers = [1, 2, 3, 4, 5];
-        const doubled = numbers.map(x => x * 2);
-        const filtered = numbers.filter(x => x > 2);
-        const sum = numbers.reduce((a, b) => a + b, 0);`,
+            title: 'Python String Manipulation',
+            code: `def string_ops(text):
+    """String manipulation examples"""
+    # Basic operations
+    upper = text.upper()
+    words = text.split()
+    word_count = len(words)
+    chars = len(text)
+    
+    return {
+        'uppercase': upper,
+        'words': words,
+        'word_count': word_count,
+        'char_count': chars
+    }
+
+# Example usage
+text = "Hello Python World"
+result = string_ops(text)
+print(result)`,
+            language: 'python',
+            explanation: 'Basic string manipulation functions.',
+            authorId: users[2].id,  // Mike
+            tags: [tags[4]] // strings
+        },
+        {
+            title: 'Python Simple Calculator',
+            code: `def calculate(a, b, operation):
+    """Simple calculator"""
+    if operation == '+':
+        return a + b
+    elif operation == '-':
+        return a - b
+    elif operation == '*':
+        return a * b
+    elif operation == '/':
+        return a / b if b != 0 else "Error: Division by zero"
+
+# Test calculations
+print(calculate(10, 5, '+'))  # 15
+print(calculate(10, 5, '-'))  # 5
+print(calculate(10, 5, '*'))  # 50
+print(calculate(10, 5, '/'))  # 2.0`,
+            language: 'python',
+            explanation: 'Simple calculator with basic operations.',
+            authorId: users[3].id,  // Emma
+            tags: [tags[1]] // basics
+        },
+            // JavaScript Templates
+        {
+            title: 'JavaScript Array Operations',
+            code: `function arrayOperations(arr) {
+    // Basic array operations
+    const doubled = arr.map(x => x * 2);
+    const evens = arr.filter(x => x % 2 === 0);
+    const sum = arr.reduce((a, b) => a + b, 0);
+    
+    return {
+        original: arr,
+        doubled: doubled,
+        evens: evens,
+        sum: sum
+    };
+}
+
+// Example usage
+const numbers = [1, 2, 3, 4, 5];
+console.log(arrayOperations(numbers));`,
             language: 'javascript',
-            explanation: 'Common array methods in JavaScript: map, filter, and reduce.',
-            authorId: users[5].id,
+            explanation: 'Basic array operations using map, filter, reduce.',
+            authorId: users[4].id,  // James
             tags: [tags[2]] // arrays
         },
         {
-            title: 'JavaScript Promise Chain',
-            code: `fetch('https://api.example.com/data')
-        .then(response => response.json())
-        .then(data => console.log(data))
-        .catch(error => console.error(error));`,
+            title: 'JavaScript String Utils',
+            code: `function stringUtils(text) {
+    return {
+        uppercase: text.toUpperCase(),
+        lowercase: text.toLowerCase(),
+        length: text.length,
+        words: text.split(' '),
+        reversed: text.split('').reverse().join('')
+    };
+}
+
+// Example usage
+const text = "JavaScript is awesome";
+console.log(stringUtils(text));`,
             language: 'javascript',
-            explanation: 'Working with Promises in JavaScript.',
-            authorId: users[6].id,
-            tags: [tags[1]] // basics
+            explanation: 'Common string utility functions.',
+            authorId: users[5].id,  // Lisa
+            tags: [tags[4]] // strings
         },
         {
-            title: 'JavaScript Async/Await',
-            code: `async function fetchData() {
-            try {
-                const response = await fetch('https://api.example.com/data');
-                const data = await response.json();
-                return data;
-            } catch (error) {
-                console.error(error);
-            }
-        }`,
+            title: 'JavaScript Math Helper',
+            code: `function mathHelper(numbers) {
+    const sum = numbers.reduce((a, b) => a + b, 0);
+    const avg = sum / numbers.length;
+    const max = Math.max(...numbers);
+    const min = Math.min(...numbers);
+    
+    return { sum, avg, max, min };
+}
+
+// Example usage
+const nums = [1, 2, 3, 4, 5];
+console.log(mathHelper(nums));`,
             language: 'javascript',
-            explanation: 'Using async/await for asynchronous operations.',
-            authorId: users[7].id,
-            tags: [tags[1]] // basics
+            explanation: 'Basic math operations helper.',
+            authorId: users[6].id,  // David
+            tags: [tags[7]] // math
         },
 
         // TypeScript Templates
         {
-            title: 'TypeScript Interface',
+            title: 'TypeScript User Manager',
             code: `interface User {
-        id: number;
-        name: string;
-        email: string;
-        age?: number;
+    id: number;
+    name: string;
+    email: string;
+}
+
+class UserManager {
+    private users: User[] = [];
+
+    addUser(user: User): void {
+        this.users.push(user);
     }
 
-    const user: User = {
-        id: 1,
-        name: "John",
-        email: "john@example.com"
-    };`,
+    findUser(id: number): User | undefined {
+        return this.users.find(user => user.id === id);
+    }
+
+    listUsers(): User[] {
+        return [...this.users];
+    }
+}
+
+// Example usage
+const manager = new UserManager();
+manager.addUser({ id: 1, name: "John", email: "john@example.com" });
+console.log(manager.listUsers());`,
             language: 'typescript',
-            explanation: 'Defining and using interfaces in TypeScript.',
-            authorId: users[8].id,
+            explanation: 'Simple user management with TypeScript.',
+            authorId: users[7].id,  // Olivia
             tags: [tags[9]] // object-oriented
         },
         {
-            title: 'TypeScript Generic Function',
-            code: `function identity<T>(arg: T): T {
-            return arg;
-        }
+            title: 'TypeScript Array Utils',
+            code: `function arrayUtils<T>(arr: T[]) {
+    return {
+        first: arr[0],
+        last: arr[arr.length - 1],
+        length: arr.length,
+        unique: [...new Set(arr)]
+    };
+}
 
-        const number = identity<number>(42);
-        const text = identity<string>("Hello");`,
+// Example usage
+const numbers = [1, 2, 2, 3, 3, 4, 5];
+console.log(arrayUtils(numbers));
+
+const words = ["hello", "world", "hello"];
+console.log(arrayUtils(words));`,
             language: 'typescript',
-            explanation: 'Using generics in TypeScript functions.',
-            authorId: users[9].id,
-            tags: [tags[3]] // functions
+            explanation: 'Generic array utility functions.',
+            authorId: users[8].id,  // Daniel
+            tags: [tags[2]] // arrays
+        },
+        // Ruby Templates
+        {
+            title: 'Ruby Array Sorting',
+            code: `# Basic array sorting methods
+numbers = [4, 1, 3, 2, 5]
+
+def array_sorting(arr)
+  {
+    original: arr,
+    sorted: arr.sort,
+    descending: arr.sort.reverse,
+    custom: arr.sort_by { |num| -num }
+  }
+end
+
+# Example usage
+result = array_sorting(numbers)
+puts result`,
+            language: 'ruby',
+            explanation: 'Different ways to sort arrays in Ruby.',
+            authorId: users[1].id,  // Sarah
+            tags: [tags[2]] // arrays
+        },
+        {
+            title: 'Ruby String Counter',
+            code: `def count_elements(str)
+  chars = str.chars.tally
+  words = str.split.length
+  
+  {
+    char_count: chars,
+    word_count: words,
+    length: str.length
+  }
+end
+
+# Example usage
+text = "Hello Ruby World"
+puts count_elements(text)`,
+            language: 'ruby',
+            explanation: 'Count characters and words in a string.',
+            authorId: users[2].id,  // Mike
+            tags: [tags[4]] // strings
+        },
+         // Go Templates
+        {
+            title: 'Go Basic Math',
+            code: `package main
+
+import "fmt"
+
+func mathOperations(a, b int) map[string]int {
+    result := map[string]int{
+        "sum": a + b,
+        "difference": a - b,
+        "product": a * b,
+    }
+    return result
+}
+
+func main() {
+    result := mathOperations(10, 5)
+    fmt.Println(result)
+}`,
+            language: 'go',
+            explanation: 'Basic math operations in Go.',
+            authorId: users[3].id,  // Emma
+            tags: [tags[7]] // math
+        },
+        {
+            title: 'Go Slice Manipulation',
+            code: `package main
+
+import "fmt"
+
+func sliceOps(numbers []int) {
+    // Basic slice operations
+    fmt.Println("Original:", numbers)
+    fmt.Println("First:", numbers[0])
+    fmt.Println("Length:", len(numbers))
+    
+    // Append
+    numbers = append(numbers, 6)
+    fmt.Println("After append:", numbers)
+}
+
+func main() {
+    nums := []int{1, 2, 3, 4, 5}
+    sliceOps(nums)
+}`,
+            language: 'go',
+            explanation: 'Common slice operations in Go.',
+            authorId: users[4].id,  // James
+            tags: [tags[2]] // arrays
+        },
+        // PHP Templates
+        {
+            title: 'PHP Array Functions',
+            code: `<?php
+function arrayFunctions($arr) {
+    $result = [
+        'sum' => array_sum($arr),
+        'average' => array_sum($arr) / count($arr),
+        'sorted' => sort($arr),
+        'reversed' => array_reverse($arr)
+    ];
+    
+    return $result;
+}
+
+// Example usage
+$numbers = [1, 2, 3, 4, 5];
+print_r(arrayFunctions($numbers));
+?>`,
+            language: 'php',
+            explanation: 'Common PHP array functions.',
+            authorId: users[5].id,  // Lisa
+            tags: [tags[2]] // arrays
+        },
+        {
+            title: 'PHP String Functions',
+            code: `<?php
+function stringFunctions($text) {
+    return [
+        'uppercase' => strtoupper($text),
+        'lowercase' => strtolower($text),
+        'length' => strlen($text),
+        'words' => str_word_count($text),
+        'reversed' => strrev($text)
+    ];
+}
+
+// Example usage
+$text = "Hello PHP World";
+print_r(stringFunctions($text));
+?>`,
+            language: 'php',
+            explanation: 'Basic string manipulation in PHP.',
+            authorId: users[6].id,  // David
+            tags: [tags[4]] // strings
         },
 
         // Java Templates
         {
-            title: 'Java ArrayList Operations',
-            code: `ArrayList<String> list = new ArrayList<>();
-        list.add("Hello");
-        list.add("World");
-        list.remove(0);
-        String first = list.get(0);`,
+            title: 'Java Array Operations',
+            code: `public class ArrayOperations {
+    public static void main(String[] args) {
+        int[] numbers = {1, 2, 3, 4, 5};
+        
+        // Basic operations
+        System.out.println("First: " + numbers[0]);
+        System.out.println("Length: " + numbers.length);
+        
+        // Sum
+        int sum = 0;
+        for (int num : numbers) {
+            sum += num;
+        }
+        System.out.println("Sum: " + sum);
+    }
+}`,
             language: 'java',
-            explanation: 'Basic ArrayList operations in Java.',
-            authorId: users[1].id,
+            explanation: 'Basic array operations in Java.',
+            authorId: users[1].id,  // Sarah
             tags: [tags[2]] // arrays
         },
         {
-            title: 'Java Stream Operations',
-            code: `List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5);
-        int sum = numbers.stream()
-                        .filter(n -> n % 2 == 0)
-                        .mapToInt(Integer::intValue)
-                        .sum();`,
+            title: 'Java String Utils',
+            code: `public class StringUtils {
+    public static void main(String[] args) {
+        String text = "Hello Java";
+        
+        // String operations
+        System.out.println("Original: " + text);
+        System.out.println("Uppercase: " + text.toUpperCase());
+        System.out.println("Length: " + text.length());
+        System.out.println("Contains 'Java': " + text.contains("Java"));
+    }
+}`,
             language: 'java',
-            explanation: 'Using Java streams for data processing.',
-            authorId: users[2].id,
-            tags: [tags[2]] // arrays
+            explanation: 'Common string operations in Java.',
+            authorId: users[2].id,  // Mike
+            tags: [tags[4]] // strings
         },
 
+        // C Templates
+        {
+            title: 'C Array Basics',
+            code: `#include <stdio.h>
+
+int main() {
+    int numbers[] = {1, 2, 3, 4, 5};
+    int size = sizeof(numbers) / sizeof(numbers[0]);
+    
+    // Print array
+    printf("Array elements: ");
+    for(int i = 0; i < size; i++) {
+        printf("%d ", numbers[i]);
+    }
+    
+    // Calculate sum
+    int sum = 0;
+    for(int i = 0; i < size; i++) {
+        sum += numbers[i];
+    }
+    printf("\\nSum: %d\\n", sum);
+    
+    return 0;
+}`,
+            language: 'c',
+            explanation: 'Basic array operations in C.',
+            authorId: users[3].id,  // Emma
+            tags: [tags[2]] // arrays
+        },
+        {
+            title: 'C Calculator',
+            code: `#include <stdio.h>
+
+int calculate(int a, int b, char op) {
+    switch(op) {
+        case '+': return a + b;
+        case '-': return a - b;
+        case '*': return a * b;
+        case '/': return b != 0 ? a / b : 0;
+        default: return 0;
+    }
+}
+
+int main() {
+    printf("10 + 5 = %d\\n", calculate(10, 5, '+'));
+    printf("10 - 5 = %d\\n", calculate(10, 5, '-'));
+    printf("10 * 5 = %d\\n", calculate(10, 5, '*'));
+    
+    return 0;
+}`,
+            language: 'c',
+            explanation: 'Simple calculator in C.',
+            authorId: users[4].id,  // James
+            tags: [tags[1]] // basics
+        },
         // C++ Templates
         {
             title: 'C++ Vector Operations',
-            code: `vector<int> numbers = {1, 2, 3, 4, 5};
-        numbers.push_back(6);
-        sort(numbers.begin(), numbers.end());
-        auto it = find(numbers.begin(), numbers.end(), 3);`,
+            code: `#include <iostream>
+#include <vector>
+using namespace std;
+
+int main() {
+    vector<int> numbers = {1, 2, 3, 4, 5};
+    
+    // Vector operations
+    numbers.push_back(6);
+    cout << "Size: " << numbers.size() << endl;
+    cout << "First: " << numbers.front() << endl;
+    cout << "Last: " << numbers.back() << endl;
+    
+    return 0;
+}`,
             language: 'cpp',
-            explanation: 'Common vector operations in C++.',
-            authorId: users[3].id,
+            explanation: 'Basic vector operations in C++.',
+            authorId: users[5].id,  // Lisa
             tags: [tags[2]] // arrays
         },
         {
-            title: 'C++ Class Definition',
-            code: `class Rectangle {
-        private:
-            int width;
-            int height;
-        public:
-            Rectangle(int w, int h) : width(w), height(h) {}
-            int area() { return width * height; }
-        };`,
+            title: 'C++ String Manipulation',
+            code: `#include <iostream>
+#include <string>
+using namespace std;
+
+int main() {
+    string text = "Hello C++";
+    
+    // String operations
+    cout << "Original: " << text << endl;
+    cout << "Length: " << text.length() << endl;
+    
+    // Modify string
+    text += " World";
+    cout << "Modified: " << text << endl;
+    
+    return 0;
+}`,
             language: 'cpp',
-            explanation: 'Basic class definition in C++.',
-            authorId: users[4].id,
-            tags: [tags[9]] // object-oriented
-        },
-    ];
+            explanation: 'String manipulation in C++.',
+            authorId: users[6].id,  // David
+            tags: [tags[4]] // strings
+        }
+    ]
 
     // Create all code templates
     const createdTemplates = await Promise.all(
@@ -379,264 +675,235 @@ async function main() {
         )
     );
 
+    // Fork some templates
     const forks = await Promise.all([
-        // Fork 1: Improved Python List Comprehension
+        // Fork 1: Educational version
         createForkedTemplate(
-            createdTemplates[0].id, // Original Python List Comprehension
-            users[5].id, // Lisa
+            createdTemplates[0].id,  // Python Number Operations
+            users[2].id,  // Mike
             {
-                titlePrefix: "Enhanced ",
-                code: `numbers = [1, 2, 3, 4, 5]
-    squares = [x**2 for x in numbers if x % 2 == 0]  # Only square even numbers
-    cubes = [x**3 for x in numbers if x % 2 != 0]  # Cube odd numbers`,
-                explanationPrefix: "Enhanced version with conditional comprehensions. "
+                titlePrefix: "Educational ",
+                explanationPrefix: "Step-by-step explanation of Python Number Operations"
             }
         ),
     
-        // Fork 2: Modified JavaScript Array Methods
+        // Fork 2: Beginner version
         createForkedTemplate(
-            createdTemplates[4].id, // JavaScript Array Methods
-            users[6].id, // David
+            createdTemplates[0].id,  // Python Number Operations
+            users[4].id,  // James
+            {
+                titlePrefix: "Beginner-Friendly ",
+                explanationPrefix: "Simplified version of Python Operations "
+            }
+        ),
+    
+        // Fork 3: Extended version
+        createForkedTemplate(
+            createdTemplates[0].id,  // Python Number Operations
+            users[6].id,  // David
+            {
+                titlePrefix: "Extended ",
+                explanationPrefix: "Comprehensive version of Python Number Operations"
+            }
+        ),
+
+        // TypeScript Forks
+        createForkedTemplate(
+            createdTemplates[6].id,
+            users[7].id,  // Olivia
+            {
+                titlePrefix: "TypeScript User Manager",
+                explanationPrefix: "Simple user management with TypeScript."
+            }
+        ),
+
+        // Ruby Array Sorting Forks
+        createForkedTemplate(
+            createdTemplates[8].id,
+            users[7].id,  // Olivia
+            {
+                titlePrefix: "Beginner's Guide to ",
+                explanationPrefix: "Simple introduction to "
+            }
+        ),
+        createForkedTemplate(
+            createdTemplates[9].id,
+            users[8].id,  // Daniel
             {
                 titlePrefix: "Advanced ",
-                code: `const numbers = [1, 2, 3, 4, 5];
-    const doubled = numbers.map(x => x * 2);
-    const filtered = numbers.filter(x => x > 2);
-    const sum = numbers.reduce((a, b) => a + b, 0);
-    const average = sum / numbers.length;
-    const hasLargeNumbers = numbers.some(x => x > 4);`,
-                explanationPrefix: "Extended version with additional array methods. "
+                explanationPrefix: "In-depth tutorial for "
             }
         ),
-    
-        // Fork 3: TypeScript Interface with Generics
+
+        // Go Basic Math Forks
         createForkedTemplate(
-            createdTemplates[7].id, // TypeScript Interface
-            users[7].id, // Olivia
+            createdTemplates[10].id,
+            users[9].id,  // Sophia
             {
-                titlePrefix: "Generic ",
-                code: `interface Container<T> {
-        value: T;
-        timestamp: Date;
-    }
-    
-    interface User {
-        id: number;
-        name: string;
-    }
-    
-    const userContainer: Container<User> = {
-        value: { id: 1, name: "John" },
-        timestamp: new Date()
-    };`,
-                explanationPrefix: "Generic version of the interface. "
+                titlePrefix: "Learning ",
+                explanationPrefix: "Educational guide to "
             }
         ),
-    
-        // Fork 4: Enhanced Quick Sort with Pivot Selection
         createForkedTemplate(
-            createdTemplates[3].id, // Python Quick Sort
-            users[8].id, // Daniel
+            createdTemplates[11].id,
+            users[1].id,  // Sarah
             {
-                titlePrefix: "Optimized ",
-                code: `def quicksort(arr):
-        if len(arr) <= 1:
-            return arr
-        
-        def choose_pivot(arr):
-            mid = len(arr) // 2
-            pivot = sorted([arr[0], arr[mid], arr[-1]])[1]
-            return pivot
-        
-        pivot = choose_pivot(arr)
-        left = [x for x in arr if x < pivot]
-        middle = [x for x in arr if x == pivot]
-        right = [x for x in arr if x > pivot]
-        
-        return quicksort(left) + middle + quicksort(right)`,
-                explanationPrefix: "Optimized version with median-of-three pivot selection. "
+                titlePrefix: "Practical ",
+                explanationPrefix: "Real-world examples of "
             }
         ),
-    
-        // Fork 5: Java Stream Operations with Parallel Processing
+
+        // PHP Array Functions Forks
         createForkedTemplate(
-            createdTemplates[10].id, // Java Stream Operations
-            users[9].id, // Sophia
+            createdTemplates[12].id,
+            users[2].id,  // Mike
             {
-                titlePrefix: "Parallel ",
-                code: `List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
-    int sum = numbers.parallelStream()
-                    .filter(n -> n % 2 == 0)
-                    .mapToInt(Integer::intValue)
-                    .sum();
-                    
-    double average = numbers.parallelStream()
-                          .mapToDouble(Integer::doubleValue)
-                          .average()
-                          .orElse(0.0);`,
-                explanationPrefix: "Parallel stream version for better performance. "
+                titlePrefix: "Interactive ",
+                explanationPrefix: "Hands-on tutorial for "
             }
         ),
-    
-        // Fork 6: Extended Promise Chain with Error Handling
         createForkedTemplate(
-            createdTemplates[5].id, // JavaScript Promise Chain
-            users[1].id, // Sarah
+            createdTemplates[12].id,
+            users[3].id,  // Emma
             {
-                titlePrefix: "Robust ",
-                code: `async function fetchDataWithRetry(url, maxRetries = 3) {
-        for(let i = 0; i < maxRetries; i++) {
-            try {
-                const response = await fetch(url);
-                if (!response.ok) throw new Error('Network response was not ok');
-                return await response.json();
-            } catch (error) {
-                if (i === maxRetries - 1) throw error;
-                await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
-            }
-        }
-    }`,
-                explanationPrefix: "Enhanced version with retry mechanism and better error handling. "
+                titlePrefix: "Step-by-Step ",
+                explanationPrefix: "Detailed walkthrough of "
             }
         ),
-    
-        // Fork 7: C++ Vector Operations with Custom Allocator
+
+        // Additional forks for String-related templates
         createForkedTemplate(
-            createdTemplates[12].id, // C++ Vector Operations
-            users[2].id, // Mike
+            createdTemplates[8].id,  // Ruby String Counter
+            users[4].id,  // James
             {
-                titlePrefix: "Custom Allocator ",
-                code: `template <typename T>
-    class CustomAllocator : public std::allocator<T> {
-        // Custom allocation logic
-    };
-    
-    vector<int, CustomAllocator<int>> numbers = {1, 2, 3, 4, 5};
-    numbers.push_back(6);
-    sort(numbers.begin(), numbers.end());
-    auto it = find(numbers.begin(), numbers.end(), 3);`,
-                explanationPrefix: "Version with custom memory allocation. "
+                titlePrefix: "Simple ",
+                explanationPrefix: "Easy-to-follow guide for "
             }
         ),
-    
-        // Fork 8: Python Recursive Fibonacci with Memoization
         createForkedTemplate(
-            createdTemplates[2].id, // Python Recursive Fibonacci
-            users[3].id, // Emma
+            createdTemplates[12].id,  // PHP String Functions
+            users[5].id,  // Lisa
             {
-                titlePrefix: "Memoized ",
-                code: `def fibonacci_memo(n, memo={}):
-        if n in memo:
-            return memo[n]
-        if n <= 1:
-            return n
-        memo[n] = fibonacci_memo(n-1, memo) + fibonacci_memo(n-2, memo)
-        return memo[n]`,
-                explanationPrefix: "Optimized version using memoization. "
+                titlePrefix: "Quick Guide to ",
+                explanationPrefix: "Fast tutorial on "
             }
         ),
-    
-        // Fork 9: TypeScript Generic Function with Constraints
+
         createForkedTemplate(
-            createdTemplates[8].id, // TypeScript Generic Function
-            users[4].id, // James
+            createdTemplates[13].id ,  // Java Array Operations
+            users[6].id,  // David
             {
-                titlePrefix: "Constrained ",
-                code: `interface Lengthwise {
-        length: number;
-    }
-    
-    function loggingIdentity<T extends Lengthwise>(arg: T): T {
-        console.log(arg.length);
-        return arg;
-    }
-    
-    const arr = loggingIdentity([1, 2, 3]);
-    const str = loggingIdentity("hello");`,
-                explanationPrefix: "Version with type constraints. "
+                titlePrefix: "Java Array Operations",
+                explanationPrefix: "Basic array operations in Java."
             }
         ),
-    
-        // Fork 10: Java ArrayList with Custom Sorting
+
         createForkedTemplate(
-            createdTemplates[9].id, // Java ArrayList Operations
-            users[5].id, // Lisa
+            createdTemplates[14].id ,  // Java String Utils
+            users[7].id,  // Olivia
             {
-                titlePrefix: "Custom Sorted ",
-                code: `ArrayList<String> list = new ArrayList<>();
-    list.add("Hello");
-    list.add("World");
-    list.add("Java");
-    
-    Collections.sort(list, (a, b) -> {
-        // Custom sorting by length, then alphabetically
-        if (a.length() != b.length()) {
-            return a.length() - b.length();
-        }
-        return a.compareTo(b);
-    });`,
-                explanationPrefix: "Version with custom sorting implementation. "
+                titlePrefix: "Java String Utils",
+                explanationPrefix: "Common string operations in Java."
+            }
+        ),
+
+        // C Array Basics Forks
+        createForkedTemplate(
+            createdTemplates[15].id,
+            users[8].id,  // Daniel
+            {
+                titlePrefix: "C Array Basics",
+                explanationPrefix: "Basic array operations in C."
+            }
+        ),
+
+        createForkedTemplate(
+            createdTemplates[16].id,
+            users[9].id,  // Sophia
+            {
+                titlePrefix: "C Calculator",
+                explanationPrefix: "Simple calculator in C."
+            }
+        ),
+
+        // C++ Vector Operations Forks
+        createForkedTemplate(
+            createdTemplates[17].id,
+            users[1].id,  // Sarah
+            {
+                titlePrefix: "C++ Vector Operations",
+                explanationPrefix: "Basic vector operations in C++."
+            }
+        ),
+
+        createForkedTemplate(
+            createdTemplates[18].id,
+            users[2].id,  // Mike
+            {
+                titlePrefix: "C++ String Manipulation",
+                explanationPrefix: "String manipulation in C++."
             }
         )
+
     ]);
 
     // Creating blog posts (distributed among users)
-    const posts = await Promise.all([
-        prisma.blogPost.create({
-            data: {
-                title: 'Getting Started with Python',
-                description: 'A beginner\'s guide to Python programming.',
-                authorId: users[3].id,  // Emma
-                tags: { connect: [{ id: tags[1].id }] },
-                codeTemplates: { connect: [{ id: createdTemplates[0].id }] }
-            }
-        }),
-        prisma.blogPost.create({
-            data: {
-                title: 'Modern JavaScript Features',
-                description: 'Exploring ES6+ features in JavaScript.',
-                authorId: users[4].id,  // James
-                tags: { connect: [{ id: tags[1].id }] },
-                codeTemplates: { connect: [{ id: createdTemplates[1].id }] }
-            }
-        })
-    ]);
+    // const posts = await Promise.all([
+    //     prisma.blogPost.create({
+    //         data: {
+    //             title: 'Getting Started with Python',
+    //             description: 'A beginner\'s guide to Python programming.',
+    //             authorId: users[3].id,  // Emma
+    //             tags: { connect: [{ id: tags[1].id }] },
+    //             codeTemplates: { connect: [{ id: createdTemplates[0].id }] }
+    //         }
+    //     }),
+    //     // prisma.blogPost.create({
+    //     //     data: {
+    //     //         title: 'Modern JavaScript Features',
+    //     //         description: 'Exploring ES6+ features in JavaScript.',
+    //     //         authorId: users[4].id,  // James
+    //     //         tags: { connect: [{ id: tags[1].id }] },
+    //     //         codeTemplates: { connect: [{ id: createdTemplates[1].id }] }
+    //     //     }
+    //     // })
+    // ]);
 
     // Creating comments from different users
-    const comments = await Promise.all([
-        prisma.comment.create({
-            data: {
-                content: 'Great explanation! Really helped me understand the concept.',
-                authorId: users[5].id,  // Lisa
-                blogPostId: posts[0].id
-            }
-        }),
-        prisma.comment.create({
-            data: {
-                content: 'Could you add more examples of practical applications?',
-                authorId: users[6].id,  // David
-                blogPostId: posts[0].id
-            }
-        }),
-        prisma.comment.create({
-            data: {
-                content: 'This helped me with my project, thanks!',
-                authorId: users[7].id,  // Olivia
-                blogPostId: posts[1].id
-            }
-        })
-    ]);
+    // const comments = await Promise.all([
+    //     prisma.comment.create({
+    //         data: {
+    //             content: 'Great explanation! Really helped me understand the concept.',
+    //             authorId: users[5].id,  // Lisa
+    //             blogPostId: posts[0].id
+    //         }
+    //     }),
+    //     prisma.comment.create({
+    //         data: {
+    //             content: 'Could you add more examples of practical applications?',
+    //             authorId: users[6].id,  // David
+    //             blogPostId: posts[0].id
+    //         }
+    //     }),
+    //     prisma.comment.create({
+    //         data: {
+    //             content: 'This helped me with my project, thanks!',
+    //             authorId: users[7].id,  // Olivia
+    //             blogPostId: posts[1].id
+    //         }
+    //     })
+    // ]);
 
     // Add some reports
-    await prisma.report.create({
-        data: {
-            type: 'COMMENT',
-            reason: 'Inappropriate content',
-            explanation: 'This comment is inappropriate and should be reviewed.',
-            reporterId: users[8].id,  // Daniel
-            commentId: comments[2].id // First comment
-        }
-    });
+    // await prisma.report.create({
+    //     data: {
+    //         type: 'COMMENT',
+    //         reason: 'Inappropriate content',
+    //         explanation: 'This comment is inappropriate and should be reviewed.',
+    //         reporterId: users[8].id,  // Daniel
+    //         commentId: comments[2].id // First comment
+    //     }
+    // });
 
     console.log('Database has been seeded successfully.');
 }
