@@ -390,7 +390,15 @@ async function createCodeTar(code: string, filename: string): Promise<Buffer> {
 async function streamToString(stream: NodeJS.ReadableStream): Promise<string> {
     return new Promise((resolve, reject) => {
         const chunks: Buffer[] = [];
-        stream.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
+        stream.on('data', (chunk) => {
+            // Skip the first 8 bytes of each chunk (Docker stream header)
+            // But only if the chunk is large enough
+            if (chunk.length > 8) {
+                chunks.push(chunk.slice(8));
+            } else {
+                chunks.push(chunk);
+            }
+        });
         stream.on('error', reject);
         stream.on('end', () => {
             const result = Buffer.concat(chunks)
@@ -415,7 +423,8 @@ async function executeCommand(
         Cmd: ['/bin/bash', '-c', command],
         AttachStdout: true,
         AttachStderr: true,
-        AttachStdin: !!input
+        AttachStdin: !!input,
+        Tty: false
     });
 
     const stream = await exec.start({ hijack: true, stdin: !!input });
