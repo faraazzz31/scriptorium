@@ -848,62 +848,62 @@ int main() {
     ]);
 
     // Creating blog posts (distributed among users)
-    // const posts = await Promise.all([
-    //     prisma.blogPost.create({
-    //         data: {
-    //             title: 'Getting Started with Python',
-    //             description: 'A beginner\'s guide to Python programming.',
-    //             authorId: users[3].id,  // Emma
-    //             tags: { connect: [{ id: tags[1].id }] },
-    //             codeTemplates: { connect: [{ id: createdTemplates[0].id }] }
-    //         }
-    //     }),
-    //     // prisma.blogPost.create({
-    //     //     data: {
-    //     //         title: 'Modern JavaScript Features',
-    //     //         description: 'Exploring ES6+ features in JavaScript.',
-    //     //         authorId: users[4].id,  // James
-    //     //         tags: { connect: [{ id: tags[1].id }] },
-    //     //         codeTemplates: { connect: [{ id: createdTemplates[1].id }] }
-    //     //     }
-    //     // })
-    // ]);
+    const posts = await Promise.all([
+        prisma.blogPost.create({
+            data: {
+                title: 'Getting Started with Python',
+                description: 'A beginner\'s guide to Python programming.',
+                authorId: users[3].id,  // Emma
+                tags: { connect: [{ id: tags[1].id }] },
+                codeTemplates: { connect: [{ id: createdTemplates[0].id }] }
+            }
+        }),
+        prisma.blogPost.create({
+            data: {
+                title: 'Modern JavaScript Features',
+                description: 'Exploring ES6+ features in JavaScript.',
+                authorId: users[4].id,  // James
+                tags: { connect: [{ id: tags[1].id }] },
+                codeTemplates: { connect: [{ id: createdTemplates[1].id }] }
+            }
+        })
+    ]);
 
     // Creating comments from different users
-    // const comments = await Promise.all([
-    //     prisma.comment.create({
-    //         data: {
-    //             content: 'Great explanation! Really helped me understand the concept.',
-    //             authorId: users[5].id,  // Lisa
-    //             blogPostId: posts[0].id
-    //         }
-    //     }),
-    //     prisma.comment.create({
-    //         data: {
-    //             content: 'Could you add more examples of practical applications?',
-    //             authorId: users[6].id,  // David
-    //             blogPostId: posts[0].id
-    //         }
-    //     }),
-    //     prisma.comment.create({
-    //         data: {
-    //             content: 'This helped me with my project, thanks!',
-    //             authorId: users[7].id,  // Olivia
-    //             blogPostId: posts[1].id
-    //         }
-    //     })
-    // ]);
+    const comments = await Promise.all([
+        prisma.comment.create({
+            data: {
+                content: 'Great explanation! Really helped me understand the concept.',
+                authorId: users[5].id,  // Lisa
+                blogPostId: posts[0].id
+            }
+        }),
+        prisma.comment.create({
+            data: {
+                content: 'Could you add more examples of practical applications?',
+                authorId: users[6].id,  // David
+                blogPostId: posts[0].id
+            }
+        }),
+        prisma.comment.create({
+            data: {
+                content: 'This helped me with my project, thanks!',
+                authorId: users[7].id,  // Olivia
+                blogPostId: posts[1].id
+            }
+        })
+    ]);
 
     // Add some reports
-    // await prisma.report.create({
-    //     data: {
-    //         type: 'COMMENT',
-    //         reason: 'Inappropriate content',
-    //         explanation: 'This comment is inappropriate and should be reviewed.',
-    //         reporterId: users[8].id,  // Daniel
-    //         commentId: comments[2].id // First comment
-    //     }
-    // });
+    await prisma.report.create({
+        data: {
+            type: 'COMMENT',
+            reason: 'Inappropriate content',
+            explanation: 'This comment is inappropriate and should be reviewed.',
+            reporterId: users[8].id,  // Daniel
+            commentId: comments[2].id // First comment
+        }
+    });
 
     console.log('Database has been seeded successfully.');
 }

@@ -7,8 +7,10 @@ import { useRouter } from 'next/navigation';
 import { Header } from '@/app/components/code-template/Header';
 import { CodeEditor } from '@/app/components/code-template/CodeEditor';
 import { InputOutput } from '@/app/components/code-template/InputOutput';
-import ForksList from '@/app/components/code-template/ForksList';
+import ForksList from './ForksList';
 import { DeleteConfirmationModal } from './DeleteConfirmation';
+import BlogPostsList from './BlogPostsList';
+import { GitFork, BookOpen } from 'lucide-react';
 
 interface CodeTemplateDetailsProps {
     templateId: number;
@@ -25,6 +27,7 @@ interface Template {
     tags: { id: number; name: string }[];
     forks?: { id: number; title: string; author: { firstName: string; lastName: string }; createdAt: string }[];
     forkOf?: { id: number; title: string; author: { firstName: string; lastName: string } };
+    blogPosts?: { id: number; title: string; author: { firstName: string; lastName: string }; createdAt: string }[];
 }
 
 interface KeyDownEvent extends React.KeyboardEvent {
@@ -51,6 +54,7 @@ const CodeTemplateDetails = ({ templateId }: CodeTemplateDetailsProps) => {
     const [isEditingMeta, setIsEditingMeta] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [showForks, setShowForks] = useState(true);
     const [error, setError] = useState('');
 
     const [input, setInput] = useState<string>('');
@@ -61,6 +65,9 @@ const CodeTemplateDetails = ({ templateId }: CodeTemplateDetailsProps) => {
     const { isDarkMode } = useTheme();
     const router = useRouter();
 
+    const hasForks = template?.forks && template.forks.length > 0;
+    const hasBlogPosts = template?.blogPosts && template.blogPosts.length > 0;
+
     useEffect(() => {
         const fetchTemplateDetails = async () => {
             try {
@@ -69,6 +76,8 @@ const CodeTemplateDetails = ({ templateId }: CodeTemplateDetailsProps) => {
                     setError('Failed to fetch template');
                 }
                 const { data } = await response.json();
+                console.log('Fetched template:', JSON.stringify(data));
+
                 setTemplate(data);
                 setEditedCode(data.code);
                 setEditedTitle(data.title);
@@ -280,8 +289,65 @@ const CodeTemplateDetails = ({ templateId }: CodeTemplateDetailsProps) => {
                     />
                 </div>
 
-                {template.forks && template.forks.length > 0 && (
-                    <ForksList forks={template.forks} isDarkMode={isDarkMode} />
+                {/* Only show toggle button if both exist */}
+                {hasForks && hasBlogPosts ? (
+                    <>
+                        <div className="flex justify-end mb-4">
+                            <button
+                                onClick={() => setShowForks(!showForks)}
+                                className={`
+                                    flex items-center gap-3 px-5 py-2.5 rounded-lg
+                                    font-medium text-sm leading-none
+                                    shadow-sm
+                                    transform transition-all duration-200
+                                    active:scale-95
+                                    ${isDarkMode
+                                        ? 'bg-blue-600 text-white hover:bg-blue-700 ring-1 ring-blue-500'
+                                        : 'bg-blue-500 text-white hover:bg-blue-600 ring-1 ring-blue-400'
+                                    }
+                                    hover:shadow-md
+                                `}
+                            >
+                                {showForks ? (
+                                    <>
+                                        <BookOpen className="w-4 h-4" />
+                                        <span>View Blog Posts</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <GitFork className="w-4 h-4" />
+                                        <span>View Forks</span>
+                                    </>
+                                )}
+                                <span className={`
+                                    inline-flex items-center justify-center px-2.5 py-0.5 
+                                    rounded-full text-xs font-medium
+                                    bg-white/20 text-white
+                                `}>
+                                    {showForks ? template.blogPosts?.length : template.forks?.length}
+                                </span>
+                            </button>
+                        </div>
+                        {showForks ? (
+                            template.forks && template.forks.length > 0 && (
+                                <ForksList forks={template.forks} isDarkMode={isDarkMode} />
+                            )
+                        ) : (
+                            template.blogPosts && template.blogPosts.length > 0 && (
+                                <BlogPostsList blogPosts={template.blogPosts} isDarkMode={isDarkMode} />
+                            )
+                        )}
+                    </>
+                ) : (
+                    // If only one exists, show that one without a button
+                    <>
+                        {template.forks && template.forks.length > 0 && (
+                            <ForksList forks={template.forks} isDarkMode={isDarkMode} />
+                        )}
+                        {template.blogPosts && template.blogPosts.length > 0 && (
+                            <BlogPostsList blogPosts={template.blogPosts} isDarkMode={isDarkMode} />
+                        )}
+                    </>
                 )}
 
                 <DeleteConfirmationModal
