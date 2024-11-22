@@ -37,10 +37,6 @@ const BlogPostCard: FC<BlogPostCardProps> = ({
   null;
   const [userVote, setUserVote] = useState<'UPVOTE' | 'DOWNVOTE' | null>(initialVote);
 
-  console.log('Current user:', user?.id, typeof user?.id);
-  console.log('Post author:', post.author.id, typeof post.author.id);
-  console.log('Are they equal?:', user?.id === post.author.id);
-
   useEffect(() => {
     if (user) {
       setUserVote(
@@ -119,6 +115,12 @@ const BlogPostCard: FC<BlogPostCardProps> = ({
         <span className={`${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
           • {formatDistanceToNow(post.createdAt)} ago
         </span>
+        {/* Show hidden tag if post is hidden */}
+        {post.isHidden && (
+          <span className="ml-2 px-2 py-0.5 text-xs font-medium rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+            Hidden
+          </span>
+        )}
       </div>
 
       {/* Title */}

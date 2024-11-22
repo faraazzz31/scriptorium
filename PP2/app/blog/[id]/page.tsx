@@ -1,7 +1,7 @@
 // app/blog/[id]/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import BlogPostCard from '@/app/components/blog/BlogPostCard';
 import CommentSection from '@/app/components/blog/CommentSection';
@@ -12,10 +12,12 @@ import Toast from '@/app/components/ui/Toast';
 import { useTheme } from '@/app/components/theme/ThemeContext';
 import BlogPostModal from '@/app/components/blog/BlogPostModal';
 import DeleteModal from '@/app/components/blog/DeleteModal';
+import ErrorPage from '@/app/components/ErrorPage';
 
 export default function BlogPostPage() {
   const [post, setPost] = useState<BlogPostWithRelations | null>(null);
   const [loading, setLoading] = useState(true);
+  const [postNotFound, setPostNotFound] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportTarget, setReportTarget] = useState<{ type: 'BLOG_POST' | 'COMMENT', id: number } | null>(null);
   const [showToast, setShowToast] = useState(false);
@@ -35,25 +37,49 @@ export default function BlogPostPage() {
     setShowToast(true);
   };
 
-  useEffect(() => {
-    const fetchPost = async () => {
-      try {
-        const response = await fetch(`/api/blog-post/${params.id}`);
-        if (!response.ok) {
-          throw new Error('Post not found');
+
+  const fetchPost = useCallback(async () => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      const response = await fetch(
+        `/api/blog-post/${params.id}`, {
+          method: 'GET',
+          headers: new Headers({
+            'Authorization': token ? `Bearer ${token}` : '',
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache'
+          }),
+          credentials: 'include'
         }
+      );
+      if (!response.ok) {
+        if (response.status === 404) {
+          setPostNotFound(true);
+        } else {
+          throw new Error('Error fetching post');
+        }
+      } else {
         const data = await response.json();
         setPost(data);
-      } catch (error) {
-        console.error('Error fetching post:', error);
-        router.push('/blog');
-      } finally {
-        setLoading(false);
       }
-    };
-
-    fetchPost();
+    } catch (error) {
+      console.error('Error fetching post:', error);
+      router.push('/blog');
+    } finally {
+      setLoading(false);
+    }
   }, [params.id, router]);
+
+  useEffect(() => {
+    fetchPost();
+  }, [params.id, router, fetchPost]);
+
+  useEffect(() => {
+    // Only fetch after component is mounted and localStorage is available
+    if (typeof window !== 'undefined') {
+      fetchPost();
+    }
+  }, [params.id, fetchPost]);
 
   const handleEditPost = async (data: { title: string; description: string; tag_ids: number[] }) => {
     try {
@@ -72,15 +98,26 @@ export default function BlogPostPage() {
       if (response.ok) {
         // After successful edit, fetch the complete post data again
         const postResponse = await fetch(`/api/blog-post/${params.id}`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-          }
+          method: 'GET',
+          headers: new Headers({
+            'Authorization': localStorage.getItem('accessToken') ? `Bearer ${localStorage.getItem('accessToken')}` : '',
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache'
+          }),
+          credentials: 'include'
         });
         if (postResponse.ok) {
           const updatedPost = await postResponse.json();
           setPost(updatedPost);
           setEditingPost(null);
           showToastMessage('Post updated successfully', 'success');
+        }
+      } else {
+        const error = await response.json();
+        if (response.status === 403 && error.error === "Blog post is hidden, can't be edited") {
+          showToastMessage("Blog post is hidden, can't be edited", 'error');
+        } else {
+          showToastMessage('Error updating post', 'error');
         }
       }
     } catch (error) {
@@ -146,6 +183,10 @@ export default function BlogPostPage() {
         </div>
       </div>
     );
+  }
+
+  if (postNotFound) {
+    return <ErrorPage message="Blog post not found" status={404} />;
   }
 
   if (!post) {

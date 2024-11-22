@@ -45,7 +45,14 @@ const CommentSection: FC<CommentSectionProps> = ({ postId }) => {
     try {
       setLoading(true);
       const response = await fetch(
-        `/api/comment/fetch-all?blogPostId=${postId}&sorting=${sorting}&page=${currentPage}&limit=${limit}`
+        `/api/comment/fetch-all?blogPostId=${postId}&sorting=${sorting}&page=${currentPage}&limit=${limit}`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache'
+          },
+          credentials: 'include',
+        }
       );
       const data = await response.json();
       setComments(data.data); // The backend now returns already organized comments

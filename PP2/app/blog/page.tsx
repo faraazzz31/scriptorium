@@ -58,23 +58,35 @@ export default function BlogPage() {
   const { isDarkMode, toggleDarkMode } = useTheme();
   const { user } = useAuth();
 
-  const fetchPosts = useCallback(async () => {    
-    setLoading(true);
-    try {
-      const response = await fetch(
-        `/api/blog-post/fetch-all?page=${currentPage}&limit=${limit}${sorting ? `&sorting=${sorting}` : ''}`
-      );
-      const data: FetchBlogPostsResponse = await response.json();
-      
-      setPosts(data.data);
-      setTotalPages(data.totalPages);
-      setTotalCount(data.totalCount);
-    } catch (error) {
-      console.error('Error fetching posts:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [currentPage, sorting]);
+// Directory: app/blog/page.tsx
+
+const fetchPosts = useCallback(async () => {    
+  setLoading(true);
+  try {
+    const token = localStorage.getItem('accessToken');
+    
+    const response = await fetch(
+      `/api/blog-post/fetch-all?page=${currentPage}&limit=${limit}${sorting ? `&sorting=${sorting}` : ''}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': token ? `Bearer ${token}` : '',
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache',
+        },
+        credentials: 'include',
+      }
+    );
+    const data: FetchBlogPostsResponse = await response.json();
+    
+    setPosts(data.data);
+    setTotalPages(data.totalPages);
+    setTotalCount(data.totalCount);
+  } catch (error) {
+    console.error('Error fetching posts:', error);
+  } finally {
+    setLoading(false);
+  }
+}, [currentPage, sorting]);
 
   useEffect(() => {
     setCurrentPage(1); // Reset to first page when sorting changes
@@ -82,7 +94,14 @@ export default function BlogPage() {
 
   useEffect(() => {
     fetchPosts();
-  }, [fetchPosts, currentPage]);
+  }, [fetchPosts, currentPage, user]);
+
+  useEffect(() => {
+    // Only fetch after component is mounted and localStorage is available
+    if (typeof window !== 'undefined') {
+      fetchPosts();
+    }
+  }, [fetchPosts]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -212,10 +231,10 @@ export default function BlogPage() {
     try {
       const response = await fetch('/api/blog-post/create', {
         method: 'POST',
-        headers: {
+        headers: new Headers({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('accessToken')}`
-        },
+        }),
         body: JSON.stringify(data)
       });
   

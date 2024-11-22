@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { checkAuth } from '@/app/middleware/auth';
 
 const prisma = new PrismaClient();
 
@@ -13,9 +14,10 @@ export async function GET(
   request: NextRequest,
   { params }: RouteParams
 ): Promise<NextResponse> {
+  const authResult = await checkAuth(request);
+
   try {
     const id = parseInt(params.id);
-
     if (isNaN(id)) {
       return NextResponse.json(
         { error: 'Invalid blog post ID' },
@@ -103,13 +105,19 @@ export async function GET(
       );
     }
 
-    // Hide the post if it's marked as hidden (unless user is admin/moderator)
+    // Check if post is hidden and handle visibility
     if (blogPost.isHidden) {
-      // TODO: add user role check here once authentication is implemented
-      return NextResponse.json(
-        { error: 'Blog post not found' },
-        { status: 404 }
+      const isAuthorized = authResult.isAuthenticated && (
+        authResult.user!.id === blogPost.author.id || // User is author
+        authResult.user!.role === 'ADMIN' // User is admin
       );
+
+      if (!isAuthorized) {
+        return NextResponse.json(
+          { error: 'Blog post not found' },
+          { status: 404 }
+        );
+      }
     }
 
     return NextResponse.json(blogPost);

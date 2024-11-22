@@ -56,6 +56,12 @@ const CommentCard: FC<CommentCardProps> = ({
     }
   }, [comment.id, comment.upvotedBy, comment.downvotedBy, user]);
 
+  const HiddenLabel = () => (
+    <span className="ml-2 px-2 py-0.5 text-xs font-medium rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+      Hidden
+    </span>
+  );
+
   const onVote = async (commentId: number, type: 'UPVOTE' | 'DOWNVOTE', change: 1 | -1) => {
     if (!user) return;
 
@@ -101,14 +107,6 @@ const CommentCard: FC<CommentCardProps> = ({
     }
   };
 
-  if (comment.isHidden) {
-    return (
-      <div className={`mt-4 ${level > 0 ? 'ml-8' : ''}`}>
-        <p className="text-gray-500 italic">This comment has been hidden by a moderator.</p>
-      </div>
-    );
-  }
-
   return (
     <div id={`comment-${comment.id}`} className={`${level > 0 ? 'ml-8' : ''}`}>
       <div className={`rounded-lg p-4 ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
@@ -119,8 +117,8 @@ const CommentCard: FC<CommentCardProps> = ({
           <span className={`${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
             • {formatDistanceToNow(new Date(comment.createdAt))} ago
           </span>
+          {comment.isHidden && <HiddenLabel />}  {/* This will show the label for both admin and author */}
         </div>
-        
         <p className={`mb-3 break-words ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
           {comment.content}
         </p>

@@ -3,6 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient, Prisma } from '@prisma/client';
 import { valueScore, controversyScore } from '@/app/utils/sortingScore';
+import { checkAuth } from '@/app/middleware/auth';
 
 const prisma = new PrismaClient();
 
@@ -37,6 +38,7 @@ interface CommentFetchAllResponse {
       id: number;
     }[];
     createdAt: Date;
+    isHidden: boolean;
   }[];
 }
 
@@ -55,9 +57,29 @@ interface Reply {
 }
 
 // Recursive function to get all replies
-async function getReplies(commentId: number): Promise<Reply[]> {
+async function getReplies(commentId: number, userId?: number, userRole?: string): Promise<Reply[]> {
+  const where: Prisma.CommentWhereInput = {
+    parentId: commentId,
+  };
+
+  // Add the condition to show hidden replies only for admins or the reply author
+  if (userId && userRole) {
+    if (userRole === 'ADMIN') {
+      // Do nothing, admin can see all replies
+    } else {
+      // Show only non-hidden replies or replies where the user is the author
+      where.OR = [
+        { isHidden: false },
+        { authorId: userId }
+      ];
+    }
+  } else {
+    // Show only non-hidden replies for unauthenticated users
+    where.isHidden = false;
+  }
+
   const replies = await prisma.comment.findMany({
-    where: { parentId: commentId },
+    where: where,
     select: {
       id: true,
       content: true,
@@ -83,6 +105,7 @@ async function getReplies(commentId: number): Promise<Reply[]> {
         }
       },
       createdAt: true,
+      isHidden: true,
     }
   });
 
@@ -90,7 +113,7 @@ async function getReplies(commentId: number): Promise<Reply[]> {
   const repliesWithChildren = await Promise.all(
     replies.map(async (reply) => ({
       ...reply,
-      replies: await getReplies(reply.id)
+      replies: await getReplies(reply.id, userId, userRole)
     }))
   );
 
@@ -98,6 +121,8 @@ async function getReplies(commentId: number): Promise<Reply[]> {
 }
 
 export async function handler(req: AuthenticatedRequest): Promise<NextResponse<CommentFetchAllResponse | ErrorResponse>> {
+  const authResult = await checkAuth(req);
+
   const { searchParams } = new URL(req.url);
   const page = parseInt(searchParams.get('page') || '1');
   const limit = parseInt(searchParams.get('limit') || '10');
@@ -122,6 +147,22 @@ export async function handler(req: AuthenticatedRequest): Promise<NextResponse<C
     }
     if (blogPostId) {
       where.blogPostId = parseInt(blogPostId);
+    }
+
+    // Add the condition to show hidden comments only for admins or the comment author
+    if (authResult.isAuthenticated) {
+      if (authResult.user!.role === 'ADMIN') {
+        // Do nothing, admin can see all comments
+      } else {
+        // Show only non-hidden comments or comments where the user is the author
+        where.OR = [
+          { isHidden: false },
+          { authorId: authResult.user!.id }
+        ];
+      }
+    } else {
+      // Show only non-hidden comments for unauthenticated users
+      where.isHidden = false;
     }
 
     // Count total top-level comments for pagination
@@ -162,6 +203,7 @@ export async function handler(req: AuthenticatedRequest): Promise<NextResponse<C
           }
         },
         createdAt: true,
+        isHidden: true,
       }
     });
 
@@ -184,7 +226,7 @@ export async function handler(req: AuthenticatedRequest): Promise<NextResponse<C
     const sortedCommentsWithReplies = await Promise.all(
       comments.map(async (comment) => ({
         ...comment,
-        replies: await getReplies(comment.id)
+        replies: await getReplies(comment.id, authResult.user?.id, authResult.user?.role)
       }))
     );
 

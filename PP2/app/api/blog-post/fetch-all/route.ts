@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient, Prisma, User } from '@prisma/client';
 import { parseStringToNumberArray } from '@/app/utils/parseString';
 import { valueScore, controversyScore } from '@/app/utils/sortingScore';
+import { checkAuth } from '@/app/middleware/auth';
 
 const prisma = new PrismaClient();
 
@@ -58,7 +59,8 @@ interface ErrorResponse {
 }
 
 export async function handler(req: AuthenticatedRequest): Promise<NextResponse<BlogPostFetchAllResponse | ErrorResponse>> {
-  console.log(`user: ${JSON.stringify(req.user)}`);
+  const authResult = await checkAuth(req);
+
   const { searchParams } = new URL(req.url);
 
   const page = parseInt(searchParams.get('page') || '1');
@@ -83,6 +85,10 @@ export async function handler(req: AuthenticatedRequest): Promise<NextResponse<B
 
   const tag_ids = tag_ids_param ? parseStringToNumberArray(tag_ids_param) : [];
   const code_template_ids = code_template_ids_param ? parseStringToNumberArray(code_template_ids_param) : [];
+
+  // Print to console to see why an admin can't see a hidden post
+  console.log(`authResult.user!.id: ${authResult.user!.id}`);
+  console.log(`authResult.user!.role: ${authResult.user!.role}`);
 
   try {
     const where: Prisma.BlogPostWhereInput = {};
@@ -121,6 +127,22 @@ export async function handler(req: AuthenticatedRequest): Promise<NextResponse<B
           }
         }
       }));
+    }
+
+    // Add the condition to show hidden posts only for admins or the post author
+    if (authResult.isAuthenticated) {
+      if (authResult.user!.role === 'ADMIN') {
+        // Do nothing, admin can see all posts
+      } else {
+        // Show only non-hidden posts or posts where the user is the author
+        where.OR = [
+          { isHidden: false },
+          { authorId: authResult.user!.id }
+        ];
+      }
+    } else {
+      // Show only non-hidden posts for unauthenticated users
+      where.isHidden = false;
     }
 
     const totalCount = await prisma.blogPost.count({
