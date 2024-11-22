@@ -37,6 +37,16 @@ export async function GET(req: AuthenticatedRequest): Promise<NextResponse<CodeT
                 id: parseInt(id)
             },
             include: {
+                blogPosts: {
+                    select: {
+                        id: true,
+                        title: true,
+                        createdAt: true,
+                        author: {
+                            select: { id: true, firstName: true, lastName: true }
+                        }
+                    }
+                },
                 tags: {
                     select: {
                         id: true,

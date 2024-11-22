@@ -83,6 +83,16 @@ export async function GET(req: AuthenticatedRequest): Promise<NextResponse<CodeT
             take: limit,
             where: where,
             include: {
+                blogPosts: {
+                    select: {
+                        id: true,
+                        title: true,
+                        createdAt: true,
+                        author: {
+                            select: { id: true, firstName: true, lastName: true }
+                        }
+                    }
+                },
                 tags: {
                     select: {
                         id: true,
@@ -124,7 +134,7 @@ export async function GET(req: AuthenticatedRequest): Promise<NextResponse<CodeT
             ]
         });
 
-        // console.log(`codeTemplates: ${JSON.stringify(codeTemplates)}`);
+        console.log(`codeTemplates: ${JSON.stringify(codeTemplates[0])}`);
 
         const totalPages = Math.ceil(totalCount / limit);
 
