@@ -1,16 +1,18 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import BlogPostCard from '@/app/components/blog/BlogPostCard';
 import ReportModal from '@/app/components/blog/ReportModal';
 import { BlogPost, User, Tag, CodeTemplate } from '@prisma/client';
 import Navbar from '../components/Navbar';
 import Toast from '../components/ui/Toast';
 import { useTheme } from '../components/theme/ThemeContext';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { useAuth } from '../components/auth/AuthContext';
 import BlogPostModal from '../components/blog/BlogPostModal';
+import { Search, Tag as LucideTag } from 'lucide-react';
+import debounce from 'lodash/debounce';
 
 export interface BlogPostWithRelations extends BlogPost {
   author: User;
@@ -53,20 +55,44 @@ export default function BlogPage() {
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState<'success' | 'error'>('success');
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
+  const [availableTags, setAvailableTags] = useState<{ id: number; name: string }[]>([]);
   
   const router = useRouter();
   const { isDarkMode, toggleDarkMode } = useTheme();
   const { user } = useAuth();
+  const searchParams = useSearchParams();
 
 // Directory: app/blog/page.tsx
+
+const fetchTags = useCallback(async () => {
+  try {
+    const response = await fetch('/api/tag/fetch');
+    if (response.ok) {
+      const data = await response.json();
+      setAvailableTags(data.tags);
+    }
+  } catch (error) {
+    console.error('Error fetching tags:', error);
+  }
+}, []);
 
 const fetchPosts = useCallback(async () => {    
   setLoading(true);
   try {
     const token = localStorage.getItem('accessToken');
     
+    const params = new URLSearchParams({
+      page: currentPage.toString(),
+      limit: limit.toString(),
+      ...(searchQuery && { search: searchQuery }),
+      ...(selectedTagIds?.length > 0 && { tag_ids: JSON.stringify(selectedTagIds) }),
+      ...(sorting && { sorting })
+    });
+    
     const response = await fetch(
-      `/api/blog-post/fetch-all?page=${currentPage}&limit=${limit}${sorting ? `&sorting=${sorting}` : ''}`, {
+      `/api/blog-post/fetch-all?${params}`, {
         method: 'GET',
         headers: {
           'Authorization': token ? `Bearer ${token}` : '',
@@ -86,7 +112,7 @@ const fetchPosts = useCallback(async () => {
   } finally {
     setLoading(false);
   }
-}, [currentPage, sorting]);
+}, [currentPage, searchQuery, selectedTagIds, sorting]);
 
   useEffect(() => {
     setCurrentPage(1); // Reset to first page when sorting changes
@@ -102,6 +128,62 @@ const fetchPosts = useCallback(async () => {
       fetchPosts();
     }
   }, [fetchPosts]);
+
+  const updateUrlParams = useCallback((
+    page: number,
+    query: string,
+    tagIds: string[],
+    sortingValue: string | null
+  ) => {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      ...(query && { search: query }),
+      ...(tagIds.length > 0 && { tag_ids: JSON.stringify(tagIds) }),
+      ...(sortingValue && { sorting: sortingValue })
+    });
+    router.push(`/blog?${params.toString()}`);
+  }, [router]);
+
+  const debouncedSearch = useMemo(
+    () => debounce((query: string) => {
+      updateUrlParams(1, query, selectedTagIds, sorting);
+    }, 300),
+    [updateUrlParams, selectedTagIds, sorting]
+  );
+
+  useEffect(() => {
+    return () => {
+      debouncedSearch.cancel();
+    };
+  }, [debouncedSearch]);
+
+  const handleTagSelect = (tagId: string) => {
+    const newSelectedTags = selectedTagIds.includes(tagId)
+      ? selectedTagIds.filter(id => id !== tagId)
+      : [...selectedTagIds, tagId];
+    setSelectedTagIds(newSelectedTags);
+    updateUrlParams(1, searchQuery, newSelectedTags, sorting);
+  };
+
+  useEffect(() => {
+    const page = parseInt(searchParams.get('page') || '1');
+    const query = searchParams.get('search') || '';
+    const tagIdsParam = searchParams.get('tag_ids');
+    const tag_ids = tagIdsParam ? JSON.parse(tagIdsParam) : [];
+    const sortingParam = searchParams.get('sorting') || null;
+  
+    setCurrentPage(page);
+    setSearchQuery(query);
+    setSelectedTagIds(tag_ids);
+    setSorting(sortingParam as typeof sorting);
+  
+    fetchTags();
+  }, [searchParams, fetchTags]);
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    debouncedSearch(query);
+  };
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -263,6 +345,50 @@ const fetchPosts = useCallback(async () => {
           </p>
         </div>
 
+        {/* Search and Filters Section */}
+        <div className="space-y-6 mb-8">
+          <div className="flex gap-4 items-center">
+            <div className="flex-1 relative">
+              <Search className={`absolute left-4 top-1/2 transform -translate-y-1/2 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'} w-5 h-5`} />
+              <input
+                type="text"
+                placeholder="Search posts..."
+                value={searchQuery}
+                onChange={(e) => handleSearch(e.target.value)}
+                className={`w-full pl-12 pr-4 py-3 rounded-xl border text-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 
+                ${isDarkMode
+                  ? 'bg-gray-800 border-gray-700 text-gray-100 placeholder-gray-400' 
+                  : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500'}`}
+              />
+            </div>
+          </div>
+
+          {/* Tags Filter */}
+          <div className="space-y-2">
+            <h3 className={`text-sm font-medium flex items-center gap-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+              <LucideTag className="w-4 h-4" />
+              Tags
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {availableTags.map((tag) => (
+                <button
+                  key={tag.id}
+                  onClick={() => handleTagSelect(tag.id.toString())}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all transform hover:scale-105
+                  ${selectedTagIds.includes(tag.id.toString())
+                    ? 'bg-blue-500 text-white shadow-md'
+                    : isDarkMode
+                      ? 'bg-gray-800 text-gray-300 border border-gray-700 hover:bg-gray-750'
+                      : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+                  }`}
+                >
+                  {tag.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
         {/* Controls */}
         <div className="flex justify-between items-center mb-6">
           <div className="flex space-x-4">
@@ -301,10 +427,10 @@ const fetchPosts = useCallback(async () => {
                 isDarkMode ? 'border-white' : 'border-gray-900'
               }`} />
             </div>
-          ) : posts.length > 0 ? (
+          ) : posts?.length > 0 ? (
             <>
               <div className="space-y-4">
-                {posts.map(post => (
+                {posts?.map(post => (
                   <BlogPostCard
                     key={post.id}
                     post={post}

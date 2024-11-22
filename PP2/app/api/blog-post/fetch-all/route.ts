@@ -65,8 +65,7 @@ export async function handler(req: AuthenticatedRequest): Promise<NextResponse<B
 
   const page = parseInt(searchParams.get('page') || '1');
   const limit = parseInt(searchParams.get('limit') || '10');
-  const title = searchParams.get('title');
-  const description = searchParams.get('description');
+  const searchQuery = searchParams.get('search');
   const authorId = searchParams.get('authorId');
   const tag_ids_param = searchParams.get('tag_ids');
   const code_template_ids_param = searchParams.get('code_template_ids');
@@ -86,23 +85,34 @@ export async function handler(req: AuthenticatedRequest): Promise<NextResponse<B
   const tag_ids = tag_ids_param ? parseStringToNumberArray(tag_ids_param) : [];
   const code_template_ids = code_template_ids_param ? parseStringToNumberArray(code_template_ids_param) : [];
 
-  // Print to console to see why an admin can't see a hidden post
-  console.log(`authResult.user!.id: ${authResult.user!.id}`);
-  console.log(`authResult.user!.role: ${authResult.user!.role}`);
-
   try {
     const where: Prisma.BlogPostWhereInput = {};
+    let conditions: Prisma.BlogPostWhereInput[] = [];
 
-    if (title) {
-      where.title = {
-        contains: title.toLowerCase()
-      };
-    }
-
-    if (description) {
-      where.description = {
-        contains: description.toLocaleLowerCase()
-      };
+    // Modified search to work with SQLite
+    if (searchQuery) {
+      const searchLower = searchQuery.toLowerCase();
+      where.OR = [
+        {
+          title: {
+            contains: searchLower
+          }
+        },
+        {
+          description: {
+            contains: searchLower
+          }
+        },
+        {
+          codeTemplates: {
+            some: {
+              title: {
+                contains: searchLower
+              }
+            }
+          }
+        }
+      ];
     }
 
     if (authorId) {
@@ -110,23 +120,28 @@ export async function handler(req: AuthenticatedRequest): Promise<NextResponse<B
     }
 
     if (tag_ids?.length > 0) {
-      where.AND = tag_ids.map(id => ({
+      // Create a separate condition for each tag ID - all must match
+      const tagConditions = tag_ids.map(tagId => ({
         tags: {
           some: {
-            id: id
+            id: tagId
           }
         }
       }));
+      // Push all tag conditions to ensure ALL selected tags must exist
+      conditions.push(...tagConditions);
     }
 
     if (code_template_ids?.length > 0) {
-      where.AND = code_template_ids.map(id => ({
+      conditions.push({
         codeTemplates: {
           some: {
-            id: id
+            id: {
+              in: code_template_ids
+            }
           }
         }
-      }));
+      });
     }
 
     // Add the condition to show hidden posts only for admins or the post author
@@ -134,15 +149,20 @@ export async function handler(req: AuthenticatedRequest): Promise<NextResponse<B
       if (authResult.user!.role === 'ADMIN') {
         // Do nothing, admin can see all posts
       } else {
-        // Show only non-hidden posts or posts where the user is the author
-        where.OR = [
-          { isHidden: false },
-          { authorId: authResult.user!.id }
-        ];
+        conditions.push({
+          OR: [
+            { isHidden: false },
+            { authorId: authResult.user!.id }
+          ]
+        });
       }
     } else {
-      // Show only non-hidden posts for unauthenticated users
-      where.isHidden = false;
+      conditions.push({ isHidden: false });
+    }
+
+    // Combine all conditions
+    if (conditions.length > 0) {
+      where.AND = conditions;
     }
 
     const totalCount = await prisma.blogPost.count({

@@ -287,7 +287,7 @@ const CommentSection: FC<CommentSectionProps> = ({ postId }) => {
       ) : (
         <>
           <div className="space-y-4">
-            {comments.map(comment => (
+            {comments?.map(comment => (
               <CommentCard
                 key={comment.id}
                 comment={comment}
