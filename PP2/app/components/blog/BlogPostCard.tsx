@@ -152,24 +152,37 @@ const BlogPostCard: FC<BlogPostCardProps> = ({
       {/* Code Templates */}
       {post.codeTemplates.length > 0 && (
         <div className="mb-4 overflow-x-auto">
-          <div className="flex space-x-4">
+          <div className="flex space-x-4 pb-2"> {/* Added pb-2 to ensure hover shadow is visible */}
             {post.codeTemplates.map(template => (
               <div
                 key={template.id}
-                className={`flex-none w-72 p-4 border rounded ${
-                  isDarkMode 
-                    ? 'border-gray-700' 
-                    : 'border-gray-200'
-                }`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.location.href = `/code-template/${template.id}`;
+                }}
+                className={`flex-none w-72 p-4 border rounded cursor-pointer 
+                  transition-colors duration-200
+                  ${isDarkMode 
+                    ? 'border-gray-700 bg-gray-800 hover:bg-gray-750 hover:border-blue-500' 
+                    : 'border-gray-200 bg-white hover:bg-blue-50 hover:border-blue-300'
+                  }`}
               >
-                <h3 className="font-semibold mb-1">{template.title}</h3>
+                <h3 className={`font-semibold mb-1 transition-colors duration-200 ${
+                  isDarkMode 
+                    ? 'text-gray-100 group-hover:text-white' 
+                    : 'text-gray-900 group-hover:text-blue-800'
+                }`}>
+                  {template.title}
+                </h3>
                 <p className={`text-sm mb-2 ${
                   isDarkMode ? 'text-gray-400' : 'text-gray-600'
                 }`}>
                   by {template.author.firstName} {template.author.lastName}
                 </p>
                 <span className={`inline-block px-2 py-1 text-sm rounded ${
-                  isDarkMode ? 'bg-gray-700' : 'bg-gray-100'
+                  isDarkMode 
+                    ? 'bg-gray-700 text-gray-300' 
+                    : 'bg-gray-100 text-gray-700'
                 }`}>
                   {template.language}
                 </span>
