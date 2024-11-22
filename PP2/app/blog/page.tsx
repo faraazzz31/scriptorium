@@ -119,15 +119,11 @@ const fetchPosts = useCallback(async () => {
   }, [sorting]);
 
   useEffect(() => {
-    fetchPosts();
-  }, [fetchPosts, currentPage, user]);
-
-  useEffect(() => {
     // Only fetch after component is mounted and localStorage is available
     if (typeof window !== 'undefined') {
       fetchPosts();
     }
-  }, [fetchPosts]);
+  }, [fetchPosts, currentPage, user]);
 
   const updateUrlParams = useCallback((
     page: number,
