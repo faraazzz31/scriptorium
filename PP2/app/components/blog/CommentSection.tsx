@@ -46,6 +46,12 @@ const CommentSection: FC<CommentSectionProps> = ({ postId }) => {
   const [totalCount, setTotalCount] = useState(0);
   const limit = 10; // Comments per page
 
+  const displayToast = (message: string, type: 'success' | 'error' = 'success') => {
+    setToastMessage(message);
+    setToastType(type);
+    setShowToast(true);
+  };
+
   const fetchComments = useCallback(async () => {
     try {
       setLoading(true);
@@ -200,9 +206,7 @@ const CommentSection: FC<CommentSectionProps> = ({ postId }) => {
     if (!commentText.trim()) return; // Don't submit empty comments
 
     if (!user) {
-      setToastMessage('Please log in to comment');
-      setToastType('error');
-      setShowToast(true);
+      displayToast('Please log in to comment', 'error');
       return;
     }
 
@@ -230,9 +234,7 @@ const CommentSection: FC<CommentSectionProps> = ({ postId }) => {
         setSelectedCommentId(null);
         await fetchComments();
         setNewCommentId(newCommentData.id);
-        setToastMessage('Comment posted successfully');
-        setToastType('success');
-        setShowToast(true);
+        displayToast('Comment posted successfully', 'success');
       }
     } catch (error) {
       console.error('Error posting comment:', error);
@@ -321,6 +323,7 @@ const CommentSection: FC<CommentSectionProps> = ({ postId }) => {
                 newComment={replyText}
                 onCommentChange={(value) => setReplyText(value)}
                 onSubmitReply={handleSubmitComment}
+                displayToast={displayToast}
               />
             ))}
           </div>

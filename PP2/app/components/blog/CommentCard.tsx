@@ -22,6 +22,7 @@ interface CommentCardProps {
   newComment: string;
   onCommentChange: (value: string) => void;
   onSubmitReply: (parentId: number) => Promise<void>;
+  displayToast: (message: string, type: 'success' | 'error') => void;
 }
 
 const CommentCard: FC<CommentCardProps> = ({
@@ -34,6 +35,7 @@ const CommentCard: FC<CommentCardProps> = ({
   newComment,
   onCommentChange,
   onSubmitReply,
+  displayToast,
 }) => {
   const { isDarkMode } = useTheme();
   const { user } = useAuth();
@@ -86,7 +88,10 @@ const CommentCard: FC<CommentCardProps> = ({
   };
 
   const handleVote = async (type: 'UPVOTE' | 'DOWNVOTE') => {
-    if (!user) return;
+    if (!user) {
+      displayToast('Please log in to vote', 'error');
+      return;
+    }
 
     try {
       if (type === userVote) {
@@ -244,6 +249,7 @@ const CommentCard: FC<CommentCardProps> = ({
                 newComment={newComment}
                 onCommentChange={onCommentChange}
                 onSubmitReply={onSubmitReply}
+                displayToast={displayToast}
               />
             ))}
           </div>

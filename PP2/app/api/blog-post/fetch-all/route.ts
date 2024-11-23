@@ -87,7 +87,7 @@ export async function handler(req: AuthenticatedRequest): Promise<NextResponse<B
 
   try {
     const where: Prisma.BlogPostWhereInput = {};
-    let conditions: Prisma.BlogPostWhereInput[] = [];
+    const conditions: Prisma.BlogPostWhereInput[] = [];
 
     // Modified search to work with SQLite
     if (searchQuery) {

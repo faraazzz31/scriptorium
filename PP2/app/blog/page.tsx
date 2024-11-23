@@ -66,53 +66,59 @@ export default function BlogPage() {
 
 // Directory: app/blog/page.tsx
 
-const fetchTags = useCallback(async () => {
-  try {
-    const response = await fetch('/api/tag/fetch');
-    if (response.ok) {
-      const data = await response.json();
-      setAvailableTags(data.tags);
-    }
-  } catch (error) {
-    console.error('Error fetching tags:', error);
-  }
-}, []);
+  const displayToast = (message: string, type: 'success' | 'error' = 'success') => {
+    setToastMessage(message);
+    setToastType(type);
+    setShowToast(true);
+  };
 
-const fetchPosts = useCallback(async () => {    
-  setLoading(true);
-  try {
-    const token = localStorage.getItem('accessToken');
-    
-    const params = new URLSearchParams({
-      page: currentPage.toString(),
-      limit: limit.toString(),
-      ...(searchQuery && { search: searchQuery }),
-      ...(selectedTagIds?.length > 0 && { tag_ids: JSON.stringify(selectedTagIds) }),
-      ...(sorting && { sorting })
-    });
-    
-    const response = await fetch(
-      `/api/blog-post/fetch-all?${params}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': token ? `Bearer ${token}` : '',
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-cache',
-        },
-        credentials: 'include',
+  const fetchTags = useCallback(async () => {
+    try {
+      const response = await fetch('/api/tag/fetch');
+      if (response.ok) {
+        const data = await response.json();
+        setAvailableTags(data.tags);
       }
-    );
-    const data: FetchBlogPostsResponse = await response.json();
-    
-    setPosts(data.data);
-    setTotalPages(data.totalPages);
-    setTotalCount(data.totalCount);
-  } catch (error) {
-    console.error('Error fetching posts:', error);
-  } finally {
-    setLoading(false);
-  }
-}, [currentPage, searchQuery, selectedTagIds, sorting]);
+    } catch (error) {
+      console.error('Error fetching tags:', error);
+    }
+  }, []);
+
+  const fetchPosts = useCallback(async () => {    
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('accessToken');
+      
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: limit.toString(),
+        ...(searchQuery && { search: searchQuery }),
+        ...(selectedTagIds?.length > 0 && { tag_ids: JSON.stringify(selectedTagIds) }),
+        ...(sorting && { sorting })
+      });
+      
+      const response = await fetch(
+        `/api/blog-post/fetch-all?${params}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': token ? `Bearer ${token}` : '',
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache',
+          },
+          credentials: 'include',
+        }
+      );
+      const data: FetchBlogPostsResponse = await response.json();
+      
+      setPosts(data.data);
+      setTotalPages(data.totalPages);
+      setTotalCount(data.totalCount);
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [currentPage, searchQuery, selectedTagIds, sorting]);
 
   useEffect(() => {
     setCurrentPage(1); // Reset to first page when sorting changes
@@ -295,9 +301,7 @@ const fetchPosts = useCallback(async () => {
   const handleShare = (postId: number) => {
     const url = `${window.location.origin}/blog/${postId}`;
     navigator.clipboard.writeText(url);
-    setToastMessage('Link copied to clipboard!');
-    setToastType('success');
-    setShowToast(true);
+    displayToast('Link copied to clipboard!', 'success');
   };
 
   const handleReport = (type: 'BLOG_POST' | 'COMMENT', id: number) => {
@@ -318,8 +322,7 @@ const fetchPosts = useCallback(async () => {
   
       if (response.ok) {
         await fetchPosts();
-        setToastMessage('Post created successfully!');
-        setShowToast(true);
+        displayToast('Post created successfully!', 'success');
       }
     } catch (error) {
       console.error('Error creating post:', error);
@@ -434,6 +437,7 @@ const fetchPosts = useCallback(async () => {
                     onReport={handleReport}
                     onSelect={() => router.push(`/blog/${post.id}`)}
                     showEditDelete={false}
+                    displayToast={displayToast}
                   />
                 ))}
               </div>

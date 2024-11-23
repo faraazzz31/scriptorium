@@ -31,7 +31,7 @@ export default function BlogPostPage() {
   const router = useRouter();
   const { isDarkMode, toggleDarkMode } = useTheme();
 
-  const showToastMessage = (message: string, type: 'success' | 'error' = 'success') => {
+  const displayToast = (message: string, type: 'success' | 'error' = 'success') => {
     setToastMessage(message);
     setToastType(type);
     setShowToast(true);
@@ -110,19 +110,19 @@ export default function BlogPostPage() {
           const updatedPost = await postResponse.json();
           setPost(updatedPost);
           setEditingPost(null);
-          showToastMessage('Post updated successfully', 'success');
+          displayToast('Post updated successfully', 'success');
         }
       } else {
         const error = await response.json();
         if (response.status === 403 && error.error === "Blog post is hidden, can't be edited") {
-          showToastMessage("Blog post is hidden, can't be edited", 'error');
+          displayToast("Blog post is hidden, can't be edited", 'error');
         } else {
-          showToastMessage('Error updating post', 'error');
+          displayToast('Error updating post', 'error');
         }
       }
     } catch (error) {
       console.error('Error updating post:', error);
-      showToastMessage('Error updating post', 'error');
+      displayToast('Error updating post', 'error');
     }
   };
   
@@ -147,12 +147,12 @@ export default function BlogPostPage() {
       console.error('Error deleting post:', error);
       setShowDeleteModal(false);
       setIsDeleting(false);
-      showToastMessage('Error deleting post', 'error');
+      displayToast('Error deleting post', 'error');
     }
   };
 
   const handleDeleteSuccess = () => {
-    showToastMessage('Post deleted successfully', 'success');
+    displayToast('Post deleted successfully', 'success');
     // Wait for a short moment to let the user see the toast
     setTimeout(() => {
       router.push('/blog');
@@ -162,7 +162,7 @@ export default function BlogPostPage() {
   const handleShare = (postId: number) => {
     const url = `${window.location.origin}/blog/${postId}`;
     navigator.clipboard.writeText(url);
-    showToastMessage('Link copied to clipboard!', 'success');
+    displayToast('Link copied to clipboard!', 'success');
   };
 
   const handleReport = (type: 'BLOG_POST' | 'COMMENT', id: number) => {
@@ -217,6 +217,7 @@ export default function BlogPostPage() {
           onDelete={() => setShowDeleteModal(true)}
           expanded
           showEditDelete={true}
+          displayToast={displayToast}
         />
         
         <div className="mt-8">

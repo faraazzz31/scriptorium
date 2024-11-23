@@ -14,6 +14,7 @@ interface BlogPostCardProps {
   onEdit?: (post: BlogPostWithRelations) => void;
   onDelete?: (postId: number) => void;
   showEditDelete?: boolean;
+  displayToast: (message: string, type: 'success' | 'error') => void;
 }
 
 const BlogPostCard: FC<BlogPostCardProps> = ({
@@ -25,6 +26,7 @@ const BlogPostCard: FC<BlogPostCardProps> = ({
   onEdit,
   onDelete,
   showEditDelete = false,
+  displayToast,
 }) => {
   const { isDarkMode } = useTheme();
   const { user } = useAuth();
@@ -74,7 +76,10 @@ const BlogPostCard: FC<BlogPostCardProps> = ({
 
   const handleVote = (type: 'UPVOTE' | 'DOWNVOTE') => async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!user) return;
+    if (!user) {
+      displayToast('Please log in to vote', 'error');
+      return;
+    }
 
     try {
       if (type === userVote) {
