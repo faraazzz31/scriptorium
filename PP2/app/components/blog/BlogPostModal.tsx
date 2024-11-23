@@ -3,6 +3,11 @@ import { X } from 'lucide-react';
 import { useTheme } from '../theme/ThemeContext';
 import type { BlogPostWithRelations } from '@/app/blog/page';
 
+interface Tag {
+  id: number;
+  name: string;
+}
+
 interface BlogPostModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -72,6 +77,14 @@ export default function BlogPostModal({
     }
   };
 
+  const handleTagSelect = (tag: Tag) => {
+    if (selectedTags.includes(tag.id)) {
+        setSelectedTags(selectedTags.filter((id) => id !== tag.id));
+    } else {
+        setSelectedTags([...selectedTags, tag.id]);
+    }
+};
+
   if (!isOpen) return null;
 
   return (
@@ -118,29 +131,23 @@ export default function BlogPostModal({
 
             <div>
               <label className="block font-medium mb-1">Tags</label>
-              <div className="flex flex-wrap gap-2">
-                {availableTags.map(tag => (
-                  <label
-                    key={tag.id}
-                    className={`flex items-center space-x-2 p-2 rounded ${
-                      isDarkMode ? 'bg-gray-700' : 'bg-gray-100'
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedTags.includes(tag.id)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setSelectedTags([...selectedTags, tag.id]);
-                        } else {
-                          setSelectedTags(selectedTags.filter(id => id !== tag.id));
-                        }
-                      }}
-                    />
-                    <span>{tag.name}</span>
-                  </label>
-                ))}
-              </div>
+                <div className="flex flex-wrap gap-2">
+                    {availableTags.map((tag) => (
+                        <button
+                            key={tag.id}
+                            onClick={() => handleTagSelect(tag)}
+                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all
+                                ${selectedTags.includes(tag.id)
+                                    ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/25'
+                                    : isDarkMode
+                                        ? 'bg-gray-800 hover:bg-gray-700 text-gray-300'
+                                        : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                                }`}
+                        >
+                            {tag.name}
+                        </button>
+                    ))}
+                </div>
             </div>
 
             <div className="flex justify-end space-x-2">
