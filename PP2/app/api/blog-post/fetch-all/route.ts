@@ -1,9 +1,10 @@
 // Used Github co-pilot to help me write this code
 
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient, Prisma } from '@prisma/client';
+import { PrismaClient, Prisma, User } from '@prisma/client';
 import { parseStringToNumberArray } from '@/app/utils/parseString';
 import { valueScore, controversyScore } from '@/app/utils/sortingScore';
+import { checkAuth } from '@/app/middleware/auth';
 
 const prisma = new PrismaClient();
 
@@ -32,9 +33,24 @@ interface BlogPostFetchAllResponse {
     codeTemplates: {
       id: number;
       title: string;
+      author: User;
     }[];
-    authorId: number;
     isHidden: boolean;
+    author: {
+      id: number;
+      firstName: string | null;
+      lastName: string | null;
+    };
+    _count: {
+      comments: number;
+    };
+    upvotedBy: {
+      id: number;
+    }[];
+    downvotedBy: {
+      id: number;
+    }[];
+    createdAt: Date;
   }[];
 }
 
@@ -43,12 +59,13 @@ interface ErrorResponse {
 }
 
 export async function handler(req: AuthenticatedRequest): Promise<NextResponse<BlogPostFetchAllResponse | ErrorResponse>> {
+  const authResult = await checkAuth(req);
+
   const { searchParams } = new URL(req.url);
 
   const page = parseInt(searchParams.get('page') || '1');
   const limit = parseInt(searchParams.get('limit') || '10');
-  const title = searchParams.get('title');
-  const description = searchParams.get('description');
+  const searchQuery = searchParams.get('search');
   const authorId = searchParams.get('authorId');
   const tag_ids_param = searchParams.get('tag_ids');
   const code_template_ids_param = searchParams.get('code_template_ids');
@@ -68,22 +85,34 @@ export async function handler(req: AuthenticatedRequest): Promise<NextResponse<B
   const tag_ids = tag_ids_param ? parseStringToNumberArray(tag_ids_param) : [];
   const code_template_ids = code_template_ids_param ? parseStringToNumberArray(code_template_ids_param) : [];
 
-
-  console.log(`page: ${page}, limit: ${limit}, title: ${title}, description: ${description}, tag_ids: ${tag_ids}, code_template_ids: ${code_template_ids}, sorting: ${sorting}`);
-
   try {
     const where: Prisma.BlogPostWhereInput = {};
+    const conditions: Prisma.BlogPostWhereInput[] = [];
 
-    if (title) {
-      where.title = {
-        contains: title.toLowerCase()
-      };
-    }
-
-    if (description) {
-      where.description = {
-        contains: description.toLocaleLowerCase()
-      };
+    // Modified search to work with SQLite
+    if (searchQuery) {
+      const searchLower = searchQuery.toLowerCase();
+      where.OR = [
+        {
+          title: {
+            contains: searchLower
+          }
+        },
+        {
+          description: {
+            contains: searchLower
+          }
+        },
+        {
+          codeTemplates: {
+            some: {
+              title: {
+                contains: searchLower
+              }
+            }
+          }
+        }
+      ];
     }
 
     if (authorId) {
@@ -91,45 +120,69 @@ export async function handler(req: AuthenticatedRequest): Promise<NextResponse<B
     }
 
     if (tag_ids?.length > 0) {
-      where.AND = tag_ids.map(id => ({
+      // Create a separate condition for each tag ID - all must match
+      const tagConditions = tag_ids.map(tagId => ({
         tags: {
           some: {
-            id: id
+            id: tagId
           }
         }
       }));
+      // Push all tag conditions to ensure ALL selected tags must exist
+      conditions.push(...tagConditions);
     }
 
     if (code_template_ids?.length > 0) {
-      where.AND = code_template_ids.map(id => ({
+      conditions.push({
         codeTemplates: {
           some: {
-            id: id
+            id: {
+              in: code_template_ids
+            }
           }
         }
-      }));
+      });
     }
 
-    console.log(`where: ${JSON.stringify(where)}`);
+    // Add the condition to show hidden posts only for admins or the post author
+    if (authResult.isAuthenticated) {
+      if (authResult.user!.role === 'ADMIN') {
+        // Do nothing, admin can see all posts
+      } else {
+        conditions.push({
+          OR: [
+            { isHidden: false },
+            { authorId: authResult.user!.id }
+          ]
+        });
+      }
+    } else {
+      conditions.push({ isHidden: false });
+    }
+
+    // Combine all conditions
+    if (conditions.length > 0) {
+      where.AND = conditions;
+    }
 
     const totalCount = await prisma.blogPost.count({
       where: where,
     });
 
-    console.log(`totalCount: ${totalCount}`);
-
     const offset = (page - 1) * limit;
 
     let blogPosts = await prisma.blogPost.findMany({
-      skip: offset,
-      take: limit,
       where: where,
+      orderBy: {
+        createdAt: 'desc',
+      },
       select: {
         id: true,
         title: true,
         description: true,
         upvotes: true,
         downvotes: true,
+        createdAt: true,
         tags: {
           select: {
             id: true,
@@ -140,24 +193,46 @@ export async function handler(req: AuthenticatedRequest): Promise<NextResponse<B
           select: {
             id: true,
             title: true,
+            author: true,
           }
         },
-        authorId: true,
         isHidden: true,
+        author: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+          }
+        },
+        _count: {
+          select: {
+            comments: true
+          }
+        },
+        upvotedBy: {
+          select: {
+            id: true
+          }
+        },
+        downvotedBy: {
+          select: {
+            id: true
+          }
+        },
       }
     });
 
-    console.log(`blogPosts: ${JSON.stringify(blogPosts)}`);
-
+    // Sorting
     if (sorting === 'Most valued') {
       blogPosts = blogPosts.sort((a, b) => valueScore(b.upvotes, b.downvotes) - valueScore(a.upvotes, a.downvotes));
     } else if (sorting === 'Most controversial') {
       blogPosts = blogPosts.sort((a, b) => controversyScore(b.upvotes, b.downvotes) - controversyScore(a.upvotes, a.downvotes));
     }
 
-    console.log(`blogPosts after sorting: ${JSON.stringify(blogPosts)}`);
+    // Paginate
+    blogPosts = blogPosts.slice(offset, offset + limit);
 
-    const totalPages = Math.ceil(blogPosts.length / limit);
+    const totalPages = Math.ceil(totalCount / limit);
 
     return NextResponse.json({
       sorting: sorting ? sorting : 'No sorting',

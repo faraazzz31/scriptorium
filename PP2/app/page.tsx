@@ -101,9 +101,13 @@ export default function Home(): JSX.Element {
       } else {
         setOutput(data.error || `Error: ${response.status} ${response.statusText}`);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error in runCode:', error);
-      setOutput(`Error: ${error.message}`);
+      if (error instanceof Error) {
+        setOutput(`Error: ${error.message}`);
+      } else {
+        setOutput('An unknown error occurred');
+      }
     } finally {
       setIsRunning(false);
     }
