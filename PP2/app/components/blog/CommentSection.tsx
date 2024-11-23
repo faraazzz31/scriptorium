@@ -5,6 +5,7 @@ import { useTheme } from '../theme/ThemeContext';
 import CommentCard from './CommentCard';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import ReportModal from './ReportModal';
+import Toast from '../ui/Toast';
 
 interface CommentWithRelations extends Comment {
   author: User;
@@ -32,9 +33,13 @@ const CommentSection: FC<CommentSectionProps> = ({ postId }) => {
   const [sorting, setSorting] = useState<'Most valued' | 'Most controversial' | null>(null);
   const [newComment, setNewComment] = useState('');
   const [newCommentId, setNewCommentId] = useState<number | null>(null);
+  const [replyText, setReplyText] = useState('');
   const [selectedCommentId, setSelectedCommentId] = useState<number | null>(null);
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportTarget, setReportTarget] = useState<{ type: 'BLOG_POST' | 'COMMENT', id: number } | null>(null);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState<'success' | 'error'>('success');
   
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -190,7 +195,17 @@ const CommentSection: FC<CommentSectionProps> = ({ postId }) => {
   };
 
   const handleSubmitComment = async (parentId?: number) => {
-    if (!user || !newComment.trim()) return;
+    const commentText = parentId ? replyText : newComment;
+
+    if (!commentText.trim()) return; // Don't submit empty comments
+
+    if (!user) {
+      setToastMessage('Please log in to comment');
+      setToastType('error');
+      setShowToast(true);
+      return;
+    }
+
     try {
       const response = await fetch('/api/comment/create', {
         method: 'POST',
@@ -207,10 +222,17 @@ const CommentSection: FC<CommentSectionProps> = ({ postId }) => {
       });
       if (response.ok) {
         const newCommentData = await response.json();
-        setNewComment('');
+        if (parentId) {
+          setReplyText('');
+        } else {
+          setNewComment('');
+        }
         setSelectedCommentId(null);
         await fetchComments();
-        setNewCommentId(newCommentData.id); // Set the new comment ID
+        setNewCommentId(newCommentData.id);
+        setToastMessage('Comment posted successfully');
+        setToastType('success');
+        setShowToast(true);
       }
     } catch (error) {
       console.error('Error posting comment:', error);
@@ -235,31 +257,29 @@ const CommentSection: FC<CommentSectionProps> = ({ postId }) => {
   return (
     <div className="mt-6">
       {/* New comment input */}
-      {user && (
-        <div className="mb-6">
-          <textarea
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            placeholder="Add a comment..."
-            className={`w-full p-3 rounded-lg border ${
-              isDarkMode 
-                ? 'bg-gray-800 border-gray-700' 
-                : 'bg-white border-gray-300'
-            }`}
-            rows={3}
-          />
-          <button
-            onClick={() => handleSubmitComment()}
-            className={`mt-2 px-4 py-2 rounded-lg text-white ${
-              isDarkMode
-                ? 'bg-teal-600 hover:bg-teal-700'
-                : 'bg-emerald-500 hover:bg-emerald-600'
-            }`}
-          >
-            Comment
-          </button>
-        </div>
-      )}
+      <div className="mb-6">
+        <textarea
+          value={newComment}
+          onChange={(e) => setNewComment(e.target.value)}
+          placeholder="Add a comment..."
+          className={`w-full p-3 rounded-lg border ${
+            isDarkMode 
+              ? 'bg-gray-800 border-gray-700' 
+              : 'bg-white border-gray-300'
+          }`}
+          rows={3}
+        />
+        <button
+          onClick={() => handleSubmitComment()}
+          className={`mt-2 px-4 py-2 rounded-lg text-white ${
+            isDarkMode
+              ? 'bg-teal-600 hover:bg-teal-700'
+              : 'bg-emerald-500 hover:bg-emerald-600'
+          }`}
+        >
+          Comment
+        </button>
+      </div>
 
       {/* Comments sorting dropdown */}
       <div className="flex justify-between items-center mb-4">
@@ -296,10 +316,10 @@ const CommentSection: FC<CommentSectionProps> = ({ postId }) => {
                 selectedCommentId={selectedCommentId}
                 onCancelReply={() => {
                   setSelectedCommentId(null);
-                  setNewComment('');
+                  setReplyText('');
                 }}
-                newComment={newComment}
-                onCommentChange={(value) => setNewComment(value)}
+                newComment={replyText}
+                onCommentChange={(value) => setReplyText(value)}
                 onSubmitReply={handleSubmitComment}
               />
             ))}
@@ -318,6 +338,15 @@ const CommentSection: FC<CommentSectionProps> = ({ postId }) => {
             setShowReportModal(false);
             setReportTarget(null);
           }}
+        />
+      )}
+
+      {/* Rejection Toast */}
+      {showToast && (
+        <Toast
+          message={toastMessage}
+          onClose={() => setShowToast(false)}
+          type={toastType}
         />
       )}
     </div>

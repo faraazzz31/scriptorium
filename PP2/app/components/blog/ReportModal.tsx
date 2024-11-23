@@ -131,7 +131,7 @@ const ReportModal: FC<ReportModalProps> = ({ type, contentId, onClose }) => {
           </div>
         </div>
       </div>
-      {/* Rejection Toast */}
+      {/* Toast */}
       {showToast && (
         <Toast
           message={toastMessage}
