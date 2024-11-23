@@ -11,6 +11,7 @@ import ForksList from './ForksList';
 import { DeleteConfirmationModal } from './DeleteConfirmation';
 import BlogPostsList from './BlogPostsList';
 import { GitFork, BookOpen } from 'lucide-react';
+import ErrorPageCodeTemplate from './ErrorPageCodeTemplate';
 
 interface CodeTemplateDetailsProps {
     templateId: number;
@@ -56,6 +57,7 @@ const CodeTemplateDetails = ({ templateId }: CodeTemplateDetailsProps) => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [showForks, setShowForks] = useState(true);
     const [error, setError] = useState('');
+    const [templateNotFound, setTemplateNotFound] = useState(false);
 
     const [input, setInput] = useState<string>('');
     const [output, setOutput] = useState<string>('');
@@ -74,6 +76,8 @@ const CodeTemplateDetails = ({ templateId }: CodeTemplateDetailsProps) => {
                 const response = await fetch(`/api/code-template/fetch?id=${templateId}`);
                 if (!response.ok) {
                     setError('Failed to fetch template');
+                    setTemplateNotFound(true);
+                    return;
                 }
                 const { data } = await response.json();
                 console.log('Fetched template:', JSON.stringify(data));
@@ -227,6 +231,10 @@ const CodeTemplateDetails = ({ templateId }: CodeTemplateDetailsProps) => {
             setIsDeleting(false);
         }
     };
+
+    if (templateNotFound) {
+        return <ErrorPageCodeTemplate message="Template not found" status={404} />;
+    }
 
     if (!template) {
         return (

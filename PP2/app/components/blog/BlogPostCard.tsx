@@ -136,11 +136,11 @@ const BlogPostCard: FC<BlogPostCardProps> = ({
         {post.tags.map(tag => (
           <span
             key={tag.id}
-            className={`px-2 py-1 ${
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
               isDarkMode 
                 ? 'bg-blue-900 text-blue-100' 
                 : 'bg-blue-100 text-blue-800'
-            } text-sm rounded`}
+            }`}
           >
             {tag.name}
           </span>
