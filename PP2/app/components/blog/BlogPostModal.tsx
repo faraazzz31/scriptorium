@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { useTheme } from '../theme/ThemeContext';
 import type { BlogPostWithRelations } from '@/app/blog/page';
+import { is } from 'date-fns/locale';
 
 interface Tag {
   id: number;
@@ -31,16 +32,18 @@ export default function BlogPostModal({
   const { isDarkMode } = useTheme();
 
   useEffect(() => {
-    if (initialData && mode === 'edit') {
-      setTitle(initialData.title);
-      setDescription(initialData.description);
-      setSelectedTags(initialData.tags.map(tag => tag.id));
-    } else {
-      setTitle('');
-      setDescription('');
-      setSelectedTags([]);
+    if (isOpen) {
+      if (initialData && mode === 'edit') {
+        setTitle(initialData.title);
+        setDescription(initialData.description);
+        setSelectedTags(initialData.tags.map(tag => tag.id));
+      } else {
+        setTitle('');
+        setDescription('');
+        setSelectedTags([]);
+      }
     }
-  }, [initialData, mode]);
+  }, [initialData, mode, isOpen]);
 
   useEffect(() => {
     const fetchTags = async () => {
@@ -77,13 +80,14 @@ export default function BlogPostModal({
     }
   };
 
-  const handleTagSelect = (tag: Tag) => {
+  const handleTagSelect = (e: React.MouseEvent, tag: Tag) => {
+    e.preventDefault(); // Prevent any form submission
     if (selectedTags.includes(tag.id)) {
         setSelectedTags(selectedTags.filter((id) => id !== tag.id));
     } else {
         setSelectedTags([...selectedTags, tag.id]);
     }
-};
+  };
 
   if (!isOpen) return null;
 
@@ -135,7 +139,8 @@ export default function BlogPostModal({
                     {availableTags.map((tag) => (
                         <button
                             key={tag.id}
-                            onClick={() => handleTagSelect(tag)}
+                            type="button"
+                            onClick={(e) => handleTagSelect(e, tag)}
                             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all
                                 ${selectedTags.includes(tag.id)
                                     ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/25'
