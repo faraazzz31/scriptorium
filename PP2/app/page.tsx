@@ -7,14 +7,14 @@ import { python } from '@codemirror/lang-python';
 import { javascript } from '@codemirror/lang-javascript';
 import { java } from '@codemirror/lang-java';
 import { cpp } from '@codemirror/lang-cpp';
-import { Moon, Sun, Play, Menu, X } from 'lucide-react';
-import Link from 'next/link';
-import Image from 'next/image'
-
-interface Tag {
-  id: string;
-  name: string;
-}
+import { php } from '@codemirror/lang-php';
+import { go } from '@codemirror/lang-go';
+import { Play } from 'lucide-react';
+import Navbar from '@/app/components/Navbar';
+import { useTheme } from '@/app/components/theme/ThemeContext';
+import SaveCodeTemplate from './components/code-template/SaveCodeTemplate';
+import { LoginModal } from './components/auth/LoginModal';
+import { SignupModal } from './components/auth/SignupModal';
 
 interface CodeMap {
   [key: string]: string;
@@ -39,8 +39,29 @@ int main() {
 int main() {
     std::cout << "Hello, World!" << std::endl;
     return 0;
-}`
+}`,
+  typescript: `console.log("Hello, World!");`,
+  go: `package main
+
+import "fmt"
+
+func main() {
+    fmt.Println("Hello, World!")
+}`,
+  ruby: `puts "Hello, World!"`,
+  kotlin: `fun main() {
+    println("Hello, World!")
+}`,
+  php: `<?php
+echo "Hello, World!";
+?>`
 };
+
+// New type for the execute response
+interface ExecuteResponse {
+  output?: string;
+  error?: string;
+}
 
 export default function Home(): JSX.Element {
   const [code, setCode] = useState<string>(defaultCode.java);
@@ -48,40 +69,11 @@ export default function Home(): JSX.Element {
   const [language, setLanguage] = useState<string>('java');
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [input, setInput] = useState<string>('');
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
-  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
-
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
-  const [templateTitle, setTemplateTitle] = useState<string>('');
-  const [templateExplanation, setTemplateExplanation] = useState<string>('');
-  const [selectedTag, setSelectedTag] = useState<string>('');
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false);
+  const [isSignupModalOpen, setIsSignupModalOpen] = useState<boolean>(false);
 
-  // const [tags, setTags] = useState<Tag[]>([]);
-  //
-  // useEffect(() => {
-  //   const fetchTags = async () => {
-  //     try {
-  //       const response = await fetch('/api/tag/fetch');
-  //       const data = await response.json();
-  //       setTags(data);
-  //     } catch (error) {
-  //       console.error('Error fetching tags:', error);
-  //     }
-  //   };
-  //
-  //   fetchTags();
-  // }, []);
-
-  useEffect(() => {
-    const darkModePreference = localStorage.getItem('darkMode');
-    setIsDarkMode(darkModePreference === 'true');
-  }, []);
-
-  const toggleDarkMode = () => {
-    const newDarkMode = !isDarkMode;
-    setIsDarkMode(newDarkMode);
-    localStorage.setItem('darkMode', newDarkMode.toString());
-  };
+  const { isDarkMode, toggleDarkMode } = useTheme();
 
   useEffect(() => {
     setCode(defaultCode[language]);
@@ -92,23 +84,30 @@ export default function Home(): JSX.Element {
     setIsRunning(true);
 
     try {
-      const apiEndpoint: string = `/api/run-${language}`;
-      const response: Response = await fetch(apiEndpoint, {
+      const response = await fetch('/api/execute', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code, input }),
+        body: JSON.stringify({
+          language,
+          code,
+          input
+        }),
       });
 
-      const data = await response.json();
+      const data: ExecuteResponse = await response.json();
 
       if (response.ok) {
         setOutput(data.output || 'No output');
       } else {
         setOutput(data.error || `Error: ${response.status} ${response.statusText}`);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error in runCode:', error);
-      setOutput(`Error: ${error.message}`);
+      if (error instanceof Error) {
+        setOutput(`Error: ${error.message}`);
+      } else {
+        setOutput('An unknown error occurred');
+      }
     } finally {
       setIsRunning(false);
     }
@@ -121,119 +120,23 @@ export default function Home(): JSX.Element {
       case 'java': return java();
       case 'c':
       case 'cpp': return cpp();
+      case 'php': return php();
+      case 'go': return go();
       default: return javascript();
     }
-  };
-
-  const languageDisplay: { [key: string]: string } = {
-    'java': 'Java',
-    'python': 'Python',
-    'javascript': 'JavaScript',
-    'c': 'C',
-    'cpp': 'C++'
   };
 
   return (
       <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'}`}>
         {/* Navigation Bar */}
-        <nav className={`border-b ${isDarkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'}`}>
-          <div className="w-full px-2"> {/* Modified this div */}
-            <div className="flex items-center h-16">  {/* Removed justify-between */}
-              {/* Logo and Brand */}
-              <div className="flex items-center pl-0"> {/* Modified this div */}
-                <Image
-                    src="favicon.ico"
-                    alt="Scriptorium Logo"
-                    width={32}
-                    height={32}
-                    className="h-8 w-8"
-                />
-                <span className="text-2xl font-bold ml-2">Scriptorium</span>
-              </div>
-
-              {/* Desktop Navigation */}
-              <div className="hidden md:flex items-center justify-center flex-1">
-                <div className="flex space-x-8">
-                  <Link href="/editor"
-                        className={`${isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-black'} px-3 py-2 rounded-md text-sm font-medium`}>
-                    Code Editor
-                  </Link>
-                  <Link href="/blog"
-                        className={`${isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-black'} px-3 py-2 rounded-md text-sm font-medium`}>
-                    Blog Posts
-                  </Link>
-                  <Link href="/templates"
-                        className={`${isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-black'} px-3 py-2 rounded-md text-sm font-medium`}>
-                    Code Templates
-                  </Link>
-                </div>
-              </div>
-
-              {/* Right side items */}
-              <div className="hidden md:flex items-center space-x-4">
-                <Link href="/login"
-                      className={`${isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-black'} px-3 py-2 rounded-md text-sm font-medium`}>
-                  Login
-                </Link>
-                <button
-                    onClick={toggleDarkMode}
-                    className={`p-2 rounded-full ${isDarkMode ? 'bg-yellow-400 text-gray-900' : 'bg-gray-700 text-white'}`}
-                >
-                  {isDarkMode ? <Sun size={20}/> : <Moon size={20}/>}
-                </button>
-              </div>
-
-              {/* Mobile menu button */}
-              <div className="md:hidden flex items-center">
-                <button
-                    onClick={() => setIsMenuOpen(!isMenuOpen)}
-                    className={`p-2 rounded-md ${isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-black'}`}
-                >
-                  {isMenuOpen ? <X size={24}/> : <Menu size={24}/>}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Mobile menu */}
-          {isMenuOpen && (
-              <div className="md:hidden">
-                <div className={`px-2 pt-2 pb-3 space-y-1 ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
-                  <Link href="/editor"
-                        className={`block px-3 py-2 rounded-md text-base font-medium ${isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-black'}`}>
-                    Code Editor
-                  </Link>
-                  <Link href="/blog"
-                        className={`block px-3 py-2 rounded-md text-base font-medium ${isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-black'}`}>
-                    Blog Posts
-                  </Link>
-                  <Link href="/templates"
-                        className={`block px-3 py-2 rounded-md text-base font-medium ${isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-black'}`}>
-                    Code Templates
-                  </Link>
-                  <Link href="/login"
-                        className={`block px-3 py-2 rounded-md text-base font-medium ${isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-black'}`}>
-                    Login
-                  </Link>
-                  <div className="px-3 py-2">
-                    <button
-                        onClick={toggleDarkMode}
-                        className={`p-2 rounded-full ${isDarkMode ? 'bg-yellow-400 text-gray-900' : 'bg-gray-700 text-white'}`}
-                    >
-                      {isDarkMode ? <Sun size={20}/> : <Moon size={20}/>}
-                    </button>
-                  </div>
-                </div>
-              </div>
-          )}
-        </nav>
+        <Navbar isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
 
         {/* Main Content */}
         <div className="container mx-auto p-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div className="space-y-4">
-              <div className="flex items-center gap-4"> {/* Modified this div */}
-                <div className="flex items-center space-x-2"> {/* Wrapped language selector */}
+              <div className="flex items-center gap-4">
+                <div className="flex items-center space-x-2">
                   <label className="font-semibold">Language:</label>
                   <select
                       value={language}
@@ -245,12 +148,17 @@ export default function Home(): JSX.Element {
                     <option value="javascript">JavaScript</option>
                     <option value="c">C</option>
                     <option value="cpp">C++</option>
+                    <option value="typescript">TypeScript</option>
+                    <option value="go">Go</option>
+                    <option value="ruby">Ruby</option>
+                    <option value="kotlin">Kotlin</option>
+                    <option value="php">PHP</option>
                   </select>
                 </div>
 
                 <button
                     onClick={() => setIsDialogOpen(true)}
-                    className={`p-2 rounded bg-blue-500 hover:bg-blue-600 text-white flex items-center h-[35px]`}
+                    className="p-2 rounded bg-blue-500 hover:bg-blue-600 text-white flex items-center h-[35px]"
                 >
                   <svg
                       className="w-4 h-4 mr-2"
@@ -268,7 +176,6 @@ export default function Home(): JSX.Element {
                   Save Template
                 </button>
               </div>
-
 
               <CodeMirror
                   value={code}
@@ -298,7 +205,7 @@ export default function Home(): JSX.Element {
                           : 'bg-emerald-500 hover:bg-emerald-600 text-white'
                   } ${isRunning ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
-                <Play size={20} className="mr-2"/>
+                <Play size={20} className="mr-2" />
                 {isRunning ? 'Running...' : 'Run Code'}
               </button>
             </div>
@@ -315,143 +222,33 @@ export default function Home(): JSX.Element {
             </div>
           </div>
         </div>
-        {isDialogOpen && (
-            <div
-                className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-auto">
-              <div
-                  className={`relative w-full max-w-3xl rounded-lg shadow-lg ${isDarkMode ? 'bg-gray-800 text-white' : 'bg-white'}`}>
-                {/* Header */}
-                <div className="p-6 pb-0">
-                  <h2 className="text-xl font-semibold">Save Code Template</h2>
-                </div>
 
-                {/* Content */}
-                <div className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
-                  {/* Title Input */}
-                  <div className="space-y-2">
-                    <label htmlFor="title" className="text-sm font-medium block">
-                      Title
-                    </label>
-                    <input
-                        id="title"
-                        type="text"
-                        value={templateTitle}
-                        onChange={(e) => setTemplateTitle(e.target.value)}
-                        className={`w-full p-2 rounded border ${
-                            isDarkMode
-                                ? 'bg-gray-700 border-gray-600 text-white'
-                                : 'bg-white border-gray-300'
-                        }`}
-                        placeholder="Enter template title"
-                    />
-                  </div>
-
-                  {/* Explanation Textarea */}
-                  <div className="space-y-2">
-                    <label htmlFor="explanation" className="text-sm font-medium block">
-                      Explanation
-                    </label>
-                    <textarea
-                        id="explanation"
-                        value={templateExplanation}
-                        onChange={(e) => setTemplateExplanation(e.target.value)}
-                        className={`w-full p-2 rounded border ${
-                            isDarkMode
-                                ? 'bg-gray-700 border-gray-600 text-white'
-                                : 'bg-white border-gray-300'
-                        }`}
-                        placeholder="Explain the purpose of this template"
-                        rows={3}
-                    />
-                  </div>
-
-                  {/* Tag Select */}
-                  <div className="space-y-2">
-                    <label htmlFor="tag" className="text-sm font-medium block">
-                      Tag
-                    </label>
-                    <select
-                        id="tag"
-                        value={selectedTag}
-                        onChange={(e) => setSelectedTag(e.target.value)}
-                        className={`w-full p-2 rounded border ${
-                            isDarkMode
-                                ? 'bg-gray-700 border-gray-600 text-white'
-                                : 'bg-white border-gray-300'
-                        }`}
-                    >
-                      <option value="">Select a tag</option>
-                      {/*{tags.map((tag) => (*/}
-                      {/*    <option key={tag.id} value={tag.id}>*/}
-                      {/*      {tag.name}*/}
-                      {/*    </option>*/}
-                      {/*))}*/}
-                    </select>
-                  </div>
-
-                  {/* Language Display */}
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium block">
-                      Language
-                    </label>
-                    <div className={`p-2 rounded ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
-                      {languageDisplay[language]}
-                    </div>
-                  </div>
-
-                  {/* Code Display */}
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium block">
-                      Code
-                    </label>
-                    <div className="h-[300px] relative">
-                      <CodeMirror
-                          value={code}
-                          height="100%"
-                          theme={isDarkMode ? oneDark : undefined}
-                          extensions={[getLanguageMode()]}
-                          editable={false}
-                          className="border rounded"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Footer with buttons - fixed at bottom */}
-                <div className="p-6 pt-2 border-t border-gray-200 dark:border-gray-700">
-                  <div className="flex justify-end space-x-2">
-                    <button
-                        onClick={() => setIsDialogOpen(false)}
-                        className={`px-4 py-2 rounded ${
-                            isDarkMode
-                                ? 'bg-gray-600 hover:bg-gray-700'
-                                : 'bg-gray-200 hover:bg-gray-300'
-                        }`}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                        onClick={() => {
-                          // Save logic will go here
-                          setIsDialogOpen(false);
-                        }}
-                        className="px-4 py-2 rounded bg-blue-500 hover:bg-blue-600 text-white"
-                    >
-                      Save
-                    </button>
-                  </div>
-                </div>
-
-                {/* Close button */}
-                <button
-                    onClick={() => setIsDialogOpen(false)}
-                    className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
-                >
-                  ✕
-                </button>
-              </div>
-            </div>
-        )}
+        {/* Modals */}
+        <SaveCodeTemplate
+            code={code}
+            language={language}
+            isOpen={isDialogOpen}
+            onClose={() => setIsDialogOpen(false)}
+            onSwitchToLogin={() => setIsLoginModalOpen(true)}
+        />
+        <LoginModal
+            isOpen={isLoginModalOpen}
+            onClose={() => setIsLoginModalOpen(false)}
+            onSwitchToSignup={() => {
+              setIsLoginModalOpen(false);
+              setIsSignupModalOpen(true);
+            }}
+            isDarkMode={isDarkMode}
+        />
+        <SignupModal
+            isOpen={isSignupModalOpen}
+            onClose={() => setIsSignupModalOpen(false)}
+            onSwitchToLogin={() => {
+              setIsLoginModalOpen(false);
+              setIsSignupModalOpen(true);
+            }}
+            isDarkMode={isDarkMode}
+        />
       </div>
   );
 }

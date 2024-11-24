@@ -1,18 +1,9 @@
 // Used Github co-pilot to help me write this code
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { withAuth } from '@/app/middleware/auth';
 
 const prisma = new PrismaClient();
-
-interface AuthenticatedRequest extends NextRequest {
-  user?: {
-    id: number;
-    email: string;
-    role: string;
-  };
-}
 
 interface TagFetchResponse {
   tags: {
@@ -25,13 +16,7 @@ interface ErrorResponse {
   error: string;
 }
 
-async function handler(req: AuthenticatedRequest): Promise<NextResponse<TagFetchResponse | ErrorResponse>> {
-  const user = req.user;
-
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
+export async function GET (): Promise<NextResponse<TagFetchResponse | ErrorResponse>> {
   try {
     const tags = await prisma.tag.findMany({
       select: {
@@ -49,5 +34,3 @@ async function handler(req: AuthenticatedRequest): Promise<NextResponse<TagFetch
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
-
-export const GET = withAuth(handler);

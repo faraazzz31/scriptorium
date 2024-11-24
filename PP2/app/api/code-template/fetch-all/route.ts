@@ -1,5 +1,3 @@
-// Used Github co-pilot to help me write this code
-
 import { NextRequest, NextResponse } from 'next/server';
 import { Prisma, PrismaClient } from '@prisma/client';
 
@@ -26,12 +24,12 @@ export async function GET(req: AuthenticatedRequest): Promise<NextResponse<CodeT
     const { searchParams } = new URL(req.url);
 
     const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '10');
-    const title = searchParams.get('title');
+    const limit = parseInt(searchParams.get('limit') || '6');
+    const query = searchParams.get('query');
+    const language = searchParams.get('language');
     const tag_id = searchParams.get('tag_id');
-    const explanation = searchParams.get('explanation');
 
-    console.log(`page: ${page}, limit: ${limit}, title: ${title}, tag_id: ${tag_id}, explanation: ${explanation}`);
+    console.log(`page: ${page}, limit: ${limit}, searchQuery: ${query}, tag_id: ${tag_id}`);
 
     if (page < 1 || limit < 1) {
         return NextResponse.json({ error: 'Invalid page or limit' }, { status: 400 });
@@ -40,16 +38,24 @@ export async function GET(req: AuthenticatedRequest): Promise<NextResponse<CodeT
     try {
         const where: Prisma.CodeTemplateWhereInput = {};
 
-        if (title) {
-            where.title = {
-                contains: title.toLowerCase()
-            };
+        // Combine title and explanation search into OR condition
+        if (query) {
+            where.OR = [
+                {
+                    title: {
+                        contains: query.toLowerCase(),
+                    }
+                },
+                {
+                    explanation: {
+                        contains: query.toLowerCase(),
+                    }
+                }
+            ];
         }
 
-        if (explanation) {
-            where.explanation = {
-                contains: explanation.toLocaleLowerCase()
-            };
+        if (language) {
+            where.language = language;
         }
 
         if (tag_id) {
@@ -62,6 +68,7 @@ export async function GET(req: AuthenticatedRequest): Promise<NextResponse<CodeT
 
         console.log(`where: ${JSON.stringify(where)}`);
 
+        // First, get the total count
         const totalCount = await prisma.codeTemplate.count({
             where: where,
         });
@@ -70,11 +77,22 @@ export async function GET(req: AuthenticatedRequest): Promise<NextResponse<CodeT
 
         const offset = (page - 1) * limit;
 
+        // Then get the templates with ordering
         const codeTemplates = await prisma.codeTemplate.findMany({
             skip: offset,
             take: limit,
             where: where,
             include: {
+                blogPosts: {
+                    select: {
+                        id: true,
+                        title: true,
+                        createdAt: true,
+                        author: {
+                            select: { id: true, firstName: true, lastName: true }
+                        }
+                    }
+                },
                 tags: {
                     select: {
                         id: true,
@@ -98,10 +116,25 @@ export async function GET(req: AuthenticatedRequest): Promise<NextResponse<CodeT
                         }
                     }
                 },
-            }
+                _count: {
+                    select: {
+                        forks: true
+                    }
+                }
+            },
+            orderBy: [
+                {
+                    forks: {
+                        _count: 'desc'
+                    }
+                },
+                {
+                    updatedAt: 'desc'
+                }
+            ]
         });
 
-        console.log(`codeTemplates: ${JSON.stringify(codeTemplates)}`);
+        console.log(`codeTemplates: ${JSON.stringify(codeTemplates[0])}`);
 
         const totalPages = Math.ceil(totalCount / limit);
 

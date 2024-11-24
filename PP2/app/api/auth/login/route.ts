@@ -44,7 +44,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<LoginResponse
 
         if (!user) {
             return NextResponse.json(
-                { error: 'Invalid credentials' },
+                { error: 'Invalid email or password' },
                 { status: 400 }
             );
         }
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<LoginResponse
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
             return NextResponse.json(
-                { error: 'Invalid credentials' },
+                { error: 'Invalid email or password' },
                 { status: 400 }
             );
         }

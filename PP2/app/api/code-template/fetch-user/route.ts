@@ -34,11 +34,11 @@ async function handler (req: AuthenticatedRequest): Promise<NextResponse<CodeTem
 
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
-    const title = searchParams.get('title');
+    const language = searchParams.get('language');
+    const query = searchParams.get('query');
     const tag_id = searchParams.get('tag_id');
-    const explanation = searchParams.get('explanation');
 
-    console.log(`page: ${page}, limit: ${limit}, title: ${title}, tag_id: ${tag_id}, explanation: ${explanation}`);
+    console.log(`page: ${page}, limit: ${limit}, query: ${query}, tag_id: ${tag_id}`);
 
     if (page < 1 || limit < 1) {
         return NextResponse.json({ error: 'Invalid page or limit' }, { status: 400 });
@@ -48,16 +48,23 @@ async function handler (req: AuthenticatedRequest): Promise<NextResponse<CodeTem
         const where: Prisma.CodeTemplateWhereInput = {};
         where.authorId = user.id;
 
-        if (title) {
-            where.title = {
-                contains: title.toLowerCase()
-            };
+        if (query) {
+            where.OR = [
+                {
+                    title: {
+                        contains: query.toLowerCase(),
+                    }
+                },
+                {
+                    explanation: {
+                        contains: query.toLowerCase(),
+                    }
+                }
+            ];
         }
 
-        if (explanation) {
-            where.explanation = {
-                contains: explanation.toLocaleLowerCase()
-            };
+        if (language) {
+            where.language = language;
         }
 
         if (tag_id) {
@@ -83,6 +90,16 @@ async function handler (req: AuthenticatedRequest): Promise<NextResponse<CodeTem
             take: limit,
             where: where,
             include: {
+                blogPosts: {
+                    select: {
+                        id: true,
+                        title: true,
+                        createdAt: true,
+                        author: {
+                            select: { id: true, firstName: true, lastName: true }
+                        }
+                    }
+                },
                 tags: {
                     select: {
                         id: true,
@@ -106,7 +123,22 @@ async function handler (req: AuthenticatedRequest): Promise<NextResponse<CodeTem
                         }
                     }
                 },
-            }
+                _count: {
+                    select: {
+                        forks: true
+                    }
+                }
+            },
+            orderBy: [
+                {
+                    updatedAt: 'desc'
+                },
+                {
+                    forks: {
+                        _count: 'desc'
+                    }
+                }
+            ]
         });
 
         console.log(`codeTemplates: ${JSON.stringify(codeTemplates)}`);
