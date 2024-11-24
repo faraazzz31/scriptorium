@@ -14,11 +14,13 @@ export interface AuthorInfo {
     email: string;
     firstName: string | null;
     lastName: string | null;
+    avatar: string | null;
 }
 
 export interface BlogPostInfo {
     id: number;
     title: string;
+    description: string;
 }
 
 export interface Report {

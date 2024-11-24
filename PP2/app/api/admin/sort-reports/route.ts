@@ -17,11 +17,13 @@ interface AuthorInfo {
     email: string;
     firstName: string | null;
     lastName: string | null;
+    avatar: string | null;
 }
 
 interface BlogPostInfo {
     id: number;
     title: string;
+    description: string;
 }
 
 interface ReportInfo {
@@ -31,6 +33,7 @@ interface ReportInfo {
     status: string;
     createdAt: Date;
     reporter: AuthorInfo;
+    avatar: string | null;
 }
 
 interface BlogPostResult {
@@ -41,6 +44,7 @@ interface BlogPostResult {
         title: string;
         description: string;
         author: AuthorInfo;
+        avatar: string | null;
     };
     reportCount: number;
     reports: ReportInfo[];
@@ -118,7 +122,8 @@ async function handler(req: AuthenticatedRequest): Promise<NextResponse<ApiRespo
                         id: true,
                         email: true,
                         firstName: true,
-                        lastName: true
+                        lastName: true,
+                        avatar: true
                     }
                 },
                 _count: {
@@ -136,7 +141,8 @@ async function handler(req: AuthenticatedRequest): Promise<NextResponse<ApiRespo
                                 id: true,
                                 email: true,
                                 firstName: true,
-                                lastName: true
+                                lastName: true,
+                                avatar: true
                             }
                         }
                     },
@@ -165,13 +171,15 @@ async function handler(req: AuthenticatedRequest): Promise<NextResponse<ApiRespo
                         id: true,
                         email: true,
                         firstName: true,
-                        lastName: true
+                        lastName: true,
+                        avatar: true
                     }
                 },
                 blogPost: {
                     select: {
                         id: true,
-                        title: true
+                        title: true,
+                        description: true
                     }
                 },
                 _count: {
@@ -189,7 +197,8 @@ async function handler(req: AuthenticatedRequest): Promise<NextResponse<ApiRespo
                                 id: true,
                                 email: true,
                                 firstName: true,
-                                lastName: true
+                                lastName: true,
+                                avatar: true
                             }
                         }
                     },
@@ -216,7 +225,8 @@ async function handler(req: AuthenticatedRequest): Promise<NextResponse<ApiRespo
                         id: post.id,
                         title: post.title,
                         description: post.description,
-                        author: post.author
+                        author: post.author,
+                        avatar: post.author.avatar
                     },
                     reportCount: post._count.reports,
                     reports: post.reports,
@@ -247,7 +257,8 @@ async function handler(req: AuthenticatedRequest): Promise<NextResponse<ApiRespo
                         id: post.id,
                         title: post.title,
                         description: post.description,
-                        author: post.author
+                        author: post.author,
+                        avatar: post.author.avatar
                     },
                     reportCount: post._count.reports,
                     reports: post.reports,
