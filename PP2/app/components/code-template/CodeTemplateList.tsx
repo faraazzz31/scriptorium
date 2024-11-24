@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Search, Code2, GitFork, Tag, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Code2, GitFork, Tag, ChevronLeft, ChevronRight, BookOpen } from 'lucide-react';
 import { useAuth } from '@/app/components/auth/AuthContext';
 import { useTheme } from '@/app/components/theme/ThemeContext';
 import debounce from 'lodash/debounce';
-import { kebabCase } from 'lodash';
 
 interface CodeTemplate {
     id: number;
@@ -22,6 +21,12 @@ interface CodeTemplate {
         createdAt: string;
         author: { id: number; firstName: string; lastName: string };
     }[];
+    blogPosts: {
+        id: number;
+        title: string;
+        createdAt: string;
+        author: { id: number; firstName: string; lastName: string };
+    }[]
 }
 
 interface PaginationButtonProps {
@@ -471,8 +476,8 @@ const CodeTemplatesList = () => {
                                                 </h3>
                                                 <div className="flex items-center gap-2">
                                                     <span className={`flex items-center gap-1 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                                                        <GitFork className="w-4 h-4" />
-                                                        {template.forks?.length || 0}
+                                                        <Code2 className="w-4 h-4" />
+                                                        {availableLanguages.find(language => language.key === template.language)?.name || template.language}
                                                     </span>
                                                 </div>
                                             </div>
@@ -527,8 +532,8 @@ const CodeTemplatesList = () => {
                                                 {template.forks?.length || 0} forks
                                             </span>
                                             <span className="flex items-center gap-1">
-                                                <Code2 className="w-4 h-4" />
-                                                {availableLanguages.find(language => language.key === template.language)?.name || template.language}
+                                                <BookOpen className="w-4 h-4" />
+                                                {template.blogPosts?.length || 0} blogs
                                             </span>
                                         </div>
                                     </div>
