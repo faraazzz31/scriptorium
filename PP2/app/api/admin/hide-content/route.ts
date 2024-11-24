@@ -218,4 +218,5 @@ async function handler(req: AuthenticatedRequest): Promise<NextResponse> {
     }
 }
 
+// @ts-ignore
 export const POST = withAuth(handler);

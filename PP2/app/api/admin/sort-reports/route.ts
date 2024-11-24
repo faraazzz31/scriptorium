@@ -318,4 +318,5 @@ async function handler(req: AuthenticatedRequest): Promise<NextResponse<ApiRespo
     }
 }
 
+// @ts-ignore
 export const GET = withAuth(handler);
