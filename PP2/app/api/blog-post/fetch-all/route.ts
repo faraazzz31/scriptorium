@@ -40,6 +40,7 @@ interface BlogPostFetchAllResponse {
       id: number;
       firstName: string | null;
       lastName: string | null;
+      avatar: string | null;
     };
     _count: {
       comments: number;
@@ -202,6 +203,7 @@ export async function handler(req: AuthenticatedRequest): Promise<NextResponse<B
             id: true,
             firstName: true,
             lastName: true,
+            avatar: true,
           }
         },
         _count: {
