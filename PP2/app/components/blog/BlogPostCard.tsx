@@ -1,4 +1,5 @@
 import { FC, useState, useEffect } from 'react';
+import Image from 'next/image';
 import { formatDistanceToNow } from 'date-fns';
 import { ArrowBigUp, ArrowBigDown, Share2, AlertTriangle, MessageCircle, Pencil, Trash2 } from 'lucide-react';
 import { BlogPostWithRelations } from '@/app/blog/page';
@@ -113,16 +114,38 @@ const BlogPostCard: FC<BlogPostCardProps> = ({
       onClick={onSelect}
     >
       {/* Header */}
-      <div className="flex items-center space-x-2 mb-2">
-        <span className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-          {post.author.firstName} {post.author.lastName}
-        </span>
-        <span className={`${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-          • {formatDistanceToNow(post.createdAt)} ago
-        </span>
+      <div className="flex items-center space-x-3 mb-2">
+        {/* Avatar */}
+        {post.author.avatar ? (
+          <Image
+            src={post.author.avatar.startsWith('/') ? post.author.avatar : `/${post.author.avatar}`}
+            width={32}
+            height={32}
+            alt="Profile"
+            className={`w-8 h-8 rounded-full ring-2 ring-offset-2 transition-all duration-200
+              ${isDarkMode 
+                ? 'ring-blue-400/50 ring-offset-gray-900' 
+                : 'ring-gray-200 ring-offset-white'}`}
+          />
+        ) : (
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-medium
+            ${isDarkMode 
+              ? 'bg-gradient-to-br from-blue-500 to-indigo-600 ring-2 ring-blue-400/50 ring-offset-2 ring-offset-gray-900' 
+              : 'bg-gradient-to-br from-blue-600 to-indigo-700 ring-2 ring-gray-200 ring-offset-2 ring-offset-white'}`}>
+            {post.author.firstName?.[0]}
+          </div>
+        )}
+        <div className="flex flex-col">
+          <span className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            {post.author.firstName} {post.author.lastName}
+          </span>
+          <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+            {formatDistanceToNow(post.createdAt)} ago
+          </span>
+        </div>
         {/* Show hidden tag if post is hidden */}
         {post.isHidden && (
-          <span className="ml-2 px-2 py-0.5 text-xs font-medium rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+          <span className="ml-auto px-2 py-0.5 text-xs font-medium rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
             Hidden
           </span>
         )}

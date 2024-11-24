@@ -28,6 +28,7 @@ interface CommentFetchAllResponse {
       id: number;
       firstName: string | null;
       lastName: string | null;
+      avatar: string | null;
     };
     blogPostId: number | null;
     parentId: number | null;
@@ -188,6 +189,7 @@ export async function handler(req: AuthenticatedRequest): Promise<NextResponse<C
             id: true,
             firstName: true,
             lastName: true,
+            avatar: true,
           }
         },
         blogPostId: true,

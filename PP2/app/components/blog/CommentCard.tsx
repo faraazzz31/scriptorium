@@ -1,4 +1,5 @@
 import { FC, useState, useEffect } from 'react';
+import Image from 'next/image';
 import { formatDistanceToNow } from 'date-fns';
 import { ArrowBigUp, ArrowBigDown, AlertTriangle, MessageCircle } from 'lucide-react';
 import type { Comment, User } from '@prisma/client';
@@ -115,13 +116,35 @@ const CommentCard: FC<CommentCardProps> = ({
   return (
     <div id={`comment-${comment.id}`} className={`${level > 0 ? 'ml-8' : ''}`}>
       <div className={`rounded-lg p-4 ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
-        <div className="flex items-center space-x-2 mb-2">
-          <span className="font-medium">
-            {comment.author.firstName || 'Anonymous'} {comment.author.lastName || ''}
-          </span>
-          <span className={`${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-            • {formatDistanceToNow(new Date(comment.createdAt))} ago
-          </span>
+        <div className="flex items-center space-x-3 mb-2">
+          {/* Avatar */}
+          {comment.author.avatar ? (
+            <Image
+              src={comment.author.avatar.startsWith('/') ? comment.author.avatar : `/${comment.author.avatar}`}
+              width={32}
+              height={32}
+              alt="Profile"
+              className={`w-8 h-8 rounded-full ring-2 ring-offset-2 transition-all duration-200
+                ${isDarkMode 
+                  ? 'ring-blue-400/50 ring-offset-gray-900' 
+                  : 'ring-gray-200 ring-offset-white'}`}
+            />
+          ) : (
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-medium
+              ${isDarkMode 
+                ? 'bg-gradient-to-br from-blue-500 to-indigo-600 ring-2 ring-blue-400/50 ring-offset-2 ring-offset-gray-900' 
+                : 'bg-gradient-to-br from-blue-600 to-indigo-700 ring-2 ring-gray-200 ring-offset-2 ring-offset-white'}`}>
+              {comment.author.firstName?.[0]}
+            </div>
+          )}
+          <div className="flex flex-col">
+            <span className="font-medium">
+              {comment.author.firstName || 'Anonymous'} {comment.author.lastName || ''}
+            </span>
+            <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+              {formatDistanceToNow(new Date(comment.createdAt))} ago
+            </span>
+          </div>
           {comment.isHidden && <HiddenLabel />}  {/* This will show the label for both admin and author */}
         </div>
         <p className={`mb-3 break-words ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
