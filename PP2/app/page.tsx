@@ -49,9 +49,9 @@ func main() {
     fmt.Println("Hello, World!")
 }`,
   ruby: `puts "Hello, World!"`,
-  kotlin: `fun main() {
-    println("Hello, World!")
-}`,
+  bash: `#!/bin/bash
+
+echo "Hello, World!"`,
   php: `<?php
 echo "Hello, World!";
 ?>`
@@ -151,7 +151,7 @@ export default function Home(): JSX.Element {
                     <option value="typescript">TypeScript</option>
                     <option value="go">Go</option>
                     <option value="ruby">Ruby</option>
-                    <option value="kotlin">Kotlin</option>
+                    <option value="bash">Bash</option>
                     <option value="php">PHP</option>
                   </select>
                 </div>

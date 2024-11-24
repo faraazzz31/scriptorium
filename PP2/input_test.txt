@@ -1,0 +1,101 @@
+# Input/Output Testing Examples
+
+## Java
+```java
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        int a = scanner.nextInt();
+        int b = scanner.nextInt();
+        System.out.println(a + b);
+    }
+}
+```
+
+## Python
+```python
+a = int(input())
+b = int(input())
+print(a + b)
+```
+
+## C
+```c
+#include <stdio.h>
+
+int main() {
+    int a, b;
+    scanf("%d", &a);
+    scanf("%d", &b);
+    printf("%d\n", a + b);
+    return 0;
+}
+```
+
+## C++
+```cpp
+#include <iostream>
+using namespace std;
+
+int main() {
+    int a, b;
+    cin >> a >> b;
+    cout << a + b << endl;
+    return 0;
+}
+```
+
+## Ruby
+```ruby
+a = gets.chomp.to_i
+b = gets.chomp.to_i
+puts a + b
+```
+
+## PHP
+```php
+<?php
+$a = intval(fgets(STDIN));
+$b = intval(fgets(STDIN));
+echo $a + $b . "\n";
+?>
+```
+
+## Go
+```go
+package main
+
+import "fmt"
+
+func main() {
+    var a, b int
+    fmt.Scanf("%d", &a)
+    fmt.Scanf("%d", &b)
+    fmt.Println(a + b)
+}
+```
+
+## JavaScript
+```javascript
+const a = parseInt(readLine());
+const b = parseInt(readLine());
+console.log(a + b);
+```
+
+## TypeScript
+```typescript
+const a: number = parseInt(readLine());
+const b: number = parseInt(readLine());
+console.log(a + b);
+```
+
+## Bash
+```bash
+#!/bin/bash
+mapfile -t input
+a=${input[0]}
+b=${input[1]}
+echo $((a + b))
+```
