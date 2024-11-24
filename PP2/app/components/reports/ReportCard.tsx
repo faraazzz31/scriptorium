@@ -109,39 +109,72 @@ export function ReportCard({ item, onViewContent, onHideContent }: ReportCardPro
                                 isDarkMode ? 'border-gray-600' : 'border-gray-200'
                             }`}>
                                 <div className="flex items-center gap-2">
-                                    <User className="h-4 w-4 text-green-500" />
-                                    <span className={`text-sm font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
-                                        {report.reporter.firstName} {report.reporter.lastName}
-                                    </span>
+                                    {report.reporter.avatar ? (
+                                        <img
+                                            src={report.reporter.avatar}
+                                            alt={`${report.reporter.firstName}'s avatar`}
+                                            className="h-6 w-6 rounded-full object-cover"
+                                            onError={(e) => {
+                                                // Fallback to user icon if image fails to load
+                                                const target = e.target as HTMLImageElement;
+                                                target.onerror = null;
+                                                target.style.display = 'none';
+                                                const parent = target.parentElement;
+                                                if (parent) {
+                                                    const fallbackIcon = document.createElement('div');
+                                                    fallbackIcon.className = 'h-6 w-6 rounded-full flex items-center justify-center bg-gray-200 dark:bg-gray-700';
+                                                    const userIcon = document.createElement('div');
+                                                    userIcon.innerHTML = '<svg class="h-4 w-4 text-gray-500 dark:text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>';
+                                                    fallbackIcon.appendChild(userIcon);
+                                                    parent.appendChild(fallbackIcon);
+                                                }
+                                            }}
+                                        />
+                                    ) : (
+                                        <div className={`h-6 w-6 rounded-full flex items-center justify-center ${
+                                            isDarkMode ? 'bg-gray-700' : 'bg-gray-200'
+                                        }`}>
+                                            <User className={`h-4 w-4 ${
+                                                isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                                            }`}/>
+                                        </div>
+                                    )}
+                                    <span className={`text-sm font-medium ${
+                                        isDarkMode ? 'text-gray-200' : 'text-gray-800'
+                                    }`}>
+            {report.reporter.firstName} {report.reporter.lastName}
+        </span>
                                 </div>
-                                <span className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                                    Report #{index + 1}
-                                </span>
+                                <span className={`text-xs ${
+                                    isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                                }`}>
+        Report #{index + 1}
+    </span>
                             </div>
 
                             {/* Reason */}
                             <div className="mb-3">
                                 <div className="flex items-center gap-2 mb-1">
-                                    <AlertTriangle className="h-4 w-4 text-yellow-500" />
+                                    <AlertTriangle className="h-4 w-4 text-yellow-500"/>
                                     <h4 className={`text-sm font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>
                                         Reason
                                     </h4>
                                 </div>
                                 <div className="ml-6">
-                                    <ExpandableText text={report.reason} isDarkMode={isDarkMode} />
+                                    <ExpandableText text={report.reason} isDarkMode={isDarkMode}/>
                                 </div>
                             </div>
 
                             {/* Explanation */}
                             <div>
                                 <div className="flex items-center gap-2 mb-1">
-                                    <BookOpenText className="h-4 w-4 text-blue-500" />
+                                    <BookOpenText className="h-4 w-4 text-blue-500"/>
                                     <h4 className={`text-sm font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>
                                         Explanation
                                     </h4>
                                 </div>
                                 <div className="ml-6">
-                                    <ExpandableText text={report.explanation} isDarkMode={isDarkMode} />
+                                    <ExpandableText text={report.explanation} isDarkMode={isDarkMode}/>
                                 </div>
                             </div>
                         </div>
@@ -160,12 +193,12 @@ export function ReportCard({ item, onViewContent, onHideContent }: ReportCardPro
                     >
                         {isExpanded ? (
                             <>
-                                <ChevronUp className="h-4 w-4" />
+                                <ChevronUp className="h-4 w-4"/>
                                 Show Less
                             </>
                         ) : (
                             <>
-                                <ChevronDown className="h-4 w-4" />
+                                <ChevronDown className="h-4 w-4"/>
                                 Show {item.reports.length - 1} More {item.reports.length - 1 === 1 ? 'Report' : 'Reports'}
                             </>
                         )}
@@ -183,7 +216,7 @@ export function ReportCard({ item, onViewContent, onHideContent }: ReportCardPro
                         : 'border-gray-300 bg-white hover:bg-gray-100'
                     }`}
                 >
-                    <Eye className="h-4 w-4" />
+                    <Eye className="h-4 w-4"/>
                     View Content
                 </button>
                 <button

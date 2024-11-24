@@ -12,6 +12,50 @@ interface ContentModalProps {
 export function ContentModal({ content, onClose }: ContentModalProps) {
     const { isDarkMode } = useTheme();
 
+    const AuthorDisplay = ({ author }: { author: { firstName: string | null; lastName: string | null; email: string; avatar: string | null } }) => (
+        <div className="flex items-center gap-3">
+            {author.avatar ? (
+                <img
+                    src={author.avatar}
+                    alt={`${author.firstName}'s avatar`}
+                    className="h-10 w-10 rounded-full object-cover"
+                    onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.onerror = null;
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent) {
+                            const fallbackIcon = document.createElement('div');
+                            fallbackIcon.className = `h-10 w-10 rounded-full flex items-center justify-center ${
+                                isDarkMode ? 'bg-green-900' : 'bg-green-100'
+                            }`;
+                            const userIcon = document.createElement('div');
+                            userIcon.innerHTML = `<svg class="h-6 w-6 ${
+                                isDarkMode ? 'text-green-300' : 'text-green-600'
+                            }" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
+                            fallbackIcon.appendChild(userIcon);
+                            parent.appendChild(fallbackIcon);
+                        }
+                    }}
+                />
+            ) : (
+                <div className={`h-10 w-10 rounded-full flex items-center justify-center ${
+                    isDarkMode ? 'bg-green-900' : 'bg-green-100'
+                }`}>
+                    <User className={`h-6 w-6 ${isDarkMode ? 'text-green-300' : 'text-green-600'}`} />
+                </div>
+            )}
+            <div>
+                <p className={`text-sm font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    {author.firstName} {author.lastName}
+                </p>
+                <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                    {author.email}
+                </p>
+            </div>
+        </div>
+    );
+
     const getContentPreview = (item: ReportContent) => {
         if (item.type === 'BLOG_POST') {
             return (
@@ -46,21 +90,7 @@ export function ContentModal({ content, onClose }: ContentModalProps) {
                             ? 'bg-gray-700/50 border-gray-600'
                             : 'bg-gray-50 border-gray-200'
                     }`}>
-                        <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-full ${
-                                isDarkMode ? 'bg-green-900' : 'bg-green-100'
-                            }`}>
-                                <User className={`h-4 w-4 ${isDarkMode ? 'text-green-300' : 'text-green-600'}`} />
-                            </div>
-                            <div>
-                                <p className={`text-sm font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                                    {item.content.author.firstName} {item.content.author.lastName}
-                                </p>
-                                <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                                    {item.content.author.email}
-                                </p>
-                            </div>
-                        </div>
+                        <AuthorDisplay author={item.content.author} />
                     </div>
                 </div>
             );
@@ -97,11 +127,14 @@ export function ContentModal({ content, onClose }: ContentModalProps) {
                         <h4 className={`text-sm font-medium mb-2 flex items-center gap-2 ${
                             isDarkMode ? 'text-gray-300' : 'text-gray-700'
                         }`}>
-                            <Link className="h-4 w-4" />
+                            <Link className="h-4 w-4"/>
                             Related Post
                         </h4>
-                        <p className={`text-sm ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                        <h1 className={`text-xl font-extrabold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                             {item.content.blogPost?.title}
+                        </h1>
+                        <p className={`text-sm ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                            {item.content.blogPost?.description}
                         </p>
                     </div>
 
@@ -111,21 +144,7 @@ export function ContentModal({ content, onClose }: ContentModalProps) {
                             ? 'bg-gray-700/50 border-gray-600'
                             : 'bg-gray-50 border-gray-200'
                     }`}>
-                        <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-full ${
-                                isDarkMode ? 'bg-green-900' : 'bg-green-100'
-                            }`}>
-                                <User className={`h-4 w-4 ${isDarkMode ? 'text-green-300' : 'text-green-600'}`} />
-                            </div>
-                            <div>
-                                <p className={`text-sm font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                                    {item.content.author.firstName} {item.content.author.lastName}
-                                </p>
-                                <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                                    {item.content.author.email}
-                                </p>
-                            </div>
-                        </div>
+                        <AuthorDisplay author={item.content.author} />
                     </div>
                 </div>
             );
