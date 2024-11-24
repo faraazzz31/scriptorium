@@ -110,7 +110,8 @@ async function handler (req: AuthenticatedRequest): Promise<NextResponse<CodeTem
                     select: {
                         id: true,
                         firstName: true,
-                        lastName: true
+                        lastName: true,
+                        avatar: true
                     }
                 },
                 forks: {

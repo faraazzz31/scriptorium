@@ -4,6 +4,7 @@ import { Search, Code2, GitFork, Tag, ChevronLeft, ChevronRight, BookOpen } from
 import { useAuth } from '@/app/components/auth/AuthContext';
 import { useTheme } from '@/app/components/theme/ThemeContext';
 import debounce from 'lodash/debounce';
+import Image from 'next/image';
 
 interface CodeTemplate {
     id: number;
@@ -14,7 +15,7 @@ interface CodeTemplate {
     createdAt: string;
     authorId: number;
     tags: { id: number; name: string }[];
-    author: { firstName: string; lastName: string };
+    author: { firstName: string; lastName: string, avatar: string };
     forks: {
         id: number;
         title: string;
@@ -481,9 +482,28 @@ const CodeTemplatesList = () => {
                                                     </span>
                                                 </div>
                                             </div>
-                                            <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                                                by {template.author.firstName} {template.author.lastName}
-                                            </p>
+                                            <div className="flex items-center gap-3">
+                                                {template.author.avatar ? (
+                                                    <Image
+                                                        src={template.author.avatar.startsWith('/') ? template.author.avatar : `/${template.author.avatar}`}
+                                                        width={40}
+                                                        height={40}
+                                                        alt={`${template.author.firstName} ${template.author.lastName}`}
+                                                        className="w-8 h-8 rounded-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <div 
+                                                        className={`w-8 h-8 rounded-full flex items-center justify-center text-base font-medium
+                                                            ${isDarkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-600'}`}
+                                                    >
+                                                        {template.author.firstName.charAt(0)}
+                                                        {template.author.lastName.charAt(0)}
+                                                    </div>
+                                                )}
+                                                <p className={`text-base ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                                                    {template.author.firstName} {template.author.lastName}
+                                                </p>
+                                            </div>
                                         </div>
 
                                         {/* Template explanation */}

@@ -103,7 +103,8 @@ export async function GET(req: AuthenticatedRequest): Promise<NextResponse<CodeT
                     select: {
                         id: true,
                         firstName: true,
-                        lastName: true
+                        lastName: true,
+                        avatar: true
                     }
                 },
                 forks: {

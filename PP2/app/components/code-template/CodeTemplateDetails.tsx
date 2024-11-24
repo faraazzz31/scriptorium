@@ -20,15 +20,26 @@ interface CodeTemplateDetailsProps {
 interface Template {
     id: number;
     title: string;
-    explanation: string;
     code: string;
+    explanation: string;
     language: string;
     createdAt: string;
     authorId: number;
     tags: { id: number; name: string }[];
-    forks?: { id: number; title: string; author: { firstName: string; lastName: string }; createdAt: string }[];
-    forkOf?: { id: number; title: string; author: { firstName: string; lastName: string } };
-    blogPosts?: { id: number; title: string; author: { firstName: string; lastName: string }; createdAt: string }[];
+    author: { firstName: string; lastName: string, avatar: string };
+    forks: {
+        id: number;
+        title: string;
+        createdAt: string;
+        author: { id: number; firstName: string; lastName: string };
+    }[];
+    forkOf: { id: number; title: string; author: { firstName: string; lastName: string } };
+    blogPosts: {
+        id: number;
+        title: string;
+        createdAt: string;
+        author: { id: number; firstName: string; lastName: string };
+    }[]
 }
 
 interface KeyDownEvent extends React.KeyboardEvent {

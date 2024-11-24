@@ -1,22 +1,35 @@
 import { UserData } from '@/app/components/auth/types';
-import { Clock, Users, Edit2, Check, X, Trash2, GitFork, Eye } from 'lucide-react';
+import { Users, Edit2, Check, X, Trash2, GitFork, Eye, BookOpen } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { LoginModal } from '../auth/LoginModal';
 import { SignupModal } from '../auth/SignupModal';
 import ForkCodeTemplate  from './ForkCodeTemplate';
+import Image from 'next/image';
 
 interface Template {
     id: number;
     title: string;
-    explanation: string;
     code: string;
+    explanation: string;
     language: string;
     createdAt: string;
     authorId: number;
     tags: { id: number; name: string }[];
-    forks?: { id: number; title: string; author: { firstName: string; lastName: string }; createdAt: string }[];
-    forkOf?: { id: number; title: string; author: { firstName: string; lastName: string } };
+    author: { firstName: string; lastName: string, avatar: string };
+    forks: {
+        id: number;
+        title: string;
+        createdAt: string;
+        author: { id: number; firstName: string; lastName: string };
+    }[];
+    forkOf: { id: number; title: string; author: { firstName: string; lastName: string } };
+    blogPosts: {
+        id: number;
+        title: string;
+        createdAt: string;
+        author: { id: number; firstName: string; lastName: string };
+    }[]
 }
 
 interface TagInterface {
@@ -130,58 +143,200 @@ export const Header = ({
     };
 
     return (
-        <div className={`rounded-lg p-4 md:p-6 transition-colors duration-200 ${containerStyles}`}>
-            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                { /* Title */}
-                <div className="space-y-4 flex-1">
-                    { isEditingMeta ? (
-                        <input
-                            type="text"
-                            value={editedTitle}
-                            onChange={(e) => setEditedTitle(e.target.value)}
-                            className={`text-xl md:text-2xl font-bold w-full px-3 py-2 rounded-md border
+        <div className={`rounded-lg p-6 md:p-8 transition-colors duration-200 ${containerStyles}`}>
+            <div className="flex flex-col gap-6">
+                {/* Header with Title and Actions */}
+                <div className="flex flex-col md:flex-row md:items-start gap-4">
+                    <div className="flex-1">
+                        {isEditingMeta ? (
+                            <input
+                                type="text"
+                                value={editedTitle}
+                                onChange={(e) => setEditedTitle(e.target.value)}
+                                className={`text-2xl md:text-3xl font-bold w-full px-4 py-2.5 rounded-lg border
                                         focus:outline-none focus:ring-2 focus:border-transparent
                                         transition-colors duration-200 ${inputStyles}`}
-                            placeholder="Enter title..."
-                        />
-                    ) : (
-                        <h1 className={`text-xl md:text-2xl font-bold ${titleStyles}`}>
-                            {template.title}
-                        </h1>
+                                placeholder="Enter title..."
+                            />
+                        ) : (
+                            <h1 className={`text-2xl md:text-3xl font-bold ${titleStyles}`}>
+                                {template.title}
+                            </h1>
+                        )}
+                    </div>
+    
+                    {/* Actions */}
+                    <div className="flex items-center gap-3 md:self-start">
+                        {user?.id === template.authorId ? (
+                            <>
+                                <button
+                                    onClick={() => setIsEditing(!isEditing)}
+                                    className={getButtonStyles('primary')}
+                                >
+                                    {isEditing ? (
+                                        <>
+                                            <Eye className="w-4 h-4 mr-2" />
+                                            View Mode
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Edit2 className="w-4 h-4 mr-2" />
+                                            Edit Mode
+                                        </>
+                                    )}
+                                </button>
+                                {isEditingMeta ? (
+                                    <>
+                                        <button
+                                            onClick={handleSave}
+                                            disabled={isSaving}
+                                            className={`${getButtonStyles('success')} disabled:opacity-50`}
+                                        >
+                                            <Check className="w-4 h-4 mr-2" />
+                                            Save
+                                        </button>
+                                        <button
+                                            onClick={() => setIsEditingMeta(false)}
+                                            className={getButtonStyles('secondary')}
+                                        >
+                                            <X className="w-4 h-4 mr-2" />
+                                            Cancel
+                                        </button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <button
+                                            onClick={() => setIsEditingMeta(true)}
+                                            className={getButtonStyles('secondary')}
+                                        >
+                                            <Edit2 className="w-4 h-4 mr-2" />
+                                            Edit Details
+                                        </button>
+                                        <button
+                                            onClick={handleDelete}
+                                            disabled={isDeleting}
+                                            className={`${getButtonStyles('danger')} disabled:opacity-50`}
+                                        >
+                                            <Trash2 className="w-4 h-4 mr-2" />
+                                            Delete
+                                        </button>
+                                    </>
+                                )}
+                            </>
+                        ) : (
+                            <button
+                                onClick={() => setIsDialogOpen(true)}
+                                className={isDarkMode
+                                    ? "flex items-center px-4 py-2 rounded-lg text-white bg-purple-600 hover:bg-purple-700"
+                                    : "flex items-center px-4 py-2 rounded-lg text-white bg-purple-500 hover:bg-purple-600"
+                                }
+                            >
+                                <GitFork className="w-4 h-4 mr-2" />
+                                Fork Template
+                            </button>
+                        )}
+                    </div>
+                </div>
+    
+                {/* Main Content */}
+                <div className="space-y-6">
+                    {/* Author Info and Metadata */}
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                        <div className="flex items-center gap-3">
+                            {template.author.avatar ? (
+                                <Image
+                                    src={template.author.avatar.startsWith('/') ? template.author.avatar : `/${template.author.avatar}`}
+                                    width={44}
+                                    height={44}
+                                    alt={`${template.author.firstName} ${template.author.lastName}`}
+                                    className="w-11 h-11 rounded-full object-cover ring-2 ring-offset-2 
+                                        ${isDarkMode ? 'ring-gray-700 ring-offset-gray-800' : 'ring-gray-100 ring-offset-white'}"
+                                />
+                            ) : (
+                                <div 
+                                    className={`w-11 h-11 rounded-full flex items-center justify-center text-lg font-medium
+                                        ${isDarkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-600'}`}
+                                >
+                                    {template.author.firstName.charAt(0)}
+                                    {template.author.lastName.charAt(0)}
+                                </div>
+                            )}
+                            <div className="flex flex-col">
+                                <p className={`text-base font-medium ${titleStyles}`}>
+                                    {template.author.firstName} {template.author.lastName}
+                                </p>
+                                <p className={`text-sm ${secondaryTextStyles}`}>
+                                    Created {new Date(template.createdAt).toLocaleDateString()}
+                                </p>
+                            </div>
+                        </div>
+    
+                        <div className={`flex items-center gap-6 sm:ml-auto ${secondaryTextStyles}`}>
+                            <div className="flex items-center gap-1.5">
+                                <Users className="w-5 h-5" />
+                                <span className="text-sm font-medium">{template.forks?.length || 0} forks</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                                <BookOpen className="w-5 h-5" />
+                                <span className="text-sm font-medium">{template.blogPosts?.length || 0} blogs</span>
+                            </div>
+                        </div>
+                    </div>
+    
+                    {/* Fork Source Info */}
+                    {template.forkOf && (
+                        <div className={`text-sm ${textStyles} py-2 px-4 rounded-lg 
+                            ${isDarkMode ? 'bg-gray-750' : 'bg-gray-50'}`}>
+                            <div className="flex items-center gap-2">
+                                <GitFork className={`w-4 h-4 ${secondaryTextStyles}`} />
+                                <span>Forked from{' '}
+                                    <Link
+                                        href={`/code-template/${template.forkOf.id}`}
+                                        className={`${linkStyles} font-medium hover:underline`}
+                                    >
+                                        {template.forkOf.title}
+                                    </Link>
+                                    <span className={secondaryTextStyles}>
+                                        {' '}by {template.forkOf.author.firstName} {template.forkOf.author.lastName}
+                                    </span>
+                                </span>
+                            </div>
+                        </div>
                     )}
-
-                    {/* Explanation */}
+    
+                    {/* Description */}
                     <div className="space-y-4">
                         {isEditingMeta ? (
                             <textarea
                                 value={editedExplanation}
                                 onChange={(e) => setEditedExplanation(e.target.value)}
-                                className={`text-sm w-full px-3 py-2 rounded-md border
-                                            focus:outline-none focus:ring-2 focus:border-transparent
-                                            transition-colors duration-200 ${inputStyles}`}
+                                className={`text-base w-full px-4 py-3 rounded-lg border
+                                        focus:outline-none focus:ring-2 focus:border-transparent
+                                        transition-colors duration-200 ${inputStyles}`}
                                 placeholder="Enter description..."
-                                rows={3}
+                                rows={4}
                             />
                         ) : (
-                            <p className={`text-sm ${textStyles}`}>
+                            <p className={`text-base leading-relaxed ${textStyles}`}>
                                 {template.explanation}
                             </p>
                         )}
                     </div>
-
+    
                     {/* Tags */}
-                    <div className="mb-4">
+                    <div className="space-y-3">
+                        <h3 className={`text-sm font-medium ${secondaryTextStyles}`}>Tags</h3>
                         {isEditingMeta ? (
                             <div className="flex flex-wrap gap-2">
                                 {availableTags.map((tag) => (
                                     <button
                                         key={tag.id}
                                         onClick={() => handleTagSelect(tag)}
-                                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all
+                                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-all
                                             ${selectedTags.some((t) => t.id === tag.id)
                                                 ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/25'
                                                 : isDarkMode
-                                                    ? 'bg-gray-800 hover:bg-gray-700 text-gray-300'
+                                                    ? 'bg-gray-750 hover:bg-gray-700 text-gray-300'
                                                     : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                                             }`}
                                     >
@@ -194,8 +349,8 @@ export const Header = ({
                                 {selectedTags.map((tag) => (
                                     <div
                                         key={tag.id}
-                                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all
-                                            bg-blue-500 text-white shadow-lg shadow-blue-500/25`}
+                                        className="px-4 py-2 rounded-lg text-sm font-medium
+                                            bg-blue-500 text-white shadow-lg shadow-blue-500/25"
                                     >
                                         {tag.name}
                                     </div>
@@ -203,106 +358,9 @@ export const Header = ({
                             </div>
                         )}
                     </div>
-
-                    <div className="flex flex-wrap items-center gap-4">
-                        <div className={`flex items-center text-sm ${textStyles}`}>
-                            <Clock className={`w-4 h-4 mr-1 ${secondaryTextStyles}`} />
-                            <span>Created {new Date(template.createdAt).toLocaleDateString()}</span>
-                        </div>
-                        <div className={`flex items-center text-sm ${textStyles}`}>
-                            <Users className={`w-4 h-4 mr-1 ${secondaryTextStyles}`} />
-                            <span>{template.forks?.length || 0} forks</span>
-                        </div>
-                    </div>
-
-                    {template.forkOf && (
-                        <div className={`text-sm ${textStyles}`}>
-                            Forked from{' '}
-                            <Link
-                                href={`/code-template/${template.forkOf.id}`}
-                                className={`${linkStyles} hover:underline`}
-                            >
-                                {template.forkOf.title}
-                            </Link>
-                            <span className={secondaryTextStyles}>
-                                {' '}by {template.forkOf.author.firstName} {template.forkOf.author.lastName}
-                            </span>
-                        </div>
-                    )}
                 </div>
-
-                <div className="flex flex-wrap gap-2">
-                    {user?.id === template.authorId ? (
-                        <>
-                            <button
-                                onClick={() => setIsEditing(!isEditing)}
-                                className={getButtonStyles('primary')}
-                            >
-                                {isEditing ? (
-                                    <>
-                                        <Edit2 className="w-4 h-4 mr-2" />
-                                        Edit Mode
-                                    </>
-                                ) : (
-                                    <>
-                                        <Eye className="w-4 h-4 mr-2" />
-                                        View Mode
-                                    </>
-                                )}
-                            </button>
-                            {isEditingMeta ? (
-                                <>
-                                    <button
-                                        onClick={handleSave}
-                                        disabled={isSaving}
-                                        className={`${getButtonStyles('success')} disabled:opacity-50`}
-                                    >
-                                        <Check className="w-4 h-4 mr-2" />
-                                        Save
-                                    </button>
-                                    <button
-                                        onClick={() => setIsEditingMeta(false)}
-                                        className={getButtonStyles('danger')}
-                                    >
-                                        <X className="w-4 h-4 mr-2" />
-                                        Cancel
-                                    </button>
-                                </>
-                            ) : (
-                                <>
-                                    <button
-                                        onClick={() => setIsEditingMeta(true)}
-                                        className={getButtonStyles('secondary')}
-                                    >
-                                        <Edit2 className="w-4 h-4 mr-2" />
-                                        Edit Details
-                                    </button>
-                                    <button
-                                        onClick={handleDelete}
-                                        disabled={isDeleting}
-                                        className={`${getButtonStyles('danger')} disabled:opacity-50`}
-                                    >
-                                        <Trash2 className="w-4 h-4 mr-2" />
-                                        Delete
-                                    </button>
-                                </>
-                            )}
-                        </>
-                    ) : (
-                        <button
-                            onClick={() => setIsDialogOpen(true)}
-                            className={isDarkMode
-                                ? "flex items-center px-3 py-1.5 md:px-4 md:py-2 rounded-md text-white bg-purple-600 hover:bg-purple-700"
-                                : "flex items-center px-3 py-1.5 md:px-4 md:py-2 rounded-md text-white bg-purple-500 hover:bg-purple-600"
-                            }
-                        >
-                            <GitFork className="w-4 h-4 mr-2" />
-                            Fork Template
-                        </button>
-                    )}
-                </div>
-
-                {/* Fork Code Template */}
+    
+                {/* Modals */}
                 <ForkCodeTemplate
                     forkOfId={template.id}
                     code={template.code}
@@ -312,8 +370,6 @@ export const Header = ({
                     onClose={() => setIsDialogOpen(false)}
                     onSwitchToLogin={() => setIsLoginModalOpen(true)}
                 />
-
-                {/* Login Modal */}
                 <LoginModal
                     isOpen={isLoginModalOpen}
                     onClose={() => setIsLoginModalOpen(false)}
@@ -323,8 +379,6 @@ export const Header = ({
                     }}
                     isDarkMode={isDarkMode}
                 />
-
-                {/* Signup Modal */}
                 <SignupModal
                     isOpen={isSignupModalOpen}
                     onClose={() => setIsSignupModalOpen(false)}
