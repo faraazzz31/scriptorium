@@ -12,3 +12,6 @@ npx prisma generate
 npx prisma migrate dev
 npx prisma seed db
 # admin email: admin@example.com, password: Test123*
+
+cd app
+docker build -t code-runner:latest .
