@@ -219,7 +219,7 @@ const CommentSection: FC<CommentSectionProps> = ({ postId }) => {
         },
         body: JSON.stringify({
           toBlogPost: !parentId,
-          content: newComment,
+          content: commentText,
           blogPostId: postId,
           parentCommentId: parentId
         }),
@@ -235,6 +235,8 @@ const CommentSection: FC<CommentSectionProps> = ({ postId }) => {
         await fetchComments();
         setNewCommentId(newCommentData.id);
         displayToast('Comment posted successfully', 'success');
+      } else {
+        displayToast('Failed to post comment', 'error');
       }
     } catch (error) {
       console.error('Error posting comment:', error);
