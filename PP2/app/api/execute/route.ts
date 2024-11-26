@@ -4,7 +4,7 @@ import crypto from 'crypto';
 import tar from 'tar-stream';
 
 interface CodeRequest {
-    language: 'python' | 'java' | 'cpp' | 'c' | 'javascript' | 'typescript' | 'go' | 'ruby' | 'php' | 'kotlin';
+    language: 'python' | 'java' | 'cpp' | 'c' | 'javascript' | 'typescript' | 'go' | 'ruby' | 'php' | 'bash';
     code: string;
     input: string;
 }

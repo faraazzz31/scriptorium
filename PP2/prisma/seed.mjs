@@ -153,6 +153,46 @@ async function main() {
                 avatar: 'avatars/avatar5.webp',
                 phone: '0123456789'
             }
+        }),
+        prisma.user.create({
+            data: {
+                email: 'john@example.com',
+                password,
+                firstName: 'John',
+                lastName: 'Smith',
+                avatar: 'avatars/avatar1.jpg',
+                phone: '1234567890'
+            }
+        }),
+        prisma.user.create({
+            data: {
+                email: 'janis@example.com',
+                password,
+                firstName: 'Janis',
+                lastName: 'Joplin',
+                avatar: 'avatars/avatar5.webp',
+                phone: '1234567890'
+            }
+        }),
+        prisma.user.create({
+            data: {
+                email: 'faraaz@example.com',
+                password,
+                firstName: 'Faraaz',
+                lastName: 'Ahmed',
+                avatar: 'avatars/avatar4.webp',
+                phone: '1234567890'
+            }
+        }),
+        prisma.user.create({
+            data: {
+                email: 'christoffer@example.com',
+                password,
+                firstName: 'Christoffer',
+                lastName: 'Tan',
+                avatar: 'avatars/avatar3.avif',
+                phone: '1234567890'
+            }
         })
     ]);
 
@@ -654,7 +694,32 @@ int main() {
             explanation: 'String manipulation in C++.',
             authorId: users[6].id,  // David
             tags: [tags[4]] // strings
-        }
+        },
+
+        // Bash Templates
+        {
+            title: 'Bash Scripting Basics',
+            code: `#!/bin/bash
+echo "Hello, World!"`,
+            language: 'bash',
+            explanation: 'Simple Bash script to print a message.',
+            authorId: users[8].id,  // Olivia
+            tags: [tags[1]] // basics
+        },
+        {
+            title: 'Bash Addition Script',
+            code: `#!/bin/bash
+mapfile -t input
+a=\${input[0]}
+b=\${input[1]}
+echo $((a + b))`
+            ,
+            language: 'bash',
+            explanation: 'Bash script to add two numbers.',
+            authorId: users[7].id,  // Olivia
+            tags: [tags[1]] // basics
+        },
+
     ]
 
     // Create all code templates
