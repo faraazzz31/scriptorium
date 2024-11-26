@@ -217,21 +217,22 @@ func main() {
         runCommand: (filename: string) => `php ${filename}`,
         poolSize: 1
     },
-    kotlin: {
-        extension: 'kt',
-        compile: true,
-        compileCommand: (filename: string) => `kotlinc ${filename} -include-runtime -d ${filename}.jar`,
-        runCommand: (filename: string) => `java -jar ${filename}.jar`,
-        processCode: (code: string, filename: string) => {
-            if (!code.includes('fun main')) {
-                return `
-fun main() {
-    ${code}
-}`;
+    bash: {
+        extension: 'sh',
+        compile: false,
+        runCommand: (filename: string) => `bash ${filename}`,
+        processCode: (code: string) => {
+            // Add shebang and input handling if not present
+            if (!code.includes('#!/bin/bash')) {
+                return `#!/bin/bash
+# Read input into array
+mapfile -t input
+
+# Your code here
+${code}`;
             }
             return code;
         },
-        setupCommands: ['mkdir -p /app/workspace'],
         poolSize: 1
     }
 };
