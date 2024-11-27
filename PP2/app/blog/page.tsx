@@ -13,6 +13,7 @@ import { useAuth } from '../components/auth/AuthContext';
 import BlogPostModal from '../components/blog/BlogPostModal';
 import { Search, Tag as LucideTag } from 'lucide-react';
 import debounce from 'lodash/debounce';
+import { Suspense } from 'react';
 
 export interface BlogPostWithRelations extends BlogPost {
   author: User;
@@ -41,7 +42,7 @@ interface PaginationButtonProps {
   children: React.ReactNode;
 }
 
-export default function BlogPage() {
+function BlogContent() {
   const [posts, setPosts] = useState<BlogPostWithRelations[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -485,5 +486,17 @@ export default function BlogPage() {
         mode='create'
       />
     </div>
+  );
+}
+
+export default function BlogPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
+      </div>
+    }>
+      <BlogContent />
+    </Suspense>
   );
 }

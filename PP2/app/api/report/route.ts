@@ -11,7 +11,7 @@ interface AuthUser {
 }
 
 interface AuthenticatedRequest extends NextRequest {
-    user: AuthUser | null;
+    user?: AuthUser | undefined;
 }
 
 interface ReportRequest {
@@ -143,16 +143,16 @@ async function handler(
                     ? {
                         blogPost: {
                             connect: { id: parseInt(blogPostId!) }
-        }
-    }
-    : {
-            comment: {
-                connect: { id: parseInt(commentId!) }
+                        }
+                    }
+                    : {
+                        comment: {
+                            connect: { id: parseInt(commentId!) }
+                        }
+                    }
+                )
             }
-        }
-    )
-    }
-    });
+        });
 
         const response: ReportResponse = {
             id: report.id,

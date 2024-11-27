@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Search, Code2, GitFork, Tag, ChevronLeft, ChevronRight, BookOpen } from 'lucide-react';
 import { useAuth } from '@/app/components/auth/AuthContext';
@@ -38,7 +38,7 @@ interface PaginationButtonProps {
     children: React.ReactNode;
 }
 
-const CodeTemplatesList = () => {
+const CodeTemplatesListContent = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { user } = useAuth();
@@ -578,4 +578,14 @@ const CodeTemplatesList = () => {
     );
 };
 
-export default CodeTemplatesList;
+export default function CodeTemplatesList() {
+    return (
+      <Suspense fallback={
+        <div className="flex justify-center p-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
+        </div>
+      }>
+        <CodeTemplatesListContent />
+      </Suspense>
+    );
+  }

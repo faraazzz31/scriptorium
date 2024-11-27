@@ -121,7 +121,7 @@ async function getReplies(commentId: number, userId?: number, userRole?: string)
   return repliesWithChildren;
 }
 
-export async function handler(req: AuthenticatedRequest): Promise<NextResponse<CommentFetchAllResponse | ErrorResponse>> {
+export async function GET(req: AuthenticatedRequest): Promise<NextResponse<CommentFetchAllResponse | ErrorResponse>> {
   const authResult = await checkAuth(req);
 
   const { searchParams } = new URL(req.url);
@@ -246,5 +246,3 @@ export async function handler(req: AuthenticatedRequest): Promise<NextResponse<C
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
-
-export const GET = handler;
