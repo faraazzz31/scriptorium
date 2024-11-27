@@ -173,8 +173,8 @@ const CodeTemplatesList = () => {
             name: 'Ruby',
         },
         {
-            key: 'kotlin',
-            name: 'Kotlin',
+            key: 'bash',
+            name: 'Bash',
         },
     ]
 
