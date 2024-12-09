@@ -1,4 +1,4 @@
-# Scriptorium: Modern Code Crafting Platform
+# Scriptorium: Modern Code Execution & Sharing Platform
 
 Scriptorium is a sophisticated web platform that modernizes the ancient concept of a scriptorium for the digital age. It provides developers with a secure environment to write, execute, and share code across multiple programming languages.
 
